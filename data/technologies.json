@@ -1,0 +1,495 @@
+[
+  {
+    "slug": "dotnet",
+    "name": ".NET",
+    "symbol": ".N",
+    "category": "Core Platform",
+    "color": "#6e5bd7",
+    "shortDescription": "The cross-platform runtime, SDK, libraries, and tooling behind modern C# applications.",
+    "keywords": ["runtime", "CLR", "SDK", "NuGet", "garbage collection", "cross-platform"],
+    "overview": ".NET is a free, open-source developer platform for building web, cloud, desktop, mobile, data, and background applications.",
+    "detail": "Think of .NET as a complete execution and development environment: the SDK compiles and packages applications, the runtime executes managed code, base libraries provide common capabilities, and tooling supports testing, diagnostics, publishing, and deployment across operating systems.",
+    "concepts": [
+      {"title": "Runtime and CLR", "description": "Executes managed code and provides garbage collection, type safety, exceptions, and just-in-time compilation."},
+      {"title": "SDK and CLI", "description": "Creates, restores, builds, tests, publishes, and manages projects through consistent dotnet commands."},
+      {"title": "Base class libraries", "description": "Reusable APIs for collections, networking, files, JSON, concurrency, cryptography, and more."},
+      {"title": "NuGet ecosystem", "description": "A package system for sharing versioned libraries and restoring repeatable dependency graphs."}
+    ],
+    "architecture": {"description": "Source code is compiled into intermediate language and metadata, then loaded by the runtime and executed as native instructions.", "nodes": ["C# source + SDK", "IL assemblies", ".NET runtime", "Operating system"], "colors": ["#6e5bd7", "#8f72db", "#2878c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A modern console application can use top-level statements, dependency-aware configuration, and async APIs without ceremony.", "code": "using System.Net.Http.Json;\n\nusing var client = new HttpClient\n{\n    BaseAddress = new Uri(\"https://api.example.com\")\n};\n\nvar status = await client.GetFromJsonAsync<ServiceStatus>(\"/health\");\nConsole.WriteLine($\"{status?.Name}: {status?.State}\");\n\npublic sealed record ServiceStatus(string Name, string State);"},
+    "bestPractices": ["Pin the target framework and centralize package versions for predictable builds.", "Use nullable reference types and analyzers to catch defects before runtime.", "Publish with the deployment model—framework-dependent, self-contained, or container—that matches operations.", "Measure with built-in diagnostics before attempting performance optimizations."],
+    "interviewQuestions": [
+      {"question": "What is the difference between the .NET SDK and runtime?", "answer": "The runtime executes compiled applications. The SDK includes the runtime plus compilers, templates, build tooling, and commands needed to create and publish them."},
+      {"question": "What does managed code mean?", "answer": "Managed code runs under the CLR, which supplies services such as memory management, type safety, exception handling, and runtime compilation."},
+      {"question": "When would you choose a self-contained deployment?", "answer": "Choose it when the target should not depend on a separately installed runtime and the larger artifact and patching responsibility are acceptable."}
+    ],
+    "note": "The runtime, SDK, and target framework are related but distinct. Record all three when diagnosing build or deployment differences.",
+    "tip": "Keep a global.json when a repository depends on a specific SDK feature or build behavior.",
+    "warning": "Do not assume a successful local build proves the published artifact will run on a different OS or CPU architecture.",
+    "sampleId": "ai-orchestrator", "readingMinutes": 8, "level": "Foundation", "updated": "2026-08-05", "latestNote": "Runtime and deployment guide refreshed"
+  },
+  {
+    "slug": "csharp",
+    "name": "C#",
+    "symbol": "C#",
+    "category": "Core Platform",
+    "color": "#7f4fc7",
+    "shortDescription": "A strongly typed, expressive language for object-oriented, functional, and asynchronous programming.",
+    "keywords": ["language", "LINQ", "records", "async", "generics", "nullable"],
+    "overview": "C# is a modern, statically typed language designed for productive application development across the .NET platform.",
+    "detail": "C# combines a rich type system with approachable syntax. Its records, pattern matching, LINQ, generics, asynchronous programming model, and nullable analysis help teams express domain rules clearly while retaining strong compile-time checks.",
+    "concepts": [
+      {"title": "Type system", "description": "Value and reference types, generics, nullability, and inference make contracts explicit without excessive syntax."},
+      {"title": "Async and tasks", "description": "async and await express non-blocking I/O as readable control flow while Task represents future completion."},
+      {"title": "LINQ", "description": "Composable query operators transform in-memory data and provider-backed query expressions."},
+      {"title": "Records and patterns", "description": "Records model value-like data while patterns make branching over shapes and values concise."}
+    ],
+    "architecture": {"description": "Language features help move data from boundary contracts through domain behavior to infrastructure without losing type information.", "nodes": ["Input records", "Domain types", "Application flow", "Output contracts"], "colors": ["#7f4fc7", "#6753c7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Order.cs", "introduction": "Records and property patterns create compact, immutable contracts and readable business decisions.", "code": "public sealed record Order(Guid Id, decimal Total, OrderStatus Status);\n\npublic static string GetNextAction(Order order) => order switch\n{\n    { Status: OrderStatus.Pending, Total: > 1000m } => \"Review\",\n    { Status: OrderStatus.Pending } => \"CapturePayment\",\n    { Status: OrderStatus.Paid } => \"Fulfil\",\n    _ => \"None\"\n};\n\npublic enum OrderStatus { Pending, Paid, Cancelled }"},
+    "bestPractices": ["Enable nullable reference types and fix warnings at boundaries.", "Prefer small immutable types for messages and values that should not change.", "Use async all the way for I/O-bound work and pass cancellation tokens.", "Keep LINQ queries readable; name intermediate results when intent becomes hidden."],
+    "interviewQuestions": [
+      {"question": "What is the difference between a class and a record?", "answer": "Classes use reference identity by default. Records emphasize value equality and concise immutable-style construction, though both remain reference types unless record struct is used."},
+      {"question": "Why should async void usually be avoided?", "answer": "It cannot be awaited, composes poorly, and propagates exceptions differently. It is generally reserved for event handlers."},
+      {"question": "What does deferred execution mean in LINQ?", "answer": "Many LINQ operators describe a query that runs only when enumerated, so data and side effects may be evaluated later or more than once."}
+    ],
+    "note": "Concise syntax should expose intent. If a clever expression makes debugging or ownership harder, a named method is usually better.",
+    "tip": "Model domain values such as Money or Email as focused types instead of passing primitive strings and decimals everywhere.",
+    "warning": "Avoid blocking Task results with .Result or .Wait() in request paths; this can reduce throughput and create deadlock risks in some contexts.",
+    "sampleId": "design-patterns", "readingMinutes": 9, "level": "Foundation", "updated": "2026-08-01", "latestNote": "Pattern matching examples expanded"
+  },
+  {
+    "slug": "dependency-injection",
+    "name": "Dependency Injection",
+    "symbol": "DI",
+    "category": "Core Platform",
+    "color": "#9a4fa8",
+    "shortDescription": "Compose applications from explicit, testable services with managed lifetimes and clear boundaries.",
+    "keywords": ["IoC", "services", "singleton", "scoped", "transient", "composition"],
+    "overview": "Dependency injection separates service construction from service use, making dependencies explicit and application composition centralized.",
+    "detail": "The built-in .NET container resolves constructor dependencies from registrations at the composition root. Lifetimes describe ownership: singleton for application-wide instances, scoped for one logical operation such as a web request, and transient for a new instance per resolution.",
+    "concepts": [
+      {"title": "Composition root", "description": "The startup location where concrete services, interfaces, configuration, and decorators are assembled."},
+      {"title": "Service lifetimes", "description": "Singleton, scoped, and transient registrations define instance reuse and disposal boundaries."},
+      {"title": "Constructor injection", "description": "Required collaborators appear in the constructor, producing explicit and testable object contracts."},
+      {"title": "Options pattern", "description": "Typed configuration objects separate configuration binding and validation from service behavior."}
+    ],
+    "architecture": {"description": "The container builds an object graph at the composition root and supplies dependencies to application entry points.", "nodes": ["Registrations", "DI container", "Application service", "Infrastructure adapters"], "colors": ["#9a4fa8", "#7558c8", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "DependencyInjection.cs", "introduction": "Group registrations by feature and validate configuration when the application starts.", "code": "public static class OrdersModule\n{\n    public static IServiceCollection AddOrders(\n        this IServiceCollection services, IConfiguration configuration)\n    {\n        services.AddOptions<OrderOptions>()\n            .Bind(configuration.GetSection(OrderOptions.SectionName))\n            .ValidateDataAnnotations()\n            .ValidateOnStart();\n\n        services.AddScoped<IOrderService, OrderService>();\n        services.AddSingleton<IClock, SystemClock>();\n        return services;\n    }\n}"},
+    "bestPractices": ["Register services near their feature and keep the composition root readable.", "Inject abstractions at real boundaries, not an interface for every class.", "Validate options on startup so invalid configuration fails fast.", "Match a dependency's lifetime to the lifetime of everything it captures."],
+    "interviewQuestions": [
+      {"question": "What is a captive dependency?", "answer": "It occurs when a longer-lived service, commonly a singleton, captures a shorter-lived dependency such as a scoped service and unintentionally extends its lifetime."},
+      {"question": "When should a service be transient?", "answer": "Use transient for lightweight, stateless services that can be created per resolution and do not need shared operation state."},
+      {"question": "Is dependency injection the same as the dependency inversion principle?", "answer": "No. DI is a composition technique; dependency inversion is a design principle about high-level policy depending on abstractions rather than low-level details."}
+    ],
+    "note": "The container is an application assembly mechanism, not a global service locator to call from domain code.",
+    "tip": "Enable service-provider validation in development to catch invalid lifetime graphs early.",
+    "warning": "Do not inject scoped services into singletons unless you create and dispose an explicit scope for a well-defined operation.",
+    "sampleId": "design-patterns", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-07-25", "latestNote": "Lifetime guidance clarified"
+  },
+  {
+    "slug": "aspnet-core",
+    "name": "ASP.NET Core",
+    "symbol": "AC",
+    "category": "Web & Data",
+    "color": "#2878c8",
+    "shortDescription": "A high-performance, cross-platform framework for APIs, web apps, real-time systems, and services.",
+    "keywords": ["web", "middleware", "MVC", "API", "Kestrel", "SignalR"],
+    "overview": "ASP.NET Core is the web framework for building HTTP APIs, server-rendered applications, real-time endpoints, and cloud services on .NET.",
+    "detail": "Requests enter Kestrel, pass through an ordered middleware pipeline, and reach an endpoint selected by routing. Built-in facilities cover configuration, logging, dependency injection, authentication, authorization, health checks, caching, and graceful shutdown.",
+    "concepts": [
+      {"title": "Middleware pipeline", "description": "Ordered components inspect, short-circuit, or pass HTTP requests and responses through the application."},
+      {"title": "Routing and endpoints", "description": "Routes match requests to controllers, Razor pages, hubs, health checks, or minimal API handlers."},
+      {"title": "Hosting model", "description": "WebApplication coordinates configuration, services, logging, server startup, and application lifetime."},
+      {"title": "Cross-cutting services", "description": "Authentication, problem details, rate limits, output caching, and telemetry integrate at the platform level."}
+    ],
+    "architecture": {"description": "The request pipeline applies cross-cutting policy before dispatching to an endpoint that coordinates application and infrastructure services.", "nodes": ["HTTP client", "Middleware pipeline", "Endpoint", "Application services"], "colors": ["#168dcc", "#2878c8", "#6556c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A focused API configures platform services first, then composes middleware in an intentional order.", "code": "var builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddProblemDetails();\nbuilder.Services.AddOpenApi();\nbuilder.Services.AddHealthChecks();\n\nvar app = builder.Build();\napp.UseExceptionHandler();\napp.UseHttpsRedirection();\n\napp.MapGet(\"/api/orders/{id:guid}\", async (\n    Guid id, IOrderService orders, CancellationToken ct) =>\n    await orders.FindAsync(id, ct) is { } order\n        ? Results.Ok(order)\n        : Results.NotFound());\n\napp.MapHealthChecks(\"/health\");\napp.Run();"},
+    "bestPractices": ["Keep middleware order explicit and cover security-sensitive ordering with integration tests.", "Return consistent problem details for failures instead of ad hoc error shapes.", "Propagate request cancellation to database and outbound HTTP operations.", "Expose separate liveness and readiness checks when orchestration depends on them."],
+    "interviewQuestions": [
+      {"question": "Why does middleware order matter?", "answer": "Each middleware wraps the next component. Ordering changes which requests it sees and whether authentication, authorization, exceptions, and endpoints behave correctly."},
+      {"question": "What is Kestrel?", "answer": "Kestrel is ASP.NET Core's cross-platform web server. It can be internet-facing or run behind a reverse proxy depending on the deployment."},
+      {"question": "When would you choose controllers over minimal APIs?", "answer": "Controllers are useful when conventions, filters, model-binding customization, and a structured large API surface outweigh minimal APIs' compact vertical-slice style."}
+    ],
+    "note": "Treat the HTTP layer as an adapter. Business rules should remain testable without constructing HTTP contexts.",
+    "tip": "Use WebApplicationFactory integration tests to verify routing, filters, serialization, authentication, and middleware together.",
+    "warning": "A health endpoint that always returns success can cause an orchestrator to route traffic to an application that cannot serve real requests.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-04", "latestNote": "Request pipeline guidance refreshed"
+  },
+  {
+    "slug": "entity-framework-core",
+    "name": "Entity Framework Core",
+    "symbol": "EF",
+    "category": "Web & Data",
+    "color": "#4767c8",
+    "shortDescription": "An object-relational mapper for expressive data access, change tracking, migrations, and transactions.",
+    "keywords": ["database", "ORM", "LINQ", "migrations", "DbContext", "SQL"],
+    "overview": "Entity Framework Core is a lightweight, extensible ORM that maps .NET models and LINQ queries to database operations.",
+    "detail": "A DbContext represents a unit of work over mapped entities. Providers translate expression trees into database queries, change tracking detects mutations, and migrations describe schema evolution. Good EF Core use still requires database literacy and query inspection.",
+    "concepts": [
+      {"title": "DbContext", "description": "A short-lived unit of work that coordinates queries, tracked changes, transactions, and persistence."},
+      {"title": "Query translation", "description": "LINQ expression trees are translated by a provider into database-specific commands."},
+      {"title": "Change tracking", "description": "Tracked entity state determines which inserts, updates, and deletes SaveChanges will issue."},
+      {"title": "Migrations", "description": "Versioned schema operations let teams review and deploy database changes deliberately."}
+    ],
+    "architecture": {"description": "Application queries pass through a DbContext and provider, which translates operations for the target relational database.", "nodes": ["Application query", "DbContext", "Database provider", "Relational database"], "colors": ["#6e5bd7", "#4767c8", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderQueries.cs", "introduction": "Project read models at the database, disable tracking when updating is unnecessary, and make cancellation explicit.", "code": "public async Task<IReadOnlyList<OrderSummary>> GetOpenOrdersAsync(\n    CancellationToken cancellationToken)\n{\n    return await db.Orders\n        .AsNoTracking()\n        .Where(order => order.Status == OrderStatus.Open)\n        .OrderByDescending(order => order.CreatedAt)\n        .Select(order => new OrderSummary(\n            order.Id, order.Customer.Name, order.Total))\n        .Take(100)\n        .ToListAsync(cancellationToken);\n}"},
+    "bestPractices": ["Project only the columns required for read models.", "Use AsNoTracking for read-only queries and bounded result sets for lists.", "Inspect generated SQL and query plans for important paths.", "Review migrations as production code and separate migration execution from application startup when needed."],
+    "interviewQuestions": [
+      {"question": "What is the recommended DbContext lifetime in a web app?", "answer": "Scoped is the common default, aligning one context with one request or unit of work. It is not thread-safe and should not be shared across concurrent operations."},
+      {"question": "What causes the N+1 query problem?", "answer": "Code loads a set of parent rows and then triggers an additional query per row for related data, often through repeated explicit or lazy loading."},
+      {"question": "When should AsNoTracking be used?", "answer": "Use it when entities are read-only in the current unit of work; it avoids change-tracking overhead."}
+    ],
+    "note": "LINQ is an abstraction over a provider. A query that is cheap in memory may translate into expensive SQL.",
+    "tip": "Tag important queries and capture their generated SQL during performance investigations.",
+    "warning": "Do not hold a DbContext for the lifetime of an application or use the same instance from concurrent threads.",
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-03", "latestNote": "Query-shaping examples added"
+  },
+  {
+    "slug": "blazor",
+    "name": "Blazor",
+    "symbol": "BZ",
+    "category": "Web & Data",
+    "color": "#7851b8",
+    "shortDescription": "Build interactive web interfaces with Razor components, C#, and flexible server or client rendering modes.",
+    "keywords": ["Razor", "components", "WebAssembly", "interactive", "SignalR", "UI"],
+    "overview": "Blazor is a component-based web UI framework that lets .NET developers build interactive experiences with C# and Razor.",
+    "detail": "Razor components combine markup and C# state. Applications can render static HTML, run interactivity on the server, execute .NET in WebAssembly, or choose rendering per component. The right mode depends on startup, latency, offline, security, and hosting needs.",
+    "concepts": [
+      {"title": "Razor components", "description": "Reusable UI units combine parameters, markup, event handlers, state, and lifecycle methods."},
+      {"title": "Render modes", "description": "Static, interactive server, interactive WebAssembly, and auto modes trade startup cost, latency, and hosting needs."},
+      {"title": "Component lifecycle", "description": "Lifecycle methods coordinate initialization, parameter changes, rendering, and browser interop."},
+      {"title": "State and forms", "description": "Binding, cascading values, EditForm, validation, and scoped services manage user interactions."}
+    ],
+    "architecture": {"description": "A Razor component renders UI and handles events through either a server circuit or a WebAssembly runtime before calling application services.", "nodes": ["Browser UI", "Razor component", "Render mode runtime", "Application/API"], "colors": ["#a04bb8", "#7851b8", "#4767c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Counter.razor", "introduction": "A component keeps its state close to its markup and exposes a small, accessible interaction surface.", "code": "@page \"/counter\"\n\n<PageTitle>Counter</PageTitle>\n\n<h1>Counter</h1>\n<p aria-live=\"polite\">Current count: @currentCount</p>\n<button class=\"btn btn-primary\" @onclick=\"Increment\">\n    Add one\n</button>\n\n@code {\n    private int currentCount;\n    private void Increment() => currentCount++;\n}"},
+    "bestPractices": ["Choose render mode per user experience and operational constraints.", "Keep components focused; move business behavior into injected application services.", "Use stable keys for dynamic lists and cancel work when components are disposed.", "Design loading, reconnecting, empty, and failure states as first-class UI."],
+    "interviewQuestions": [
+      {"question": "How do Server and WebAssembly interactivity differ?", "answer": "Server interactivity executes components on the server over a real-time circuit; WebAssembly downloads a .NET runtime and executes components in the browser."},
+      {"question": "What triggers a component render?", "answer": "Parameter updates, handled events, and explicit StateHasChanged calls can schedule rendering. The renderer then applies a diff to the DOM."},
+      {"question": "When is JavaScript interop appropriate?", "answer": "Use it for browser capabilities or existing JavaScript libraries without practical .NET abstractions, keeping the boundary small and lifecycle-aware."}
+    ],
+    "note": "Rendering and interactivity are separate decisions. A page may be server-rendered without becoming an interactive server component.",
+    "tip": "Test the reconnect and slow-network experience when using interactive server rendering.",
+    "warning": "Never place trusted secrets in WebAssembly code or browser-delivered configuration; users can inspect all client assets.",
+    "sampleId": "authentication-demo", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-07-29", "latestNote": "Render mode comparison added"
+  },
+  {
+    "slug": "minimal-apis",
+    "name": "Minimal APIs",
+    "symbol": "API",
+    "category": "Web & Data",
+    "color": "#168dcc",
+    "shortDescription": "Create focused HTTP endpoints with compact route handlers, typed results, filters, and OpenAPI support.",
+    "keywords": ["HTTP", "REST", "endpoints", "routing", "OpenAPI", "typed results"],
+    "overview": "Minimal APIs provide a concise way to define HTTP endpoints while retaining ASP.NET Core's hosting, dependency injection, security, and diagnostics.",
+    "detail": "Route handlers bind input from routes, queries, headers, bodies, services, and custom binders. Endpoint groups, filters, typed results, validation, and OpenAPI metadata support modular APIs without requiring controller classes.",
+    "concepts": [
+      {"title": "Route handlers", "description": "Delegates receive bound request values and services, then return serializable or typed HTTP results."},
+      {"title": "Route groups", "description": "Groups share prefixes, metadata, filters, authorization, and naming conventions."},
+      {"title": "Typed results", "description": "Concrete result types improve compile-time contracts, tests, and OpenAPI description."},
+      {"title": "Endpoint filters", "description": "Filters wrap selected handlers for validation, logging, policy, or other endpoint-level behavior."}
+    ],
+    "architecture": {"description": "An endpoint group applies shared HTTP policy, binds a request contract, calls an application use case, and maps the outcome to typed results.", "nodes": ["HTTP request", "Endpoint group", "Use case", "Typed result"], "colors": ["#168dcc", "#2678c8", "#6556c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderEndpoints.cs", "introduction": "Group related endpoints and make the success and failure contract visible in the handler signature.", "code": "var orders = app.MapGroup(\"/api/orders\")\n    .WithTags(\"Orders\")\n    .RequireAuthorization();\n\norders.MapGet(\"/{id:guid}\", async Task<Results<Ok<OrderDto>, NotFound>>(\n    Guid id, IOrderQueries queries, CancellationToken ct) =>\n{\n    var order = await queries.FindAsync(id, ct);\n    return order is null ? TypedResults.NotFound() : TypedResults.Ok(order);\n})\n.WithName(\"GetOrder\");"},
+    "bestPractices": ["Group endpoints by cohesive capability, not by HTTP verb.", "Use request and response contracts rather than exposing persistence entities.", "Give endpoints stable names and include useful OpenAPI metadata.", "Keep handlers thin by delegating workflow and business policy to application services."],
+    "interviewQuestions": [
+      {"question": "Are minimal APIs only for small applications?", "answer": "No. They can scale when endpoints are organized by feature and handlers delegate complexity. Their suitability depends more on conventions and team structure than raw endpoint count."},
+      {"question": "How are services injected into a route handler?", "answer": "Registered services are resolved from dependency injection through inferred or explicit parameter binding."},
+      {"question": "What do typed results improve?", "answer": "They provide concrete response types that help compile-time checking, endpoint tests, and generated OpenAPI metadata."}
+    ],
+    "note": "Minimal syntax does not mean minimal design. Contracts, validation, security, observability, and failure semantics still matter.",
+    "tip": "Use route groups as the module boundary for shared authorization and filters.",
+    "warning": "Avoid returning database entities directly; accidental navigation properties or schema changes can leak into the API contract.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-07-30", "latestNote": "Typed result patterns added"
+  },
+  {
+    "slug": "authentication-authorization",
+    "name": "Authentication & Authorization",
+    "symbol": "ID",
+    "category": "Web & Data",
+    "color": "#c14f72",
+    "shortDescription": "Establish identity, enforce policy, protect credentials, and design secure application boundaries.",
+    "keywords": ["JWT", "OAuth", "OIDC", "Identity", "claims", "policies", "security"],
+    "overview": "Authentication establishes who a principal is; authorization decides what that principal may do in a specific context.",
+    "detail": "ASP.NET Core authentication handlers validate credentials such as cookies or bearer tokens and construct a ClaimsPrincipal. Authorization evaluates roles, claims, policies, requirements, and resource context after authentication—ideally with deny-by-default rules.",
+    "concepts": [
+      {"title": "Schemes and handlers", "description": "A scheme selects the handler that authenticates, challenges, or forbids a request."},
+      {"title": "Claims principal", "description": "One or more identities and their claims represent the authenticated caller."},
+      {"title": "Policy authorization", "description": "Named policies combine reusable requirements that handlers evaluate against user and resource."},
+      {"title": "Token lifecycle", "description": "Issuance, audience, expiry, rotation, revocation, and key management shape token safety."}
+    ],
+    "architecture": {"description": "An identity provider issues credentials; the application validates them, builds a principal, then evaluates policy before invoking a protected resource.", "nodes": ["Identity provider", "Authentication", "Authorization policy", "Protected resource"], "colors": ["#7f4fc7", "#c14f72", "#d26a2e", "#168c78"]},
+    "code": {"language": "csharp", "label": "Authorization.cs", "introduction": "A policy expresses business permission as a named requirement instead of scattering claim checks through endpoints.", "code": "builder.Services.AddAuthorizationBuilder()\n    .AddPolicy(\"CanApproveExpense\", policy => policy\n        .RequireAuthenticatedUser()\n        .RequireClaim(\"permission\", \"expense:approve\"));\n\napp.MapPost(\"/expenses/{id:guid}/approve\", ApproveExpense)\n    .RequireAuthorization(\"CanApproveExpense\");\n\nstatic async Task<IResult> ApproveExpense(\n    Guid id, IExpenseService service, CancellationToken ct)\n{\n    return await service.ApproveAsync(id, ct)\n        ? Results.NoContent()\n        : Results.NotFound();\n}"},
+    "bestPractices": ["Validate issuer, audience, signature, lifetime, and algorithms for bearer tokens.", "Prefer policy and resource-based authorization over inline role checks.", "Keep signing keys and client secrets outside source control and rotate them.", "Return minimal information from authentication failures and log securely with correlation."],
+    "interviewQuestions": [
+      {"question": "What is the difference between authentication and authorization?", "answer": "Authentication verifies identity. Authorization evaluates whether that identity is permitted to perform an action on a resource."},
+      {"question": "Why are refresh tokens treated differently from access tokens?", "answer": "Refresh tokens are longer-lived credentials used to obtain access tokens, so they require stronger storage, rotation, reuse detection, and revocation controls."},
+      {"question": "What is resource-based authorization?", "answer": "It evaluates access using both the principal and the actual resource instance—for example, whether the current user owns a document."}
+    ],
+    "note": "CORS is a browser cross-origin policy; it is not authentication or authorization and does not protect server-to-server calls.",
+    "tip": "Write negative authorization tests—anonymous, wrong role, missing claim, wrong tenant, and non-owner—not only the happy path.",
+    "warning": "Do not decode a JWT and trust its claims without cryptographically validating the token and its intended issuer and audience.",
+    "sampleId": "authentication-demo", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-02", "latestNote": "Policy testing guidance strengthened"
+  },
+  {
+    "slug": "azure-for-dotnet",
+    "name": "Azure for .NET",
+    "symbol": "AZ",
+    "category": "Cloud & Architecture",
+    "color": "#0878c9",
+    "shortDescription": "Run, integrate, observe, and secure .NET workloads using Azure-managed services and identity.",
+    "keywords": ["cloud", "App Service", "Container Apps", "Functions", "Service Bus", "Key Vault", "managed identity"],
+    "overview": "Azure offers managed compute, data, messaging, identity, secrets, and observability services that integrate naturally with .NET.",
+    "detail": "A sound Azure design begins with workload requirements rather than a service catalog. Choose compute based on execution and scaling needs, prefer managed identity over stored credentials, design transient-failure handling, and make telemetry, cost, network boundaries, and deployment part of the architecture.",
+    "concepts": [
+      {"title": "Managed compute", "description": "App Service, Container Apps, Functions, and Kubernetes offer different control, scaling, and operational trade-offs."},
+      {"title": "Managed identity", "description": "Workloads obtain Entra-backed tokens for Azure resources without shipping long-lived application secrets."},
+      {"title": "Messaging", "description": "Service Bus and Event Hubs decouple workloads across commands, events, streams, retries, and backpressure."},
+      {"title": "Observability", "description": "OpenTelemetry and Azure Monitor connect traces, metrics, logs, alerts, and dependency context."}
+    ],
+    "architecture": {"description": "A managed entry point routes traffic to .NET compute, which uses identity-based access to data and messaging while emitting correlated telemetry.", "nodes": ["Edge / gateway", ".NET compute", "Data + messaging", "Azure Monitor"], "colors": ["#0878c9", "#2678c8", "#168c78", "#d26a2e"]},
+    "code": {"language": "csharp", "label": "AzureClient.cs", "introduction": "DefaultAzureCredential supports local developer identity and managed identity in Azure without changing application code.", "code": "using Azure.Identity;\nusing Azure.Storage.Blobs;\n\nvar accountUri = new Uri(builder.Configuration[\"Storage:AccountUri\"]!);\nvar credential = new DefaultAzureCredential();\n\nbuilder.Services.AddSingleton(new BlobServiceClient(\n    accountUri,\n    credential));\n\n// Local: developer credential chain\n// Azure: managed identity when configured"},
+    "bestPractices": ["Use managed identity and role assignments instead of embedded credentials.", "Define infrastructure as code and promote the same templates through environments.", "Set timeouts, retries with jitter, and circuit breaking only for transient operations.", "Design telemetry, budgets, backup, recovery objectives, and region strategy before production."],
+    "interviewQuestions": [
+      {"question": "When would you choose Azure Container Apps over AKS?", "answer": "Container Apps suits teams wanting container-based scaling and revisions with less cluster operations; AKS fits workloads needing Kubernetes APIs, ecosystem control, or specialized cluster capabilities."},
+      {"question": "What problem does managed identity solve?", "answer": "It lets an Azure resource obtain short-lived Entra tokens for other resources without storing and rotating a client secret in the application."},
+      {"question": "How should transient Azure failures be handled?", "answer": "Use bounded retries with backoff and jitter for operations known to be safe to retry, plus timeouts, observability, and idempotency where side effects are possible."}
+    ],
+    "note": "Cloud-native is an operating model as much as a hosting location: automated delivery, observability, resiliency, and ownership all matter.",
+    "tip": "Use the same credential abstraction locally and in Azure, but verify exactly which credential wins in each environment.",
+    "warning": "Retries can amplify an outage or duplicate effects. Bound them, add jitter, and make write operations idempotent before retrying.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-07-31", "latestNote": "Managed identity guidance refreshed"
+  },
+  {
+    "slug": "microservices",
+    "name": "Microservices",
+    "symbol": "MS",
+    "category": "Cloud & Architecture",
+    "color": "#e07036",
+    "shortDescription": "Design independently deployable services around business capabilities and operational ownership.",
+    "keywords": ["distributed systems", "events", "messaging", "resilience", "saga", "outbox"],
+    "overview": "Microservices split a system into independently deployable services aligned to cohesive business capabilities and owned data.",
+    "detail": "The architecture trades in-process simplicity for deployment autonomy and distributed-systems costs. Clear boundaries, independent data ownership, asynchronous messaging, observability, idempotency, and team ownership are more important than service count.",
+    "concepts": [
+      {"title": "Service boundaries", "description": "Capabilities and change patterns shape cohesive services more reliably than technical layers or tables."},
+      {"title": "Data ownership", "description": "Each service controls its persistence model and shares behavior through contracts, not database joins."},
+      {"title": "Messaging patterns", "description": "Events, queues, outbox delivery, idempotent consumers, and sagas coordinate without global transactions."},
+      {"title": "Operational autonomy", "description": "Independent deployment requires health, telemetry, release safety, capacity, and clear ownership per service."}
+    ],
+    "architecture": {"description": "Clients enter through an edge; independently deployed services own their data and exchange durable messages through a broker.", "nodes": ["API gateway", "Domain services", "Message broker", "Owned data stores"], "colors": ["#2678c8", "#e07036", "#9a4fa8", "#168c78"]},
+    "code": {"language": "csharp", "label": "IdempotentConsumer.cs", "introduction": "A consumer records message identity in the same transaction as its business change so redelivery is safe.", "code": "public async Task HandleAsync(OrderPlaced message, CancellationToken ct)\n{\n    if (await db.ProcessedMessages.AnyAsync(x => x.Id == message.Id, ct))\n        return;\n\n    inventory.Reserve(message.OrderId, message.Lines);\n    db.ProcessedMessages.Add(new ProcessedMessage(message.Id, clock.UtcNow));\n\n    await db.SaveChangesAsync(ct);\n}\n\npublic sealed record OrderPlaced(Guid Id, Guid OrderId,\n    IReadOnlyList<OrderLine> Lines);"},
+    "bestPractices": ["Start with boundaries and ownership; do not split solely to follow an architecture trend.", "Assume messages may be delayed, duplicated, or reordered.", "Use correlation identifiers and distributed tracing across synchronous and asynchronous hops.", "Deploy compatibility changes before removing old contract behavior."],
+    "interviewQuestions": [
+      {"question": "Why is a database per service recommended?", "answer": "It preserves autonomy and prevents other services from coupling to internal schemas. The storage can be physically shared, but ownership and access boundaries must remain clear."},
+      {"question": "What problem does the transactional outbox solve?", "answer": "It atomically records a business change and an outgoing message in one local transaction, then publishes the message asynchronously to avoid dual-write inconsistency."},
+      {"question": "When is a modular monolith a better choice?", "answer": "When the domain or team boundaries are still evolving and independent deployment benefits do not justify distributed operations, latency, and consistency costs."}
+    ],
+    "note": "A service is a socio-technical boundary: code, data, deployment, telemetry, support, and a team capable of changing it.",
+    "tip": "Prove modular boundaries inside a monolith before paying the operational cost of network separation.",
+    "warning": "Never use synchronous retries as a substitute for designing partial failure and idempotency.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 13, "level": "Advanced", "updated": "2026-08-05", "latestNote": "Idempotent consumer example added"
+  },
+  {
+    "slug": "clean-architecture",
+    "name": "Clean Architecture",
+    "symbol": "CA",
+    "category": "Cloud & Architecture",
+    "color": "#168c78",
+    "shortDescription": "Protect business policy from delivery and infrastructure details through explicit dependency direction.",
+    "keywords": ["layers", "domain", "application", "infrastructure", "dependency rule", "ports adapters"],
+    "overview": "Clean Architecture keeps core business rules independent from frameworks, databases, transport protocols, and user interfaces.",
+    "detail": "Dependencies point inward toward stable domain and application policy. Outer adapters translate HTTP, persistence, messaging, or UI concerns. The goal is not a fixed folder count; it is replaceable details, testable use cases, and boundaries that match the system's real change pressures.",
+    "concepts": [
+      {"title": "Dependency rule", "description": "Source-code dependencies point toward policies; inner layers do not reference outer implementation details."},
+      {"title": "Use cases", "description": "Application services coordinate domain behavior, authorization context, persistence ports, and outcomes."},
+      {"title": "Ports and adapters", "description": "Interfaces define required capabilities while outer adapters implement HTTP, database, or message integration."},
+      {"title": "Domain model", "description": "Entities and value objects enforce business invariants without depending on delivery frameworks."}
+    ],
+    "architecture": {"description": "External adapters depend on application ports, and application orchestration depends on the domain—not the reverse.", "nodes": ["Web / workers", "Application use cases", "Domain model", "Infrastructure adapters"], "colors": ["#2678c8", "#6556c8", "#168c78", "#e07036"]},
+    "code": {"language": "csharp", "label": "PlaceOrder.cs", "introduction": "A use case coordinates policy through ports without knowing whether input arrived over HTTP or where data is stored.", "code": "public sealed class PlaceOrderHandler(\n    IOrderRepository orders,\n    IUnitOfWork unitOfWork,\n    IClock clock)\n{\n    public async Task<Guid> HandleAsync(PlaceOrder command, CancellationToken ct)\n    {\n        var order = Order.Place(command.CustomerId, command.Lines, clock.UtcNow);\n        await orders.AddAsync(order, ct);\n        await unitOfWork.SaveChangesAsync(ct);\n        return order.Id;\n    }\n}"},
+    "bestPractices": ["Introduce a boundary when it protects a meaningful policy or source of change.", "Keep domain invariants inside domain types, not only in controllers or validators.", "Name use cases in business language and return explicit outcomes.", "Test architecture rules automatically if dependency direction is important."],
+    "interviewQuestions": [
+      {"question": "What is the dependency rule?", "answer": "Dependencies should point inward toward higher-level policy, so domain and application code do not depend on UI, database, or framework details."},
+      {"question": "Does every project need four class-library projects?", "answer": "No. Project layout is a tool. Small applications can preserve boundaries with namespaces and tests; larger systems may benefit from compile-time project separation."},
+      {"question": "Where should validation live?", "answer": "Input-shape validation belongs near the boundary; business invariants belong in the domain; use-case preconditions belong in the application layer."}
+    ],
+    "note": "Clean Architecture optimizes for changeability and testability, not for maximizing interfaces and folders.",
+    "tip": "Start by drawing dependency arrows and ownership boundaries before choosing project names.",
+    "warning": "A repository abstraction that merely mirrors every ORM method adds ceremony without protecting useful policy.",
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 11, "level": "Advanced", "updated": "2026-07-28", "latestNote": "Boundary trade-offs clarified"
+  },
+  {
+    "slug": "design-patterns",
+    "name": "Design Patterns",
+    "symbol": "DP",
+    "category": "Cloud & Architecture",
+    "color": "#b45e98",
+    "shortDescription": "A vocabulary of reusable design structures for recurring collaboration and change problems.",
+    "keywords": ["GoF", "strategy", "factory", "decorator", "observer", "adapter", "SOLID"],
+    "overview": "Design patterns describe proven arrangements of responsibilities and collaborations for recurring software design problems.",
+    "detail": "Patterns are communication tools, not mandatory templates. Strategy varies behavior, decorator layers responsibilities, adapter translates incompatible contracts, factory centralizes creation, and observer distributes notifications. Apply them when the variation or coupling they address is real.",
+    "concepts": [
+      {"title": "Creational patterns", "description": "Factories, builders, and prototypes separate construction decisions from consumers."},
+      {"title": "Structural patterns", "description": "Adapters, decorators, composites, and facades shape how objects and systems fit together."},
+      {"title": "Behavioral patterns", "description": "Strategies, observers, commands, and mediators organize algorithms and collaboration."},
+      {"title": "Pattern trade-offs", "description": "Each pattern shifts complexity; the benefit must outweigh indirection, objects, and conventions."}
+    ],
+    "architecture": {"description": "A caller depends on a stable strategy contract while the composition root selects a behavior suited to current policy.", "nodes": ["Caller", "Strategy contract", "Concrete strategy", "External capability"], "colors": ["#2678c8", "#b45e98", "#6e5bd7", "#168c78"]},
+    "code": {"language": "csharp", "label": "PricingStrategy.cs", "introduction": "Strategy replaces branching that changes for different pricing policies with a focused, selectable behavior.", "code": "public interface IPricingStrategy\n{\n    decimal Calculate(Order order);\n}\n\npublic sealed class LoyaltyPricing : IPricingStrategy\n{\n    public decimal Calculate(Order order) =>\n        order.Subtotal >= 100m\n            ? order.Subtotal * 0.90m\n            : order.Subtotal;\n}\n\npublic sealed class Checkout(IPricingStrategy pricing)\n{\n    public decimal Total(Order order) => pricing.Calculate(order);\n}"},
+    "bestPractices": ["Name the design pressure before naming a pattern.", "Prefer language features and simple composition when they solve the problem clearly.", "Keep pattern participants cohesive and make selection rules visible.", "Document trade-offs when a pattern introduces meaningful indirection."],
+    "interviewQuestions": [
+      {"question": "How do Strategy and State differ?", "answer": "They have similar structure, but Strategy selects an interchangeable algorithm while State models behavior that changes with an object's internal state transitions."},
+      {"question": "What is the difference between Adapter and Facade?", "answer": "Adapter changes an interface so a client can use it. Facade provides a simpler entry point over a subsystem without necessarily adapting an incompatible contract."},
+      {"question": "When is a pattern over-engineering?", "answer": "When the predicted variation is unlikely, the simpler design is already easy to change, or the added abstractions make ownership and behavior harder to understand."}
+    ],
+    "note": "Patterns give teams names for trade-offs. They do not remove the need to understand the forces in a specific design.",
+    "tip": "Study a pattern beside the refactoring pressure that leads to it, not as an isolated class diagram.",
+    "warning": "Do not force every class into a GoF pattern; unnecessary abstraction makes simple changes expensive.",
+    "sampleId": "design-patterns", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-07-24", "latestNote": "Strategy example refreshed"
+  },
+  {
+    "slug": "docker",
+    "name": "Docker",
+    "symbol": "DK",
+    "category": "Delivery & Operations",
+    "color": "#1686d9",
+    "shortDescription": "Package .NET applications and runtime dependencies into repeatable, portable container images.",
+    "keywords": ["containers", "images", "Dockerfile", "Compose", "registry", "multi-stage"],
+    "overview": "Docker packages an application, its runtime, and filesystem dependencies into an immutable image executed as isolated containers.",
+    "detail": "For .NET, multi-stage builds separate SDK compilation from the smaller runtime image. Containers should write state to external services or mounted volumes, receive configuration at runtime, expose health signals, and run as a non-root user where possible.",
+    "concepts": [
+      {"title": "Images and layers", "description": "Immutable layers describe a filesystem and startup configuration, enabling caching and content-addressed distribution."},
+      {"title": "Containers", "description": "Running image instances isolate processes and files while sharing the host kernel."},
+      {"title": "Multi-stage builds", "description": "A build stage compiles with the SDK and a final stage carries only publish output and runtime dependencies."},
+      {"title": "Compose", "description": "A declarative local topology coordinates services, networks, volumes, environment, and health dependencies."}
+    ],
+    "architecture": {"description": "Source is compiled in an SDK stage, copied into a minimal runtime image, and executed as a replaceable container connected to external state.", "nodes": ["Source + SDK stage", "Runtime image", "App container", "External data"], "colors": ["#6e5bd7", "#1686d9", "#2678c8", "#168c78"]},
+    "code": {"language": "dockerfile", "label": "Dockerfile", "introduction": "A multi-stage Dockerfile restores deterministically, publishes once, and runs the final image without root privileges.", "code": "FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build\nWORKDIR /src\nCOPY [\"Portal.Api.csproj\", \".\"]\nRUN dotnet restore \"Portal.Api.csproj\"\nCOPY . .\nRUN dotnet publish \"Portal.Api.csproj\" -c Release -o /app --no-restore\n\nFROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final\nWORKDIR /app\nCOPY --from=build /app .\nUSER $APP_UID\nEXPOSE 8080\nENTRYPOINT [\"dotnet\", \"Portal.Api.dll\"]"},
+    "bestPractices": ["Use multi-stage builds and a minimal trusted runtime base image.", "Copy project files before source to preserve dependency restore caching.", "Run as a non-root user and scan both dependencies and the final image.", "Keep secrets out of layers, build arguments, and committed Compose files."],
+    "interviewQuestions": [
+      {"question": "What is the difference between an image and a container?", "answer": "An image is an immutable package definition; a container is a running instance with a writable layer and runtime configuration."},
+      {"question": "Why use a multi-stage build?", "answer": "It keeps compilers, source, and build caches out of the runtime image, reducing size and attack surface."},
+      {"question": "Why should container state be externalized?", "answer": "Containers are replaceable. External databases, object stores, or volumes preserve durable state across restarts, rescheduling, and scaling."}
+    ],
+    "note": "A successful image build proves packaging, not that the application starts correctly with real dependencies and configuration.",
+    "tip": "Build from the repository root when project references or shared files live outside the API project folder.",
+    "warning": "Never bake production secrets into an image; image layers remain inspectable even after a later layer removes a file.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-07-27", "latestNote": "Non-root image example added"
+  },
+  {
+    "slug": "kubernetes",
+    "name": "Kubernetes",
+    "symbol": "K8s",
+    "category": "Delivery & Operations",
+    "color": "#3970cf",
+    "shortDescription": "Orchestrate containerized workloads with declarative scheduling, service discovery, rollout, and recovery.",
+    "keywords": ["orchestration", "pods", "deployment", "service", "ingress", "probes", "scaling"],
+    "overview": "Kubernetes continuously reconciles declared workload state with running containers across a cluster.",
+    "detail": "Pods run one or more tightly coupled containers; Deployments manage replicas and rollout; Services provide stable discovery; Ingress or Gateway resources route external traffic; probes communicate lifecycle; and configuration is injected separately from images.",
+    "concepts": [
+      {"title": "Desired state", "description": "Controllers watch resources and repeatedly reconcile observed state toward the declared specification."},
+      {"title": "Pods and deployments", "description": "Pods are scheduling units; Deployments manage replica sets, updates, rollback, and availability."},
+      {"title": "Services and ingress", "description": "Services provide stable internal discovery while ingress or gateways expose controlled external routes."},
+      {"title": "Probes and resources", "description": "Startup, readiness, liveness, requests, and limits inform safe scheduling and traffic decisions."}
+    ],
+    "architecture": {"description": "External traffic enters a gateway and Service, which selects ready .NET pods managed by a Deployment and connected to managed state.", "nodes": ["Gateway", "Service", ".NET pods", "Managed dependencies"], "colors": ["#3970cf", "#168dcc", "#6e5bd7", "#168c78"]},
+    "code": {"language": "yaml", "label": "deployment.yaml", "introduction": "Readiness controls traffic while liveness detects a stuck process; resource requests give the scheduler useful information.", "code": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: orders-api\nspec:\n  replicas: 3\n  template:\n    spec:\n      containers:\n        - name: api\n          image: ghcr.io/example/orders-api:1.4.0\n          ports:\n            - containerPort: 8080\n          readinessProbe:\n            httpGet: { path: /health/ready, port: 8080 }\n          livenessProbe:\n            httpGet: { path: /health/live, port: 8080 }\n          resources:\n            requests: { cpu: 100m, memory: 128Mi }\n            limits: { memory: 512Mi }"},
+    "bestPractices": ["Set realistic resource requests using observed workload data.", "Use separate startup, readiness, and liveness semantics.", "Deploy immutable image tags or digests and record configuration provenance.", "Plan disruption budgets, graceful shutdown, rollout safety, and rollback together."],
+    "interviewQuestions": [
+      {"question": "What is the difference between readiness and liveness probes?", "answer": "Readiness decides whether a pod should receive traffic. Liveness decides whether Kubernetes should restart the container."},
+      {"question": "What does a Kubernetes Service provide?", "answer": "It gives a stable virtual address and discovery name over a changing set of selected pods."},
+      {"question": "Why set resource requests?", "answer": "The scheduler uses requests to place pods, and autoscaling or capacity decisions depend on having meaningful resource expectations."}
+    ],
+    "note": "Kubernetes automates declared operations; it does not make an application stateless, resilient, or observable by itself.",
+    "tip": "Make the application stop accepting new work before termination and finish in-flight requests within the grace period.",
+    "warning": "A liveness probe that depends on a downstream database can restart every healthy app instance during a database outage.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 11, "level": "Advanced", "updated": "2026-07-26", "latestNote": "Probe semantics clarified"
+  },
+  {
+    "slug": "testing",
+    "name": "Testing",
+    "symbol": "TST",
+    "category": "Quality & Growth",
+    "color": "#168f72",
+    "shortDescription": "Build confidence through focused unit, integration, contract, and end-to-end feedback loops.",
+    "keywords": ["xUnit", "unit tests", "integration", "Testcontainers", "WebApplicationFactory", "contract"],
+    "overview": "Testing provides layered evidence that units, integrations, contracts, and complete user flows behave as intended.",
+    "detail": "Fast unit tests protect deterministic policy; integration tests verify database, HTTP pipeline, serialization, or broker behavior; contract tests protect service compatibility; and a small number of end-to-end tests cover critical journeys. Test shape should follow risk, not a fixed pyramid quota.",
+    "concepts": [
+      {"title": "Unit tests", "description": "Fast, isolated checks of deterministic behavior and edge cases without infrastructure."},
+      {"title": "Integration tests", "description": "Verify real boundaries such as database providers, HTTP middleware, serialization, and authentication."},
+      {"title": "Contract tests", "description": "Assert that producer and consumer expectations remain compatible as services evolve."},
+      {"title": "End-to-end tests", "description": "Exercise a small set of critical user outcomes through the deployed surface."}
+    ],
+    "architecture": {"description": "A balanced suite gives broad, fast domain feedback and progressively narrower but higher-fidelity checks at system boundaries.", "nodes": ["Unit tests", "Integration tests", "Contract tests", "Critical journeys"], "colors": ["#168f72", "#2678c8", "#6e5bd7", "#e07036"]},
+    "code": {"language": "csharp", "label": "OrderTests.cs", "introduction": "A useful test names the behavior, arranges only relevant state, and asserts an externally meaningful outcome.", "code": "public sealed class OrderTests\n{\n    [Fact]\n    public void AddLine_WhenQuantityIsZero_RejectsChange()\n    {\n        var order = Order.Create(CustomerId.New());\n\n        var action = () => order.AddLine(ProductId.New(), quantity: 0);\n\n        action.Should().Throw<DomainException>()\n            .WithMessage(\"Quantity must be positive.\");\n        order.Lines.Should().BeEmpty();\n    }\n}"},
+    "bestPractices": ["Name tests after observable behavior, condition, and outcome.", "Use real infrastructure in integration tests when provider behavior matters.", "Control time, identifiers, and randomness through explicit seams.", "Keep tests independent and make failure output reveal the violated behavior."],
+    "interviewQuestions": [
+      {"question": "What should be mocked?", "answer": "Mock narrow outbound boundaries when controlling behavior is valuable. Avoid mocking the object under test, data structures, or every internal collaborator."},
+      {"question": "What is the value of an integration test?", "answer": "It exposes false assumptions about real frameworks and infrastructure—translation, configuration, serialization, transactions, routing, and security."},
+      {"question": "How do you prevent flaky tests?", "answer": "Remove uncontrolled time and concurrency, isolate data, await asynchronous completion, avoid shared mutable state, and capture diagnostic evidence."}
+    ],
+    "note": "Coverage is a map of executed code, not proof that the right behaviors and failure cases were asserted.",
+    "tip": "Write a regression test that fails for the reported defect before changing production code.",
+    "warning": "An in-memory database substitute may not reproduce relational constraints, transactions, collation, or SQL translation.",
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-03", "latestNote": "Integration testing guidance expanded"
+  },
+  {
+    "slug": "performance",
+    "name": "Performance",
+    "symbol": "⚡",
+    "category": "Quality & Growth",
+    "color": "#d17a2d",
+    "shortDescription": "Measure latency, throughput, allocation, and saturation before optimizing the system bottleneck.",
+    "keywords": ["benchmark", "profiling", "latency", "throughput", "GC", "caching", "async"],
+    "overview": "Performance engineering turns user and capacity goals into measurable budgets, diagnoses bottlenecks, and validates improvements under realistic load.",
+    "detail": "The most valuable optimizations usually reduce expensive I/O, unnecessary work, payload size, contention, and allocation in hot paths. Metrics, traces, profilers, load tests, and representative data show where time is spent and whether a change improves end-to-end outcomes.",
+    "concepts": [
+      {"title": "Latency and percentiles", "description": "Median describes typical response while tail percentiles reveal slow experiences hidden by averages."},
+      {"title": "Throughput and saturation", "description": "Work per interval must be understood beside queues, CPU, memory, connections, and dependency capacity."},
+      {"title": "Allocation and GC", "description": "Allocation rate and object lifetime influence collection frequency, pauses, and memory footprint."},
+      {"title": "Measurement", "description": "Benchmarks isolate code; load tests evaluate systems; profiles locate time and allocation in realistic paths."}
+    ],
+    "architecture": {"description": "A request budget is consumed across edge, application, cache, database, and network calls, all observed through correlated telemetry.", "nodes": ["Client budget", "Application", "Cache / database", "Telemetry evidence"], "colors": ["#2678c8", "#d17a2d", "#168c78", "#6e5bd7"]},
+    "code": {"language": "csharp", "label": "ProductCache.cs", "introduction": "Cache-aside can remove repeated I/O, but the cache must be bounded, observable, and allowed to miss safely.", "code": "public async Task<ProductDto?> FindAsync(Guid id, CancellationToken ct)\n{\n    var key = $\"product:{id}\";\n    if (cache.TryGetValue(key, out ProductDto? cached))\n        return cached;\n\n    var product = await database.Products\n        .AsNoTracking()\n        .Where(x => x.Id == id)\n        .Select(x => new ProductDto(x.Id, x.Name, x.Price))\n        .SingleOrDefaultAsync(ct);\n\n    if (product is not null)\n        cache.Set(key, product, TimeSpan.FromMinutes(2));\n    return product;\n}"},
+    "bestPractices": ["Define performance budgets and representative workloads before optimization.", "Inspect database queries and downstream calls before micro-optimizing C#.", "Track percentiles, error rate, throughput, saturation, and allocation together.", "Benchmark release builds and prevent dead-code elimination or unrealistic inputs."],
+    "interviewQuestions": [
+      {"question": "Why are percentiles better than average latency alone?", "answer": "Averages hide the distribution. P95 or P99 reveal tail experiences that often dominate timeouts and user dissatisfaction."},
+      {"question": "When can caching make a system worse?", "answer": "It adds invalidation, staleness, memory, stampede, and consistency concerns; low reuse or oversized keys can cost more than the saved work."},
+      {"question": "What is the difference between a benchmark and a load test?", "answer": "A benchmark isolates a code path under controlled conditions. A load test exercises a system under concurrency and dependency constraints."}
+    ],
+    "note": "Optimize the constraint that limits the user or capacity objective, not the code that merely looks inefficient.",
+    "tip": "Capture a trace for a slow request and follow the critical path before opening a microbenchmark project.",
+    "warning": "Unbounded caches and queues can convert a latency problem into memory exhaustion during sustained load.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Advanced", "updated": "2026-08-04", "latestNote": "Latency budget model added"
+  },
+  {
+    "slug": "interview-questions",
+    "name": "Interview Questions",
+    "symbol": "IQ",
+    "category": "Quality & Growth",
+    "color": "#5f6f86",
+    "shortDescription": "Practice explaining .NET decisions, trade-offs, failure modes, and production reasoning with clarity.",
+    "keywords": ["career", "questions", "answers", "system design", "practice", "architecture interview"],
+    "overview": "Strong .NET interview answers connect a clear concept to a concrete example, trade-off, failure mode, and verification method.",
+    "detail": "Interview preparation is more durable when organized around reasoning rather than memorized definitions. Explain the mechanism, state when it helps, identify costs, describe how it fails, and connect the answer to evidence from a project you have actually built or operated.",
+    "concepts": [
+      {"title": "Concept", "description": "Start with a precise definition in plain language before adding implementation detail."},
+      {"title": "Context", "description": "Explain which constraints make the technology or pattern a suitable choice."},
+      {"title": "Trade-off", "description": "State what complexity, cost, coupling, or operational burden the decision introduces."},
+      {"title": "Evidence", "description": "Use a real example, measurement, test, incident, or design decision to ground the answer."}
+    ],
+    "architecture": {"description": "A complete technical answer moves from concept to context, then trade-off and evidence instead of stopping at a definition.", "nodes": ["Define concept", "Apply context", "Explain trade-off", "Give evidence"], "colors": ["#5f6f86", "#2678c8", "#d17a2d", "#168c78"]},
+    "code": {"language": "csharp", "label": "AnswerFramework.cs", "introduction": "Use a compact mental model to structure an answer while keeping it conversational.", "code": "public sealed record TechnicalAnswer(\n    string Concept,\n    string Context,\n    IReadOnlyList<string> TradeOffs,\n    string Evidence);\n\nvar answer = new TechnicalAnswer(\n    Concept: \"The outbox makes database state and message intent atomic.\",\n    Context: \"Use it when a workflow changes data and publishes an event.\",\n    TradeOffs: [\"Eventual delivery\", \"Relay operations\", \"Idempotent consumers\"],\n    Evidence: \"Verified with duplicate delivery and relay-restart tests.\");"},
+    "bestPractices": ["Answer the exact question before expanding into related knowledge.", "Pair every recommendation with constraints and at least one trade-off.", "Use project evidence and be honest about what you personally implemented.", "Practice drawing request, data, failure, and deployment flows on a blank page."],
+    "interviewQuestions": [
+      {"question": "How should you answer a technology-choice question?", "answer": "State the requirements, compare viable options against them, choose one, name the cost, and explain what evidence would validate the decision."},
+      {"question": "What makes a strong production-readiness answer?", "answer": "It covers security, observability, failure handling, data recovery, deployment, capacity, ownership, and explicit gaps—not only code structure."},
+      {"question": "How should you respond when you do not know?", "answer": "State the boundary honestly, reason from what you do know, identify the risk of guessing, and explain how you would verify the answer."}
+    ],
+    "note": "The best interview narrative is specific enough to be credible and concise enough that the interviewer can explore it with follow-up questions.",
+    "tip": "For every portfolio repository, prepare a two-minute architecture story and one concrete defect or trade-off you worked through.",
+    "warning": "Do not claim production scale, security, or resilience that you only inferred from a successful build or local demo.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 8, "level": "All levels", "updated": "2026-08-02", "latestNote": "Answer framework added"
+  }
+]

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical, visual learning portal for modern .NET, C#, cloud architecture, testing, containers, and production engineering.">
+  <meta name="author" content="Dhakshinamoorthy A">
+  <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content=".NET Atlas — Learn the modern .NET ecosystem">
+  <meta property="og:description" content="Clear explanations, practical code, architecture guidance, and real GitHub samples for modern .NET developers.">
+  <meta property="og:image" content="https://adhakshinamoorthy.github.io/dotnet-technology-portal/assets/images/og-card.svg">
+  <meta property="og:url" content="https://adhakshinamoorthy.github.io/dotnet-technology-portal/">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>.NET Atlas — Learn the modern .NET ecosystem</title>
+  <link rel="canonical" href="https://adhakshinamoorthy.github.io/dotnet-technology-portal/">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script>
+    (() => {
+      const saved = localStorage.getItem('dotnet-atlas-theme');
+      const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body data-page="home" data-base="">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="site-navbar"></div>
+
+  <div class="site-shell">
+    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation"></aside>
+
+    <main id="main-content" class="main-content home-main" tabindex="-1">
+      <section class="hero section-pad" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span class="status-dot"></span> Your map to modern .NET</div>
+          <h1 id="hero-title">Build clarity across the <span class="text-gradient">.NET ecosystem.</span></h1>
+          <p class="hero-lede">Explore concepts, architecture, production practices, and runnable samples—from your first C# service to cloud-native distributed systems.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="technologies/dotnet.html">Start with .NET <span aria-hidden="true">→</span></a>
+            <a class="button button-secondary" href="#roadmap">View learning roadmap</a>
+          </div>
+          <dl class="hero-stats" aria-label="Portal summary">
+            <div><dt>17</dt><dd>technology guides</dd></div>
+            <div><dt>6</dt><dd>practical samples</dd></div>
+            <div><dt>100%</dt><dd>free &amp; static</dd></div>
+          </dl>
+        </div>
+        <div class="hero-visual reveal" aria-hidden="true">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="hero-code-card glass-card">
+            <div class="window-dots"><i></i><i></i><i></i><span>Program.cs</span></div>
+            <pre><code><span class="code-keyword">var</span> builder = WebApplication
+  .CreateBuilder(args);
+
+builder.Services
+  .AddProblemDetails()
+  .AddOpenApi();
+
+<span class="code-keyword">var</span> app = builder.Build();
+
+app.MapGet(<span class="code-string">"/learn"</span>, () =>
+  Results.Ok(<span class="code-string">"Build. Learn. Share."</span>));
+
+app.Run();</code></pre>
+          </div>
+          <span class="floating-chip chip-csharp">C#</span>
+          <span class="floating-chip chip-cloud">Azure</span>
+          <span class="floating-chip chip-data">EF</span>
+        </div>
+      </section>
+
+      <section class="home-search-wrap section-pad-sm reveal" aria-labelledby="find-topic-title">
+        <div class="home-search-card">
+          <div>
+            <span class="eyebrow">Find your next topic</span>
+            <h2 id="find-topic-title">What do you want to learn?</h2>
+          </div>
+          <label class="search-field search-field-large">
+            <span class="search-icon" aria-hidden="true"></span>
+            <span class="sr-only">Search technologies</span>
+            <input id="home-search" type="search" placeholder="Try “authentication” or “Docker”" autocomplete="off">
+            <kbd>/</kbd>
+          </label>
+          <div id="home-search-results" class="home-search-results" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section-pad reveal" aria-labelledby="blob-title">
+        <div class="section-heading split-heading">
+          <div>
+            <span class="eyebrow">Explore visually</span>
+            <h2 id="blob-title">Technology cloud</h2>
+          </div>
+          <p>Each technology connects to the same goal: dependable software that is clear to build, run, and evolve.</p>
+        </div>
+        <div id="blob-cloud" class="blob-cloud" aria-label="Interactive technology cloud"></div>
+      </section>
+
+      <section class="section-pad surface-section" aria-labelledby="featured-title">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Popular starting points</span>
+          <h2 id="featured-title">Featured technologies</h2>
+          <p>Begin with the runtime, build an API, and connect it to durable data.</p>
+        </div>
+        <div id="featured-technologies" class="card-grid card-grid-3"></div>
+      </section>
+
+      <section class="section-pad" aria-labelledby="samples-title">
+        <div class="section-heading split-heading reveal">
+          <div>
+            <span class="eyebrow">Learn from working systems</span>
+            <h2 id="samples-title">Featured GitHub samples</h2>
+          </div>
+          <a class="text-link" href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">View GitHub profile <span aria-hidden="true">↗</span></a>
+        </div>
+        <div id="featured-samples" class="card-grid card-grid-3"></div>
+      </section>
+
+      <section id="roadmap" class="section-pad roadmap-section" aria-labelledby="roadmap-title">
+        <div class="section-heading center-heading reveal">
+          <span class="eyebrow">A deliberate path</span>
+          <h2 id="roadmap-title">From language fundamentals to architecture</h2>
+          <p>Follow the sequence or jump straight to the concept you need today.</p>
+        </div>
+        <ol id="roadmap-list" class="roadmap-list"></ol>
+      </section>
+
+      <section class="section-pad surface-section" aria-labelledby="latest-title">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Fresh in the portal</span>
+          <h2 id="latest-title">Latest additions</h2>
+        </div>
+        <div id="latest-additions" class="latest-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="site-footer"></div>
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">↑</button>
+  <script type="module" src="assets/js/home.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "solution-architecture-portfolio",
+    "name": "Solution Architecture Portfolio",
+    "description": "Implementation-backed Azure and AWS reference architectures covering distributed .NET systems, event-driven workflows, resilience, security, and observability.",
+    "technologies": [".NET", "Azure", "AWS", "Architecture"],
+    "tags": ["microservices", "cloud", "observability"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/solution-architecture-portfolio",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "ai-gatekeeper",
+    "name": "AI GateKeeper",
+    "description": "A production-minded .NET and React AI gateway with streaming, rate limiting, PostgreSQL auditing, Docker, and explicit scaling boundaries.",
+    "technologies": ["ASP.NET Core", "React", "PostgreSQL", "Docker"],
+    "tags": ["api", "security", "rate-limiting"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/AIGateKeeper",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "authentication-demo",
+    "name": "Authentication Demo",
+    "description": "JWT access and refresh tokens, rotation, ASP.NET Core Identity, policy-based authorization, Blazor, SQL Server, and focused tests.",
+    "technologies": ["ASP.NET Core", "Identity", "Blazor", "SQL Server"],
+    "tags": ["jwt", "authorization", "security"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/Authn",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "ai-orchestrator",
+    "name": "Relay AI Orchestrator",
+    "description": "A multi-provider AI chat architecture with provider adapters, safe configuration, rate limiting, health checks, and regression coverage.",
+    "technologies": [".NET", "Blazor", "AI", "Health Checks"],
+    "tags": ["orchestration", "adapters", "resilience"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/AiOrchestrator",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "ride-sharing-cqrs",
+    "name": "Ride Sharing CQRS API",
+    "description": "CQRS with separate EF Core write and Dapper read paths, validation, idempotent commands, and a documented API workflow.",
+    "technologies": ["ASP.NET Core", "EF Core", "Dapper", "PostgreSQL"],
+    "tags": ["cqrs", "clean-architecture", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/RideSharingCqrsApi",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "design-patterns",
+    "name": "Design Patterns in C#",
+    "description": "Runnable GoF pattern examples plus repository, dependency injection, and CQRS patterns explained through practical before-and-after examples.",
+    "technologies": ["C#", ".NET", "xUnit", "Patterns"],
+    "tags": ["gof", "solid", "learning"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/DesignPatterns",
+    "liveDemoUrl": null
+  }
+]

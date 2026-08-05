@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">.NET Atlas</title><desc id="desc">A visual guide to the modern .NET ecosystem</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#262260"/></linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#a89bff"/><stop offset="1" stop-color="#67d4ff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1030" cy="120" r="190" fill="#6e5bd7" opacity=".2"/><circle cx="950" cy="560" r="260" fill="#24a1d8" opacity=".12"/>
+  <rect x="84" y="86" width="76" height="76" rx="20" fill="#6e5bd7"/><path fill="#fff" d="M102 132a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm16-29h12l22 32v-32h14v48h-12l-22-32v32h-14v-48Z"/>
+  <text x="84" y="262" fill="#fff" font-family="Segoe UI, Arial" font-size="78" font-weight="700">.NET Atlas</text>
+  <text x="84" y="340" fill="url(#brand)" font-family="Segoe UI, Arial" font-size="42" font-weight="600">Build clarity across the ecosystem.</text>
+  <text x="84" y="422" fill="#cbd5e1" font-family="Segoe UI, Arial" font-size="27">Concepts • Architecture • Code • Practice</text>
+  <text x="84" y="526" fill="#94a3b8" font-family="Segoe UI, Arial" font-size="22">dotnet • csharp • cloud-native</text>
+</svg>
