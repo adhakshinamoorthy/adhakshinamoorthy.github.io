@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$BaseUrl = "https://adhakshinamoorthy.github.io/dotnet-technology-portal"
+    [string]$BaseUrl = "https://adhakshinamoorthy.github.io"
 )
 
 $ErrorActionPreference = "Stop"

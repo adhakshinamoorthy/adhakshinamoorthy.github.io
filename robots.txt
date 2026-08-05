@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://adhakshinamoorthy.github.io/dotnet-technology-portal/sitemap.xml
+Sitemap: https://adhakshinamoorthy.github.io/sitemap.xml

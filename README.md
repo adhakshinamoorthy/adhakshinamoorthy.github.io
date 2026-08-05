@@ -31,12 +31,12 @@ npx serve .
 
 ## Deploy to GitHub Pages
 
-1. Create a repository named `dotnet-technology-portal` and push this folder to its `main` branch.
+1. Create the user-site repository `adhakshinamoorthy.github.io` and push this folder to its `main` branch.
 2. In **Settings → Pages**, choose **Deploy from a branch**.
 3. Select `main` and `/ (root)`, then save.
-4. The expected project URL is `https://adhakshinamoorthy.github.io/dotnet-technology-portal/`.
+4. The expected site URL is `https://adhakshinamoorthy.github.io/`.
 
-All asset and page references are relative, so the portal works under the GitHub Pages repository subpath. If the repository name or owner changes, update the canonical URLs in `index.html`, `robots.txt`, and the generator's `BaseUrl`.
+All asset and page references are relative. If the repository owner changes, update the canonical URLs in `index.html`, `robots.txt`, and the generator's `BaseUrl`.
 
 ## Replace GitHub samples
 
@@ -69,7 +69,7 @@ Set `liveDemoUrl` to `null` to hide the demo button. Use a sample's `id` in a te
 To publish under a different URL:
 
 ```powershell
-./scripts/generate-topic-pages.ps1 -BaseUrl "https://owner.github.io/repository"
+./scripts/generate-topic-pages.ps1 -BaseUrl "https://owner.github.io"
 ```
 
 The shared renderers live in [`assets/js/components.js`](assets/js/components.js), the landing page behavior in [`assets/js/home.js`](assets/js/home.js), and article composition in [`assets/js/topic.js`](assets/js/topic.js). Reusable HTML templates are in [`components/templates.html`](components/templates.html).
