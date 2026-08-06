@@ -155,13 +155,21 @@ export function renderNavbar(base, technologies, activeSlug = '') {
   bindMobileMenu();
 }
 
+export function groupTechnologiesByCategory(technologies) {
+  return technologies.reduce((groups, item) => {
+    if (!groups.has(item.category)) groups.set(item.category, []);
+    groups.get(item.category).push(item);
+    return groups;
+  }, new Map());
+}
+
+export function getTechnologyNavigationOrder(technologies) {
+  return [...groupTechnologiesByCategory(technologies).values()].flat();
+}
+
 export function renderSidebar(base, technologies, activeSlug = '') {
   const host = document.getElementById('site-sidebar');
-  const groups = technologies.reduce((result, item) => {
-    if (!result.has(item.category)) result.set(item.category, []);
-    result.get(item.category).push(item);
-    return result;
-  }, new Map());
+  const groups = groupTechnologiesByCategory(technologies);
   host.innerHTML = [...groups].map(([category, items]) => `
     <nav class="sidebar-group" aria-label="${escapeHtml(category)}">
       <span class="sidebar-label">${escapeHtml(category)}</span>

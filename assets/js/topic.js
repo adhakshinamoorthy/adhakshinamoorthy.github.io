@@ -5,6 +5,7 @@ import {
   escapeHtml,
   faqItem,
   getPortalData,
+  getTechnologyNavigationOrder,
   githubCard,
   loadTemplates,
   renderError,
@@ -89,13 +90,14 @@ function renderArticle(topic, technologies, samples) {
 }
 
 function renderAdjacentNavigation(host, topic, technologies) {
-  const index = technologies.findIndex(item => item.slug === topic.slug);
-  const previous = technologies[index - 1];
-  const next = technologies[index + 1];
+  const navigationOrder = getTechnologyNavigationOrder(technologies);
+  const index = navigationOrder.findIndex(item => item.slug === topic.slug);
+  const previous = navigationOrder[index - 1];
+  const next = navigationOrder[index + 1];
   if (previous) host.append(navLink(previous, '← Previous'));
-  else host.append(navLink(technologies.at(-1), '← Last guide'));
+  else host.append(navLink(navigationOrder.at(-1), '← Last guide'));
   if (next) host.append(navLink(next, 'Next →'));
-  else host.append(navLink(technologies[0], 'First guide →'));
+  else host.append(navLink(navigationOrder[0], 'First guide →'));
 }
 
 function navLink(topic, label) {
