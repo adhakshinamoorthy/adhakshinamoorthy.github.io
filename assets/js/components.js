@@ -170,9 +170,11 @@ export function getTechnologyNavigationOrder(technologies) {
 export function renderSidebar(base, technologies, activeSlug = '') {
   const host = document.getElementById('site-sidebar');
   const groups = groupTechnologiesByCategory(technologies);
-  host.innerHTML = [...groups].map(([category, items]) => `
+  host.innerHTML = [...groups].map(([category, items]) => {
+    const containsActiveTopic = items.some(item => item.slug === activeSlug);
+    return `
     <nav class="sidebar-group" aria-label="${escapeHtml(category)}">
-      <details class="sidebar-disclosure">
+      <details class="sidebar-disclosure" ${containsActiveTopic ? 'open' : ''}>
         <summary class="sidebar-label">
           <span>${escapeHtml(category)}</span>
           <span class="sidebar-count" aria-label="${items.length} topics">${items.length}</span>
@@ -182,7 +184,8 @@ export function renderSidebar(base, technologies, activeSlug = '') {
           ${items.map(item => `<li><a class="sidebar-link" href="${base}technologies/${item.slug}.html" ${item.slug === activeSlug ? 'aria-current="page"' : ''}><span class="sidebar-dot" style="--topic-color:${item.color}"></span>${escapeHtml(item.name)}</a></li>`).join('')}
         </ul>
       </details>
-    </nav>`).join('');
+    </nav>`;
+  }).join('');
   const overlay = document.createElement('div');
   overlay.className = 'sidebar-overlay';
   overlay.id = 'sidebar-overlay';

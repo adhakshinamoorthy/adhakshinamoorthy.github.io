@@ -83,7 +83,11 @@ try {
 
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
-  check(await page.locator('.sidebar-disclosure[open]').count() === 0, 'Topic sidebar categories are not collapsed by default');
+  check(await page.locator('.sidebar-disclosure[open]').count() === 1, 'Topic page does not expand exactly one sidebar category');
+  check(
+    await page.locator('.sidebar-disclosure[open] .sidebar-link[aria-current="page"]').count() === 1,
+    'Expanded sidebar category does not contain the active topic'
+  );
   check(await page.locator('.article-section').count() === 7, 'Topic does not render all seven content sections');
   check(await page.locator('.concept-card').count() === 4, 'Topic key concepts are incomplete');
   check(await page.locator('.diagram-node').count() >= 3, 'Architecture diagram flow is incomplete');
