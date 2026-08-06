@@ -45,6 +45,13 @@ try {
   check(await page.locator('#featured-samples .github-card').count() === 3, 'Home page does not render three featured samples');
   check(await page.locator('#hero-title').isVisible(), 'Hero heading is not visible');
   check(await page.locator('.hero-actions .button-primary').isVisible(), 'Primary hero action is not visible');
+  check(await page.locator('.sidebar-disclosure').count() > 0, 'Sidebar category disclosures are missing');
+  check(await page.locator('.sidebar-disclosure[open]').count() === 0, 'Sidebar categories are not collapsed by default');
+  await page.locator('.sidebar-label').first().click();
+  check(await page.locator('.sidebar-disclosure').first().getAttribute('open') !== null, 'Sidebar category did not expand');
+  check(await page.locator('.sidebar-list').first().isVisible(), 'Expanded sidebar topics are not visible');
+  await page.locator('.sidebar-label').first().click();
+  check(await page.locator('.sidebar-disclosure').first().getAttribute('open') === null, 'Sidebar category did not collapse');
 
   const desktopMetrics = await page.evaluate(() => ({
     width: innerWidth,
@@ -76,6 +83,7 @@ try {
 
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
+  check(await page.locator('.sidebar-disclosure[open]').count() === 0, 'Topic sidebar categories are not collapsed by default');
   check(await page.locator('.article-section').count() === 7, 'Topic does not render all seven content sections');
   check(await page.locator('.concept-card').count() === 4, 'Topic key concepts are incomplete');
   check(await page.locator('.diagram-node').count() >= 3, 'Architecture diagram flow is incomplete');
@@ -104,7 +112,7 @@ try {
   const wafCategory = page.locator('.sidebar-group[aria-label="Azure Well-Architected"] .sidebar-link');
   check(await wafCategory.count() === 6, 'Azure Well-Architected category does not contain six guides');
   check(
-    JSON.stringify(await wafCategory.allInnerTexts()) === JSON.stringify([
+    JSON.stringify((await wafCategory.allTextContents()).map(text => text.trim())) === JSON.stringify([
       'Azure Well-Architected Framework',
       'WAF: Reliability',
       'WAF: Security',
@@ -118,7 +126,7 @@ try {
   const architecturePractice = page.locator('.sidebar-group[aria-label="Architecture Practice"] .sidebar-link');
   check(await architecturePractice.count() === 6, 'Architecture Practice category does not contain six guides');
   check(
-    JSON.stringify(await architecturePractice.allInnerTexts()) === JSON.stringify([
+    JSON.stringify((await architecturePractice.allTextContents()).map(text => text.trim())) === JSON.stringify([
       'Solution Architecture Fundamentals',
       'Architecture Decision Records',
       'API Design Best Practices',
@@ -132,7 +140,7 @@ try {
   const cloudPlatforms = page.locator('.sidebar-group[aria-label="Cloud Platforms"] .sidebar-link');
   check(await cloudPlatforms.count() === 5, 'Cloud Platforms category does not contain five guides');
   check(
-    JSON.stringify(await cloudPlatforms.allInnerTexts()) === JSON.stringify([
+    JSON.stringify((await cloudPlatforms.allTextContents()).map(text => text.trim())) === JSON.stringify([
       'Azure API Management',
       'Azure Functions & Serverless',
       'Azure Data Factory & ETL',
@@ -186,6 +194,8 @@ try {
   await mobilePage.locator('.menu-button').tap();
   check(await mobilePage.locator('#site-sidebar').evaluate(element => element.classList.contains('is-open')), 'Mobile sidebar did not open');
   check(await mobilePage.locator('.sidebar-overlay').isVisible(), 'Mobile sidebar overlay is missing');
+  await mobilePage.locator('.sidebar-label').first().tap();
+  check(await mobilePage.locator('.sidebar-list').first().isVisible(), 'Mobile sidebar category did not expand');
   await Promise.all([
     mobilePage.waitForURL('**/technologies/dotnet.html'),
     mobilePage.locator('.sidebar-link').first().tap()

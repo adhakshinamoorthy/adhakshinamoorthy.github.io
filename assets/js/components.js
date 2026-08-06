@@ -172,10 +172,16 @@ export function renderSidebar(base, technologies, activeSlug = '') {
   const groups = groupTechnologiesByCategory(technologies);
   host.innerHTML = [...groups].map(([category, items]) => `
     <nav class="sidebar-group" aria-label="${escapeHtml(category)}">
-      <span class="sidebar-label">${escapeHtml(category)}</span>
-      <ul class="sidebar-list">
-        ${items.map(item => `<li><a class="sidebar-link" href="${base}technologies/${item.slug}.html" ${item.slug === activeSlug ? 'aria-current="page"' : ''}><span class="sidebar-dot" style="--topic-color:${item.color}"></span>${escapeHtml(item.name)}</a></li>`).join('')}
-      </ul>
+      <details class="sidebar-disclosure">
+        <summary class="sidebar-label">
+          <span>${escapeHtml(category)}</span>
+          <span class="sidebar-count" aria-label="${items.length} topics">${items.length}</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </summary>
+        <ul class="sidebar-list">
+          ${items.map(item => `<li><a class="sidebar-link" href="${base}technologies/${item.slug}.html" ${item.slug === activeSlug ? 'aria-current="page"' : ''}><span class="sidebar-dot" style="--topic-color:${item.color}"></span>${escapeHtml(item.name)}</a></li>`).join('')}
+        </ul>
+      </details>
     </nav>`).join('');
   const overlay = document.createElement('div');
   overlay.className = 'sidebar-overlay';
