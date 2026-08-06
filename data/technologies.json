@@ -782,5 +782,173 @@
     "tip": "Log at the boundary of a meaningful business event—order placed, payment failed—rather than logging every internal method call.",
     "warning": "Logging full request or response bodies by default is a common way secrets and personal data end up in a log platform.",
     "sampleId": "ai-gatekeeper", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on message templates, enrichers, and sinks"
+  },
+  {
+    "slug": "semantic-kernel",
+    "name": "Semantic Kernel",
+    "symbol": "SK",
+    "category": "Cloud & Architecture",
+    "color": "#7b3fe4",
+    "shortDescription": "Microsoft's SDK for building AI-powered .NET applications using LLMs, plugins, memory, and orchestrated agents.",
+    "keywords": ["AI", "LLM", "GPT", "plugins", "agents", "memory", "orchestration", "OpenAI"],
+    "overview": "Semantic Kernel is an open-source SDK from Microsoft that lets .NET developers integrate large language models into applications using familiar C# patterns.",
+    "detail": "Semantic Kernel acts as an orchestration layer between your application and AI services like OpenAI or Azure OpenAI. You define plugins—functions the AI can call—and a kernel routes user intent to the right combination of those plugins. Memory connectors let the AI retrieve relevant context from vector stores, and agents can plan and execute multi-step tasks autonomously.",
+    "concepts": [
+      {"title": "Kernel and services", "description": "The Kernel is the central object that wires together AI services, plugins, and memory, and routes requests through them."},
+      {"title": "Plugins", "description": "C# methods decorated with attributes become tools the LLM can call to read data, call APIs, or trigger business logic."},
+      {"title": "Memory and embeddings", "description": "Text is converted to vector embeddings and stored so the AI can retrieve semantically relevant context before responding."},
+      {"title": "Agents and planners", "description": "Agents reason over a goal and decide which plugins to call and in what order, enabling multi-step autonomous workflows."}
+    ],
+    "architecture": {
+      "description": "A user prompt enters the Kernel, which enriches it with memory context and routes it to the LLM; the model calls plugins as needed before returning a grounded response.",
+      "nodes": ["User prompt", "Kernel + memory", "LLM (OpenAI / Azure)", "Plugins / tools"],
+      "colors": ["#7b3fe4", "#2678c8", "#168c78", "#e07036"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderAssistant.cs",
+      "introduction": "A plugin exposes a C# method as a tool the LLM can call; the kernel wires everything together in one place.",
+      "code": "using Microsoft.SemanticKernel;\n\nvar builder = Kernel.CreateBuilder();\nbuilder.AddAzureOpenAIChatCompletion(\n    deploymentName: config[\"AzureOpenAI:Deployment\"]!,\n    endpoint: config[\"AzureOpenAI:Endpoint\"]!,\n    apiKey: config[\"AzureOpenAI:Key\"]!);\n\nbuilder.Plugins.AddFromType<OrderPlugin>();\n\nvar kernel = builder.Build();\n\nvar result = await kernel.InvokePromptAsync(\n    \"What is the status of order {{$orderId}}?\",\n    new KernelArguments { [\"orderId\"] = \"ORD-42\" });\n\nConsole.WriteLine(result);\n\npublic sealed class OrderPlugin\n{\n    [KernelFunction, Description(\"Get the current status of an order by its ID.\")]\n    public async Task<string> GetOrderStatusAsync(string orderId)\n        => await orderService.GetStatusAsync(orderId);\n}"
+    },
+    "bestPractices": [
+      "Keep plugins small and focused on one capability so the LLM can choose them reliably.",
+      "Store secrets like API keys in Azure Key Vault or environment variables, never in code.",
+      "Add memory and retrieval-augmented generation before building agents, as grounded context reduces hallucinations.",
+      "Log token usage and latency per kernel invocation so AI costs and performance are visible from the start."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the difference between a Semantic Kernel plugin and a prompt template?",
+        "answer": "A plugin is a C# method the LLM can call to perform an action or retrieve data; a prompt template is a structured string passed to the model to guide its text response. Plugins add capabilities; prompt templates shape the conversation."
+      },
+      {
+        "question": "What problem does retrieval-augmented generation (RAG) solve?",
+        "answer": "LLMs have a fixed training cutoff and no access to private data. RAG retrieves relevant documents from a vector store and injects them into the prompt, grounding the model's response in current, application-specific facts."
+      },
+      {
+        "question": "When would you use an agent instead of a single prompt?",
+        "answer": "When the task requires multiple steps, decisions, or tool calls that cannot be predicted upfront—for example, researching a topic and then drafting a summary—an agent can plan and iterate rather than a single prompt producing one fixed response."
+      }
+    ],
+    "note": "Semantic Kernel is the orchestration layer, not the model itself. The quality of your plugins and prompts determines how useful the AI actually is.",
+    "tip": "Start with a single plugin and one well-scoped prompt before adding planners or agents; simpler pipelines are easier to debug and cheaper to run.",
+    "warning": "Never trust LLM-generated content to drive destructive operations without a human confirmation step or a strict validation layer.",
+    "sampleId": "ai-orchestrator",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-06",
+    "latestNote": "New guide on Kernel setup, plugins, and retrieval-augmented generation"
+  },
+  {
+    "slug": "domain-driven-design",
+    "name": "Domain-Driven Design",
+    "symbol": "DDD",
+    "category": "Cloud & Architecture",
+    "color": "#2a7a5e",
+    "shortDescription": "Model complex business domains using a shared language, bounded contexts, aggregates, and value objects.",
+    "keywords": ["DDD", "aggregates", "value objects", "bounded context", "ubiquitous language", "domain events", "entities"],
+    "overview": "Domain-Driven Design is an approach to software development that puts the business domain at the centre, using a shared language between developers and domain experts to build models that reflect real-world rules.",
+    "detail": "DDD separates complex business logic into bounded contexts, each with its own model and language. Inside a context, aggregates enforce invariants and act as consistency boundaries; value objects describe domain concepts without identity; domain events capture meaningful things that happened; and repositories provide access to aggregates without leaking persistence details.",
+    "concepts": [
+      {"title": "Ubiquitous language", "description": "A shared vocabulary used by both developers and domain experts in code, tests, and conversations, so the model and the business stay aligned."},
+      {"title": "Bounded context", "description": "An explicit boundary within which a particular domain model and its language are consistent; different contexts can have different models for the same concept."},
+      {"title": "Aggregates and entities", "description": "An aggregate is a cluster of objects treated as one unit for data changes; the root entity controls access and enforces all invariants."},
+      {"title": "Value objects and domain events", "description": "Value objects model concepts by their attributes rather than identity; domain events record meaningful state changes that other parts of the system can react to."}
+    ],
+    "architecture": {
+      "description": "Bounded contexts own their models and communicate through well-defined contracts or domain events, keeping each context independently evolvable.",
+      "nodes": ["Bounded context A", "Domain events / contracts", "Bounded context B", "Shared kernel (if any)"],
+      "colors": ["#2a7a5e", "#e07036", "#2678c8", "#6e5bd7"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "Order.cs",
+      "introduction": "An aggregate root enforces its own invariants and raises domain events instead of letting callers mutate state directly.",
+      "code": "public sealed class Order : AggregateRoot\n{\n    private readonly List<OrderLine> _lines = [];\n    public IReadOnlyList<OrderLine> Lines => _lines;\n    public OrderStatus Status { get; private set; }\n    public Money Total { get; private set; }\n\n    private Order() { }\n\n    public static Order Place(CustomerId customerId, IEnumerable<OrderLine> lines)\n    {\n        var order = new Order\n        {\n            Status = OrderStatus.Pending,\n            Total = Money.Zero\n        };\n        foreach (var line in lines)\n            order.AddLine(line);\n\n        order.Raise(new OrderPlaced(order.Id, customerId));\n        return order;\n    }\n\n    public void AddLine(OrderLine line)\n    {\n        if (Status != OrderStatus.Pending)\n            throw new DomainException(\"Cannot modify a non-pending order.\");\n\n        _lines.Add(line);\n        Total = Total.Add(line.Subtotal);\n    }\n}\n\npublic sealed record Money(decimal Amount, string Currency)\n{\n    public static readonly Money Zero = new(0, \"GBP\");\n    public Money Add(Money other) =>\n        Currency == other.Currency\n            ? this with { Amount = Amount + other.Amount }\n            : throw new DomainException(\"Currency mismatch.\");\n}"
+    },
+    "bestPractices": [
+      "Involve domain experts when naming concepts; code that uses business language is easier to validate and maintain.",
+      "Keep aggregates small—an aggregate that owns too much becomes a bottleneck and a source of contention.",
+      "Model domain events in past tense to describe what happened, not what should happen.",
+      "Map bounded context relationships explicitly using context maps so cross-boundary dependencies are visible and intentional."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the difference between an entity and a value object?",
+        "answer": "An entity has a unique identity that persists over time regardless of attribute changes; a value object is defined entirely by its attributes and has no meaningful identity of its own, so two value objects with the same attributes are interchangeable."
+      },
+      {
+        "question": "Why should an aggregate be kept small?",
+        "answer": "Aggregates are loaded and saved as a unit and act as a consistency boundary. A large aggregate increases lock contention, load time, and the risk of unrelated operations blocking each other."
+      },
+      {
+        "question": "What is a bounded context and why does it matter?",
+        "answer": "A bounded context is an explicit boundary within which a domain model is internally consistent. It matters because the same word—like 'customer'—can mean different things in different parts of a business, and mixing those meanings in one model creates confusion and fragile code."
+      }
+    ],
+    "note": "DDD is a design philosophy, not a set of mandatory patterns. Apply aggregates and events where the domain is genuinely complex; simpler areas often need only basic CRUD.",
+    "tip": "Start with a context map and a glossary before writing any code—shared language problems surface quickly and are cheap to fix on paper.",
+    "warning": "Avoid anemic domain models where aggregates are just data bags and all logic lives in services; this defeats the purpose of encapsulating business rules in the domain.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 13,
+    "level": "Advanced",
+    "updated": "2026-08-06",
+    "latestNote": "New guide on aggregates, value objects, and bounded contexts"
+  },
+  {
+    "slug": "vertical-slice-architecture",
+    "name": "Vertical Slice Architecture",
+    "symbol": "VSA",
+    "category": "Cloud & Architecture",
+    "color": "#c0454a",
+    "shortDescription": "Organise code by feature instead of by layer, keeping everything a feature needs together and coupling to a minimum.",
+    "keywords": ["vertical slice", "feature folders", "MediatR", "minimal coupling", "cohesion", "CQRS"],
+    "overview": "Vertical Slice Architecture organises an application around features rather than technical layers, so each feature contains its own endpoint, handler, validation, and data access in one place.",
+    "detail": "Instead of grouping all controllers together, all repositories together, and all services together, Vertical Slice Architecture puts everything a single use case needs into one folder or file. Changes to one feature touch only that slice, reducing the risk of breaking unrelated features. MediatR is a common companion because it lets each slice define its own command or query and handler without a shared service class.",
+    "concepts": [
+      {"title": "Feature folders", "description": "All code for one feature—endpoint, handler, validator, response type—lives in one folder, making the feature easy to find, change, and delete."},
+      {"title": "Minimal coupling between slices", "description": "Slices share as little as possible. Common infrastructure like database access is shared, but business logic stays inside the slice that owns it."},
+      {"title": "Each slice owns its contract", "description": "A slice defines the request and response types it needs, rather than reusing shared DTOs that accumulate properties for many callers."},
+      {"title": "Contrast with layered architecture", "description": "Layers separate concerns horizontally across the whole application; vertical slices separate concerns vertically per feature, favouring cohesion over uniform abstraction."}
+    ],
+    "architecture": {
+      "description": "Each feature is a self-contained vertical slice from HTTP endpoint to data access; shared infrastructure sits below all slices but no slice depends on another.",
+      "nodes": ["HTTP endpoints", "Feature slices", "Shared infrastructure", "Database"],
+      "colors": ["#c0454a", "#e07036", "#2678c8", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "PlaceOrder/",
+      "introduction": "A single file contains the endpoint, command, handler, and response for the Place Order feature—nothing is shared with other features unless it truly belongs to shared infrastructure.",
+      "code": "// Features/Orders/PlaceOrder.cs\n\npublic static class PlaceOrder\n{\n    public sealed record Command(Guid CustomerId, IReadOnlyList<OrderLine> Lines)\n        : IRequest<Guid>;\n\n    public sealed class Validator : AbstractValidator<Command>\n    {\n        public Validator()\n        {\n            RuleFor(x => x.CustomerId).NotEmpty();\n            RuleFor(x => x.Lines).NotEmpty();\n        }\n    }\n\n    public sealed class Handler(AppDbContext db) : IRequestHandler<Command, Guid>\n    {\n        public async Task<Guid> Handle(Command command, CancellationToken ct)\n        {\n            var order = new Order(command.CustomerId, command.Lines);\n            db.Orders.Add(order);\n            await db.SaveChangesAsync(ct);\n            return order.Id;\n        }\n    }\n\n    public static void MapEndpoint(IEndpointRouteBuilder app) =>\n        app.MapPost(\"/api/orders\", async (Command command, IMediator mediator, CancellationToken ct) =>\n        {\n            var id = await mediator.Send(command, ct);\n            return Results.Created($\"/api/orders/{id}\", new { id });\n        }).RequireAuthorization();\n}"
+    },
+    "bestPractices": [
+      "Co-locate the endpoint, handler, validator, and response type in a single file or folder per feature.",
+      "Share only what is genuinely shared—database context, auth helpers, base types—not business logic.",
+      "Let each slice define the exact request and response shape it needs instead of inheriting a bloated shared DTO.",
+      "Use integration tests per slice to verify the full path from HTTP to database without shared test setup getting in the way."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the main advantage of Vertical Slice Architecture over a traditional layered approach?",
+        "answer": "Changes to one feature touch only that slice, reducing the risk of breaking unrelated features and making it easier to reason about what a change affects. Layered architectures spread one feature across many layers, so a change ripples horizontally."
+      },
+      {
+        "question": "Does Vertical Slice Architecture replace Clean Architecture?",
+        "answer": "Not necessarily—they answer different questions. Clean Architecture defines where dependencies point; Vertical Slice Architecture defines how to organise code within a project. You can use feature folders inside a clean architecture structure."
+      },
+      {
+        "question": "When is Vertical Slice Architecture a poor fit?",
+        "answer": "When features share significant business logic or domain rules that would be duplicated across slices, a richer shared domain model may be a better fit than pure vertical isolation."
+      }
+    ],
+    "note": "Vertical Slice Architecture is a code organisation strategy, not a silver bullet. The right amount of sharing between slices depends on how much the features genuinely overlap.",
+    "tip": "Start by grouping existing files into feature folders without changing any logic—the structure alone usually reveals unexpected coupling.",
+    "warning": "Taken too far, every slice becoming a copy-paste of the last leads to the same duplication problems that layers were meant to solve; shared infrastructure must still be shared.",
+    "sampleId": "design-patterns",
+    "readingMinutes": 10,
+    "level": "Intermediate",
+    "updated": "2026-08-06",
+    "latestNote": "New guide on feature folders, minimal coupling, and slice-per-feature organisation"
   }
 ]
