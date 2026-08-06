@@ -38,7 +38,10 @@ try {
   await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
 
   check(await page.title() === '.NET Atlas — Learn the modern .NET ecosystem', 'Unexpected home page title');
-  check(await page.locator('.tech-blob').count() === 17, 'Home page does not render 17 technology blobs');
+  check(
+    await page.locator('.tech-blob').count() === await page.locator('.sidebar-link').count(),
+    'Home page technology blobs do not match the sidebar topics'
+  );
   check(await page.locator('#featured-samples .github-card').count() === 3, 'Home page does not render three featured samples');
   check(await page.locator('#hero-title').isVisible(), 'Hero heading is not visible');
   check(await page.locator('.hero-actions .button-primary').isVisible(), 'Primary hero action is not visible');
@@ -80,6 +83,25 @@ try {
   check(await page.locator('.faq-item').count() >= 3, 'Topic interview FAQ is incomplete');
   check(await page.locator('.article-nav a').count() === 2, 'Previous/next navigation is incomplete');
   check(await page.locator('.code-block .tok-keyword').count() > 0, 'C# syntax highlighting is missing');
+
+  const sidebarOrder = await page.locator('.sidebar-link').evaluateAll(links =>
+    links.map(link => new URL(link.href).pathname.split('/').at(-1))
+  );
+  for (let index = 0; index < sidebarOrder.length; index += 1) {
+    const current = sidebarOrder[index];
+    const expectedPrevious = sidebarOrder[(index - 1 + sidebarOrder.length) % sidebarOrder.length];
+    const expectedNext = sidebarOrder[(index + 1) % sidebarOrder.length];
+    await page.goto(`${baseUrl}/technologies/${current}`, { waitUntil: 'networkidle' });
+    const adjacentLinks = await page.locator('.article-nav a').evaluateAll(links =>
+      links.map(link => new URL(link.href).pathname.split('/').at(-1))
+    );
+    check(
+      adjacentLinks[0] === expectedPrevious && adjacentLinks[1] === expectedNext,
+      `${current} navigation does not match sidebar order`
+    );
+  }
+
+  await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
 
   await page.locator('.copy-button').click();
   check(/Copied|Select & copy/.test(await page.locator('.copy-button').innerText()), 'Copy button did not provide feedback');
