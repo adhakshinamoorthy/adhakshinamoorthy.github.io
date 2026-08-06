@@ -950,5 +950,208 @@
     "level": "Intermediate",
     "updated": "2026-08-06",
     "latestNote": "New guide on feature folders, minimal coupling, and slice-per-feature organisation"
+  },
+  {
+    "slug": "microsoft-extensions-ai",
+    "name": "Microsoft.Extensions.AI",
+    "symbol": "AI",
+    "category": "Cloud & Architecture",
+    "color": "#5b5fc7",
+    "shortDescription": "Provider-neutral abstractions and middleware for adding generative AI capabilities to .NET applications.",
+    "keywords": ["Microsoft.Extensions.AI", "IChatClient", "IEmbeddingGenerator", "generative AI", "LLM", "middleware", "telemetry"],
+    "overview": "Microsoft.Extensions.AI provides common .NET abstractions for generative AI services so application code can work with chat, embeddings, and related capabilities without being coupled to one provider SDK.",
+    "detail": "The abstractions package defines exchange types such as IChatClient and IEmbeddingGenerator, while the higher-level Microsoft.Extensions.AI package adds composable middleware for function invocation, telemetry, caching, and other cross-cutting behavior. Providers implement the interfaces, and applications consume them through dependency injection, which makes provider changes and test doubles much easier to manage.",
+    "concepts": [
+      {"title": "IChatClient", "description": "A common contract for complete and streaming chat responses, messages, tools, and multi-modal content across compatible providers."},
+      {"title": "IEmbeddingGenerator", "description": "A generic abstraction for turning text or other inputs into vector embeddings used by semantic search and retrieval workflows."},
+      {"title": "Composable middleware", "description": "Chat clients can be wrapped with function invocation, caching, telemetry, rate limiting, or custom delegating behavior."},
+      {"title": "Provider portability", "description": "Application services depend on shared abstractions while provider-specific registration remains at the composition root."}
+    ],
+    "architecture": {"description": "Application code calls shared AI abstractions, a middleware pipeline applies cross-cutting behavior, and a provider adapter communicates with the selected model service.", "nodes": ["Application service", "IChatClient pipeline", "Provider adapter", "AI model service"], "colors": ["#5b5fc7", "#7b3fe4", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "SupportAssistant.cs", "introduction": "The application service depends only on IChatClient, so provider setup and middleware remain outside the business workflow.", "code": "using Microsoft.Extensions.AI;\n\npublic sealed class SupportAssistant(IChatClient chatClient)\n{\n    public async Task<string> AnswerAsync(\n        string question, CancellationToken cancellationToken)\n    {\n        var messages = new[]\n        {\n            new ChatMessage(ChatRole.System,\n                \"Answer from the approved support knowledge only.\"),\n            new ChatMessage(ChatRole.User, question)\n        };\n\n        var response = await chatClient.GetResponseAsync(\n            messages, cancellationToken: cancellationToken);\n\n        return response.Text;\n    }\n}"},
+    "bestPractices": ["Keep provider-specific construction at the composition root and inject the shared abstractions into application services.", "Add telemetry around latency, token use, model identity, and failures without recording sensitive prompt content by default.", "Use explicit timeouts, cancellation, retry limits, and rate limits because model calls are remote and comparatively expensive.", "Test AI workflows with deterministic fake IChatClient implementations before relying on slower provider integration tests."],
+    "interviewQuestions": [
+      {"question": "How is Microsoft.Extensions.AI different from Semantic Kernel?", "answer": "Microsoft.Extensions.AI supplies provider-neutral primitives and composable client middleware. Semantic Kernel is a broader orchestration SDK for plugins, agents, prompts, and multi-step AI workflows; the two can be used together."},
+      {"question": "Why inject IChatClient instead of a provider SDK client?", "answer": "It keeps application code portable, simplifies tests, and centralizes provider-specific authentication, model selection, and middleware in the composition root."},
+      {"question": "What belongs in an AI client middleware pipeline?", "answer": "Cross-cutting concerns such as telemetry, caching, function invocation, rate limiting, safety checks, and resilience belong there when their ordering and failure behavior are explicit."}
+    ],
+    "note": "Provider neutrality reduces coupling, but models still differ in supported modalities, tool behavior, context limits, and response quality.",
+    "tip": "Define one application-level AI use case behind IChatClient first, then add provider selection and middleware only where the use case requires them.",
+    "warning": "Do not treat provider portability as output equivalence; validate safety, quality, latency, and cost again whenever the model or provider changes.",
+    "sampleId": "ai-orchestrator", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on provider-neutral AI abstractions and middleware"
+  },
+  {
+    "slug": "dotnet-maui",
+    "name": ".NET MAUI",
+    "symbol": "MAUI",
+    "category": "Cross-Platform",
+    "color": "#7b4fe0",
+    "shortDescription": "Build native Android, iOS, macOS, and Windows applications from a shared C# and XAML codebase.",
+    "keywords": ["MAUI", "mobile", "desktop", "Android", "iOS", "Mac Catalyst", "WinUI", "XAML", "native"],
+    "overview": ".NET Multi-platform App UI (.NET MAUI) is the .NET framework for creating native mobile and desktop applications with C# and XAML from a shared project.",
+    "detail": ".NET MAUI provides a single project system, shared controls and layouts, data binding, handlers, app lifecycle APIs, and access to native device capabilities. Shared code targets Android, iOS, macOS through Mac Catalyst, and Windows through WinUI 3, while platform folders and conditional compilation allow focused native customization when a common abstraction is not enough.",
+    "concepts": [
+      {"title": "Single project", "description": "One SDK-style project shares code, fonts, images, app metadata, and resources while multi-targeting native platforms."},
+      {"title": "Handlers", "description": "Cross-platform controls map through handlers to native platform views and can be customized globally or per control."},
+      {"title": "XAML and MVVM", "description": "XAML describes UI structure while binding, commands, and observable view models separate presentation state from views."},
+      {"title": "Platform integration", "description": "Cross-platform APIs cover sensors, connectivity, secure storage, files, and permissions, with direct native APIs available when required."}
+    ],
+    "architecture": {"description": "Shared C# and XAML target the MAUI control and API layer, which maps behavior to the native UI frameworks and operating-system services on each platform.", "nodes": ["Shared C# + XAML", ".NET MAUI controls", "Platform handlers", "Native app package"], "colors": ["#7b4fe0", "#5b5fc7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "MainPage.xaml.cs", "introduction": "A shared page can call a cross-platform device API while permission and platform details stay behind .NET MAUI abstractions.", "code": "public partial class MainPage : ContentPage\n{\n    public MainPage() => InitializeComponent();\n\n    private async void OnLocateClicked(object sender, EventArgs e)\n    {\n        var permission = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();\n        if (permission != PermissionStatus.Granted)\n            return;\n\n        var location = await Geolocation.Default.GetLocationAsync(\n            new GeolocationRequest(GeolocationAccuracy.Medium),\n            CancellationToken.None);\n\n        LocationLabel.Text = location is null\n            ? \"Location unavailable\"\n            : $\"{location.Latitude:F4}, {location.Longitude:F4}\";\n    }\n}"},
+    "bestPractices": ["Keep business logic and application state in platform-neutral services and view models so they can be unit tested without a device.", "Design adaptive layouts and test real screen sizes, orientations, input methods, and accessibility settings on every supported platform.", "Use handlers or platform folders for genuine native differences instead of scattering platform checks throughout shared code.", "Profile startup, memory, rendering, and package size on release builds because debug and emulator behavior can be misleading."],
+    "interviewQuestions": [
+      {"question": "Does .NET MAUI render one identical UI on every platform?", "answer": "No. Shared MAUI controls are mapped to native platform controls through handlers, so behavior and appearance can retain platform conventions while sharing most UI code."},
+      {"question": "When should platform-specific code be used?", "answer": "Use it when a capability has no suitable cross-platform abstraction or when native behavior is central to the experience; isolate it behind an interface or in the platform-specific folders."},
+      {"question": "Why must iOS and macOS builds use a Mac?", "answer": "Apple's native toolchain and signing infrastructure are required to compile and package those applications, even when development begins from another operating system."}
+    ],
+    "note": "A shared codebase does not remove platform differences; it gives teams one place to share common UI and logic while making native exceptions explicit.",
+    "tip": "Start with one representative workflow and validate it on physical devices before committing an entire product to a cross-platform UI strategy.",
+    "warning": "Do not judge production performance from debug builds or emulators alone; measure signed release builds on the oldest supported devices.",
+    "sampleId": "design-patterns", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New cross-platform guide for native mobile and desktop apps"
+  },
+  {
+    "slug": "modular-monolith",
+    "name": "Modular Monolith",
+    "symbol": "MM",
+    "category": "Cloud & Architecture",
+    "color": "#2f7d71",
+    "shortDescription": "Keep one deployable application while enforcing business-module boundaries that can evolve independently.",
+    "keywords": ["modular monolith", "modules", "bounded contexts", "monolith", "microservices", "encapsulation", "architecture"],
+    "overview": "A modular monolith is a single deployable application divided into strongly encapsulated business modules with explicit contracts and controlled dependencies.",
+    "detail": "Unlike a traditional monolith organized mainly by technical layers, a modular monolith groups code and data ownership around business capabilities. Modules communicate through public contracts or in-process messages, hide their internal models, and can own separate schemas while still sharing one process and deployment pipeline. It preserves operational simplicity and leaves room to extract a module only when independent scaling or deployment provides proven value.",
+    "concepts": [
+      {"title": "Business modules", "description": "Each module owns a cohesive capability, its application behavior, domain model, persistence, and public contract."},
+      {"title": "Enforced boundaries", "description": "Internal types stay inaccessible and dependency rules prevent modules from reaching into one another's implementation details."},
+      {"title": "Module communication", "description": "Public interfaces, commands, queries, or events make cross-module interactions explicit and replace direct table or class access."},
+      {"title": "Single deployment", "description": "Modules compile and run together, avoiding distributed transactions and network failure while retaining architectural separation."}
+    ],
+    "architecture": {"description": "One host composes independently owned modules; modules communicate through contracts while sharing the process and, when appropriate, a database server with isolated schemas.", "nodes": ["HTTP host", "Business modules", "Module contracts", "Isolated data schemas"], "colors": ["#2f7d71", "#5b5fc7", "#e07036", "#2678c8"]},
+    "code": {"language": "csharp", "label": "OrdersModule.cs", "introduction": "A module exposes only registration and endpoint mapping while keeping handlers, entities, and persistence types internal.", "code": "public static class OrdersModule\n{\n    public static IServiceCollection AddOrders(\n        this IServiceCollection services, IConfiguration configuration)\n    {\n        services.AddDbContext<OrdersDbContext>(options =>\n            options.UseNpgsql(configuration.GetConnectionString(\"Database\")));\n        services.AddScoped<IOrdersModule, OrdersModuleApi>();\n        return services;\n    }\n\n    public static IEndpointRouteBuilder MapOrders(\n        this IEndpointRouteBuilder endpoints)\n    {\n        var group = endpoints.MapGroup(\"/api/orders\")\n            .RequireAuthorization();\n        group.MapPost(\"/\", PlaceOrder.HandleAsync);\n        group.MapGet(\"/{id:guid}\", GetOrder.HandleAsync);\n        return endpoints;\n    }\n}\n\ninternal sealed class OrdersDbContext(DbContextOptions<OrdersDbContext> options)\n    : DbContext(options);"},
+    "bestPractices": ["Define modules from business capabilities and bounded contexts, not arbitrary folders or deployment aspirations.", "Make module internals inaccessible and enforce dependency rules with architecture tests in continuous integration.", "Give each module ownership of its tables or schema; cross-module reads should use contracts or deliberately maintained read models.", "Extract a module into a service only when independent deployment, scaling, ownership, or isolation justifies the distributed-system cost."],
+    "interviewQuestions": [
+      {"question": "How does a modular monolith differ from a layered monolith?", "answer": "A layered monolith groups code by technical role across the system, while a modular monolith groups cohesive business capabilities and restricts dependencies across those module boundaries."},
+      {"question": "What advantages does it have over microservices?", "answer": "It keeps calls and transactions in process, simplifies deployment and debugging, and avoids network and consistency complexity while still making business boundaries explicit."},
+      {"question": "How do you stop module boundaries from eroding?", "answer": "Use internal visibility, small public contracts, separate schemas or contexts, architecture tests, and code ownership rules that fail builds when forbidden dependencies appear."}
+    ],
+    "note": "The value comes from enforced modularity, not from putting the word Modules in a folder name.",
+    "tip": "Start with the business capability that changes most often and define its public contract before reorganizing the rest of the application.",
+    "warning": "A shared database becomes hidden coupling when modules query or update one another's tables directly.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on module boundaries and monolith-to-services tradeoffs"
+  },
+  {
+    "slug": "source-generators",
+    "name": "Source Generators",
+    "symbol": "SG",
+    "category": "Core Platform",
+    "color": "#9a4fa8",
+    "shortDescription": "Generate strongly typed C# during compilation to remove repetitive runtime work and boilerplate.",
+    "keywords": ["source generators", "Roslyn", "incremental generator", "compile time", "code generation", "analyzers", "metaprogramming"],
+    "overview": "C# source generators are Roslyn compiler components that inspect compilation inputs and add new source code to the same compilation.",
+    "detail": "Generators are useful when a library can discover declarations or configuration at build time and emit strongly typed code instead of relying on runtime reflection or handwritten repetition. Incremental generators model the work as cached transformations, allowing the compiler to rerun only the affected steps as source changes. Generated output is additive: a generator can create new code but cannot rewrite the user's existing syntax tree.",
+    "concepts": [
+      {"title": "Compiler integration", "description": "A generator receives compilation-related inputs and contributes generated syntax trees before the final assembly is emitted."},
+      {"title": "Incremental pipeline", "description": "IIncrementalGenerator builds cacheable, composable transformations so unchanged inputs do not repeat expensive work."},
+      {"title": "Candidate filtering", "description": "Syntax providers first select inexpensive candidates, then semantic analysis confirms symbols and attributes that matter."},
+      {"title": "Generated contracts", "description": "Consumers see normal strongly typed C# with compile-time diagnostics, navigation, and no runtime code-emission requirement."}
+    ],
+    "architecture": {"description": "The compiler feeds syntax and semantic inputs through an incremental pipeline, which emits generated C# that joins user code in the final compilation.", "nodes": ["User source", "Incremental pipeline", "Generated source", "Compiled assembly"], "colors": ["#9a4fa8", "#5b5fc7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "BuildInfoGenerator.cs", "introduction": "A minimal incremental generator contributes a strongly typed build-information class during compilation.", "code": "using Microsoft.CodeAnalysis;\nusing Microsoft.CodeAnalysis.Text;\nusing System.Text;\n\n[Generator]\npublic sealed class BuildInfoGenerator : IIncrementalGenerator\n{\n    public void Initialize(IncrementalGeneratorInitializationContext context)\n    {\n        context.RegisterPostInitializationOutput(static output =>\n        {\n            const string source = \"\"\"\n                namespace Generated;\n\n                internal static class BuildInfo\n                {\n                    public const string Product = \"Orders.Api\";\n                }\n                \"\"\";\n\n            output.AddSource(\"BuildInfo.g.cs\",\n                SourceText.From(source, Encoding.UTF8));\n        });\n    }\n}"},
+    "bestPractices": ["Prefer IIncrementalGenerator for new generators and keep each transformation deterministic and free of mutable shared state.", "Filter syntax cheaply before requesting semantic models, and combine only the inputs required to produce an output.", "Generate readable, stable source with unique hint names so developers can inspect and debug the result.", "Report diagnostics for invalid user input instead of throwing exceptions or silently generating incomplete code."],
+    "interviewQuestions": [
+      {"question": "When does a source generator run?", "answer": "It runs as part of compilation and contributes source before the compiler emits the final assembly; it is not a runtime code-generation mechanism."},
+      {"question": "Why prefer an incremental generator?", "answer": "Its pipeline lets Roslyn cache intermediate results and rerun only work affected by changed inputs, improving IDE and build performance."},
+      {"question": "Can a source generator modify existing source code?", "answer": "No. Generators add new source files to a compilation. Analyzers and code fixes can diagnose or offer edits to user code, but generation itself is additive."}
+    ],
+    "note": "Source generators and analyzers share Roslyn infrastructure but solve different problems: generators add code, while analyzers report diagnostics.",
+    "tip": "Ship snapshot tests for generated source and compilation tests for diagnostics so formatting and API contracts remain stable.",
+    "warning": "A generator that scans every syntax node or performs file and network I/O can make typing and builds noticeably slower.",
+    "sampleId": "design-patterns", "readingMinutes": 11, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on Roslyn incremental compile-time generation"
+  },
+  {
+    "slug": "mlnet",
+    "name": "ML.NET",
+    "symbol": "ML",
+    "category": "Cloud & Architecture",
+    "color": "#5c61d6",
+    "shortDescription": "Train and consume classical machine-learning models for classification, regression, recommendation, forecasting, and more in .NET.",
+    "keywords": ["ML.NET", "machine learning", "classification", "regression", "recommendation", "training", "inference", "AutoML"],
+    "overview": "ML.NET is an open-source, cross-platform machine-learning framework for training custom models and running predictions inside .NET applications.",
+    "detail": "ML.NET expresses data preparation and algorithms as a pipeline that is fitted to training data to produce an immutable model. It supports tasks including binary and multiclass classification, regression, clustering, recommendation, anomaly detection, forecasting, and integrations for selected deep-learning scenarios. Models can be trained code-first or with tooling, saved as artifacts, and loaded into applications for local inference.",
+    "concepts": [
+      {"title": "MLContext", "description": "The entry point for loading data, defining pipelines, training models, evaluating results, and saving artifacts."},
+      {"title": "IDataView", "description": "A lazy, schema-aware representation that lets ML.NET process datasets larger than memory through composable transforms."},
+      {"title": "Estimator pipeline", "description": "Data transforms and a trainer are chained, then Fit learns parameters and produces an immutable transformer model."},
+      {"title": "Evaluation and inference", "description": "Task-specific metrics validate a held-out dataset before the saved model is loaded for predictions in an application."}
+    ],
+    "architecture": {"description": "Training data passes through preparation and a trainer to create a versioned model artifact, which an application loads to perform local predictions.", "nodes": ["Training data", "Transforms + trainer", "Model artifact", "Application inference"], "colors": ["#5c61d6", "#7b4fe0", "#e07036", "#168c78"]},
+    "code": {"language": "csharp", "label": "SentimentModel.cs", "introduction": "A text-featurization and binary-classification pipeline trains a small sentiment model and uses it for a local prediction.", "code": "using Microsoft.ML;\n\nvar ml = new MLContext(seed: 42);\nvar trainingData = ml.Data.LoadFromEnumerable(new[]\n{\n    new Review(\"Fast delivery and excellent support\", true),\n    new Review(\"The order arrived damaged\", false),\n    new Review(\"Simple setup and reliable results\", true),\n    new Review(\"Support never replied\", false)\n});\n\nvar pipeline = ml.Transforms.Text.FeaturizeText(\n        outputColumnName: \"Features\", inputColumnName: nameof(Review.Text))\n    .Append(ml.BinaryClassification.Trainers.SdcaLogisticRegression());\n\nvar model = pipeline.Fit(trainingData);\nvar engine = ml.Model.CreatePredictionEngine<Review, Sentiment>(model);\nvar prediction = engine.Predict(new Review(\"A very helpful product\", false));\n\npublic sealed record Review(string Text, bool Label);\npublic sealed class Sentiment { public bool PredictedLabel { get; set; } }"},
+    "bestPractices": ["Split training, validation, and test data before experimentation to avoid evaluating a model on examples it learned from.", "Choose metrics that match the business cost of false positives and false negatives instead of optimizing accuracy alone.", "Version the model together with its input schema, feature pipeline, training data lineage, and evaluation results.", "Monitor production data and predictions for drift, and retrain only through a repeatable, reviewed pipeline."],
+    "interviewQuestions": [
+      {"question": "How is ML.NET different from generative AI libraries?", "answer": "ML.NET primarily trains and runs task-specific predictive models such as classifiers and regressors, while generative AI libraries integrate foundation models that create or transform content."},
+      {"question": "What is the difference between an estimator and a transformer?", "answer": "An estimator describes a learnable pipeline stage. Calling Fit on data produces a transformer containing the learned parameters that can transform new data."},
+      {"question": "Why is a held-out test set important?", "answer": "It estimates how the trained model generalizes to unseen data; evaluating on training examples produces overly optimistic metrics and hides overfitting."}
+    ],
+    "note": "A model is only as trustworthy as its data, evaluation design, and production monitoring; the training API cannot compensate for biased or unrepresentative examples.",
+    "tip": "Begin with a simple baseline and one business-relevant metric before experimenting with more complex trainers or AutoML.",
+    "warning": "PredictionEngine is convenient for simple or single-threaded examples but is not thread-safe; production services should use an appropriate pooled or batch prediction pattern.",
+    "sampleId": "ai-orchestrator", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on classical machine learning and local inference"
+  },
+  {
+    "slug": "openapi-scalar",
+    "name": "OpenAPI & Scalar",
+    "symbol": "API",
+    "category": "Web & Data",
+    "color": "#168dcc",
+    "shortDescription": "Generate accurate OpenAPI contracts and present an interactive, modern API reference with Scalar.",
+    "keywords": ["OpenAPI", "Scalar", "API documentation", "Microsoft.AspNetCore.OpenApi", "contract", "schema", "versioning"],
+    "overview": "ASP.NET Core can generate OpenAPI documents from endpoint metadata, while Scalar renders those documents as an interactive API reference for developers.",
+    "detail": "Microsoft.AspNetCore.OpenApi provides first-party document generation for Minimal APIs and controllers, including runtime endpoints, build-time generation, multiple documents, and transformers. Scalar.AspNetCore is a separate UI integration that reads the generated document and renders searchable reference documentation and a request client. Accurate endpoint metadata and deliberate document exposure matter more than the visual shell.",
+    "concepts": [
+      {"title": "OpenAPI document", "description": "A language-neutral contract describing operations, paths, parameters, request bodies, responses, schemas, and security schemes."},
+      {"title": "Endpoint metadata", "description": "Typed results, attributes, summaries, descriptions, and response declarations feed the generated operation definitions."},
+      {"title": "Document transformers", "description": "Transformers apply cross-cutting changes such as security schemes, branding metadata, or environment-specific server information."},
+      {"title": "Scalar API reference", "description": "Scalar consumes an OpenAPI URL and provides interactive, searchable documentation without generating the contract itself."}
+    ],
+    "architecture": {"description": "ASP.NET Core endpoint metadata is assembled into an OpenAPI document, exposed as JSON, and consumed by Scalar or downstream client-generation tools.", "nodes": ["Endpoint metadata", "OpenAPI generator", "OpenAPI document", "Scalar + clients"], "colors": ["#168dcc", "#2678c8", "#5b5fc7", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "The app generates a first-party OpenAPI document and exposes Scalar only in development, while endpoint metadata improves the contract.", "code": "using Scalar.AspNetCore;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddOpenApi(\"v1\");\n\nvar app = builder.Build();\n\nif (app.Environment.IsDevelopment())\n{\n    app.MapOpenApi();\n    app.MapScalarApiReference(options =>\n        options.WithTitle(\"Orders API\"));\n}\n\napp.MapGet(\"/api/orders/{id:guid}\", (Guid id) =>\n        TypedResults.Ok(new OrderSummary(id, \"Ready\")))\n    .WithName(\"GetOrder\")\n    .WithSummary(\"Gets one order by identifier\")\n    .Produces<OrderSummary>(StatusCodes.Status200OK);\n\napp.Run();\n\npublic sealed record OrderSummary(Guid Id, string Status);"},
+    "bestPractices": ["Treat the OpenAPI document as a tested contract and fail continuous integration when unintended breaking changes appear.", "Use typed results and explicit metadata so status codes, schemas, descriptions, and security requirements match actual behavior.", "Version APIs deliberately and publish separate documents when consumers need stable lifecycle boundaries.", "Restrict or secure interactive documentation in production and never prefill real credentials or secrets in a browser-visible client."],
+    "interviewQuestions": [
+      {"question": "What roles do Microsoft.AspNetCore.OpenApi and Scalar play?", "answer": "The Microsoft package generates the OpenAPI document from ASP.NET Core metadata. Scalar consumes that document and renders an interactive reference; it does not replace accurate contract generation."},
+      {"question": "Why can generated documentation still be wrong?", "answer": "Generation reflects available metadata. If response types, status codes, security requirements, or descriptions are missing or differ from runtime behavior, the generated contract will preserve those gaps."},
+      {"question": "How should API versioning relate to OpenAPI documents?", "answer": "Each supported public API version should have a clear lifecycle and discoverable contract, commonly through separate named documents that client teams can pin and compare."}
+    ],
+    "note": "Scalar is a documentation experience; the OpenAPI document remains the portable source of truth for tools and consumers.",
+    "tip": "Check the generated JSON into an artifact or compare it in CI so contract changes are reviewed alongside code.",
+    "warning": "An unrestricted production documentation UI can expose internal operations and make credential misuse easier even when the underlying API still enforces authorization.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on first-party OpenAPI generation and Scalar"
+  },
+  {
+    "slug": "feature-flags",
+    "name": "Feature Flags",
+    "symbol": "FF",
+    "category": "Delivery & Operations",
+    "color": "#d18415",
+    "shortDescription": "Separate deployment from release with runtime flags, targeted rollouts, variants, and operational kill switches.",
+    "keywords": ["feature flags", "Microsoft.FeatureManagement", "Azure App Configuration", "rollout", "variants", "targeting", "deployment"],
+    "overview": "Feature flags let teams change feature availability at runtime so code can be deployed independently from when or to whom a capability is released.",
+    "detail": "Microsoft.FeatureManagement integrates flag evaluation with .NET configuration and dependency injection, while Azure App Configuration can centrally store and refresh definitions. Boolean flags support on or off decisions, filters enable time windows and targeting, and variants can assign different configurations to audiences. Flags reduce release risk only when ownership, observability, testing, and removal are treated as part of the feature lifecycle.",
+    "concepts": [
+      {"title": "Deployment versus release", "description": "Code can reach production disabled, then be enabled gradually without building and deploying another artifact."},
+      {"title": "Feature filters", "description": "Time-window, percentage, targeting, and custom filters evaluate contextual rules instead of one global Boolean value."},
+      {"title": "Variants", "description": "A flag can assign named configurations to different audiences for experiments, migrations, or tier-specific behavior."},
+      {"title": "Flag lifecycle", "description": "Every flag needs an owner, purpose, expiry condition, telemetry, and cleanup plan to prevent permanent branching complexity."}
+    ],
+    "architecture": {"description": "A central configuration source supplies flag definitions, the feature manager evaluates them against request context, and application code selects the enabled behavior while telemetry records the decision.", "nodes": ["Flag configuration", "Feature manager", "Application decision", "Telemetry + cleanup"], "colors": ["#d18415", "#e07036", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "The feature manager is registered once and evaluated at the decision point, allowing a new checkout to be released independently from deployment.", "code": "using Microsoft.FeatureManagement;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddFeatureManagement();\n\nvar app = builder.Build();\n\napp.MapGet(\"/checkout\", async (\n    IFeatureManager features, CheckoutService checkout, CancellationToken ct) =>\n{\n    if (await features.IsEnabledAsync(\"NewCheckout\"))\n        return Results.Ok(await checkout.GetNewExperienceAsync(ct));\n\n    return Results.Ok(await checkout.GetCurrentExperienceAsync(ct));\n});\n\napp.Run();"},
+    "bestPractices": ["Give every flag a clear owner, creation date, expected removal date, and documented behavior for configuration failure.", "Evaluate flags at stable decision points and avoid scattering the same flag through many layers of the codebase.", "Test both enabled and disabled paths, then observe errors, latency, and business metrics while rollout changes.", "Remove temporary flags and dead branches promptly after a rollout or migration completes."],
+    "interviewQuestions": [
+      {"question": "How is a feature flag different from application configuration?", "answer": "Both may use configuration infrastructure, but a feature flag represents a managed release decision with targeting, variants, telemetry, ownership, and a lifecycle rather than a general application setting."},
+      {"question": "What is a kill switch?", "answer": "It is an operational flag designed to disable risky behavior quickly without redeploying, with a safe and well-tested fallback path."},
+      {"question": "What is the main long-term risk of feature flags?", "answer": "Stale flags leave permanent branches and multiply the states developers must understand and test, so cleanup discipline is essential."}
+    ],
+    "note": "Feature flags make releases reversible, but they also add runtime states that must be observable and tested.",
+    "tip": "Start rollout with internal users or a small stable audience and expand only when technical and business metrics remain healthy.",
+    "warning": "Do not use a feature flag as the only authorization check; release targeting and security policy solve different problems.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on safe runtime releases and targeted rollouts"
   }
 ]
