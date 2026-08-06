@@ -987,27 +987,27 @@
     "category": "Cross-Platform",
     "color": "#7b4fe0",
     "shortDescription": "Build native Android, iOS, macOS, and Windows applications from a shared C# and XAML codebase.",
-    "keywords": ["MAUI", "mobile", "desktop", "Android", "iOS", "Mac Catalyst", "WinUI", "XAML", "native"],
+    "keywords": ["MAUI", "mobile", "desktop", "Android", "iOS", "Mac Catalyst", "WinUI", "XAML", "Blazor Hybrid", "BlazorWebView", "native"],
     "overview": ".NET Multi-platform App UI (.NET MAUI) is the .NET framework for creating native mobile and desktop applications with C# and XAML from a shared project.",
-    "detail": ".NET MAUI provides a single project system, shared controls and layouts, data binding, handlers, app lifecycle APIs, and access to native device capabilities. Shared code targets Android, iOS, macOS through Mac Catalyst, and Windows through WinUI 3, while platform folders and conditional compilation allow focused native customization when a common abstraction is not enough.",
+    "detail": ".NET MAUI provides a single project system, shared controls and layouts, data binding, handlers, app lifecycle APIs, and access to native device capabilities. Shared code targets Android, iOS, macOS through Mac Catalyst, and Windows through WinUI 3. Teams can build native XAML interfaces or host reusable Razor components locally through BlazorWebView, combining web UI reuse with native device access and store packaging.",
     "concepts": [
       {"title": "Single project", "description": "One SDK-style project shares code, fonts, images, app metadata, and resources while multi-targeting native platforms."},
       {"title": "Handlers", "description": "Cross-platform controls map through handlers to native platform views and can be customized globally or per control."},
-      {"title": "XAML and MVVM", "description": "XAML describes UI structure while binding, commands, and observable view models separate presentation state from views."},
+      {"title": "Native and hybrid UI", "description": "Use XAML and native controls, or host Razor components locally with BlazorWebView and share them with a Blazor web application through a Razor class library."},
       {"title": "Platform integration", "description": "Cross-platform APIs cover sensors, connectivity, secure storage, files, and permissions, with direct native APIs available when required."}
     ],
-    "architecture": {"description": "Shared C# and XAML target the MAUI control and API layer, which maps behavior to the native UI frameworks and operating-system services on each platform.", "nodes": ["Shared C# + XAML", ".NET MAUI controls", "Platform handlers", "Native app package"], "colors": ["#7b4fe0", "#5b5fc7", "#2678c8", "#168c78"]},
+    "architecture": {"description": "Shared C# uses native XAML controls or locally hosted Razor components, while MAUI handlers and device services connect the application to each operating system.", "nodes": ["Shared C# + UI", "XAML or BlazorWebView", "Handlers + device APIs", "Native app package"], "colors": ["#7b4fe0", "#5b5fc7", "#2678c8", "#168c78"]},
     "code": {"language": "csharp", "label": "MainPage.xaml.cs", "introduction": "A shared page can call a cross-platform device API while permission and platform details stay behind .NET MAUI abstractions.", "code": "public partial class MainPage : ContentPage\n{\n    public MainPage() => InitializeComponent();\n\n    private async void OnLocateClicked(object sender, EventArgs e)\n    {\n        var permission = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();\n        if (permission != PermissionStatus.Granted)\n            return;\n\n        var location = await Geolocation.Default.GetLocationAsync(\n            new GeolocationRequest(GeolocationAccuracy.Medium),\n            CancellationToken.None);\n\n        LocationLabel.Text = location is null\n            ? \"Location unavailable\"\n            : $\"{location.Latitude:F4}, {location.Longitude:F4}\";\n    }\n}"},
-    "bestPractices": ["Keep business logic and application state in platform-neutral services and view models so they can be unit tested without a device.", "Design adaptive layouts and test real screen sizes, orientations, input methods, and accessibility settings on every supported platform.", "Use handlers or platform folders for genuine native differences instead of scattering platform checks throughout shared code.", "Profile startup, memory, rendering, and package size on release builds because debug and emulator behavior can be misleading."],
+    "bestPractices": ["Keep business logic and application state in platform-neutral services and view models so they can be unit tested without a device.", "Place reusable Razor components in a Razor class library when a Blazor Hybrid app and a Blazor Web App share UI, while isolating host-specific services behind interfaces.", "Use handlers or platform folders for genuine native differences instead of scattering platform checks throughout shared code.", "Profile startup, memory, rendering, and package size on release builds because debug and emulator behavior can be misleading."],
     "interviewQuestions": [
       {"question": "Does .NET MAUI render one identical UI on every platform?", "answer": "No. Shared MAUI controls are mapped to native platform controls through handlers, so behavior and appearance can retain platform conventions while sharing most UI code."},
-      {"question": "When should platform-specific code be used?", "answer": "Use it when a capability has no suitable cross-platform abstraction or when native behavior is central to the experience; isolate it behind an interface or in the platform-specific folders."},
+      {"question": "How does Blazor Hybrid differ from a hosted web app?", "answer": "Blazor Hybrid renders Razor components in a BlazorWebView inside the native MAUI app, with UI assets packaged locally and direct access to .NET and device services; it does not require a browser-hosted WebAssembly application."},
       {"question": "Why must iOS and macOS builds use a Mac?", "answer": "Apple's native toolchain and signing infrastructure are required to compile and package those applications, even when development begins from another operating system."}
     ],
     "note": "A shared codebase does not remove platform differences; it gives teams one place to share common UI and logic while making native exceptions explicit.",
     "tip": "Start with one representative workflow and validate it on physical devices before committing an entire product to a cross-platform UI strategy.",
     "warning": "Do not judge production performance from debug builds or emulators alone; measure signed release builds on the oldest supported devices.",
-    "sampleId": "design-patterns", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New cross-platform guide for native mobile and desktop apps"
+    "sampleId": "design-patterns", "readingMinutes": 13, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "Blazor Hybrid and shared Razor component guidance added"
   },
   {
     "slug": "modular-monolith",
@@ -1153,5 +1153,150 @@
     "tip": "Start rollout with internal users or a small stable audience and expand only when technical and business metrics remain healthy.",
     "warning": "Do not use a feature flag as the only authorization check; release targeting and security policy solve different problems.",
     "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on safe runtime releases and targeted rollouts"
+  },
+  {
+    "slug": "model-context-protocol",
+    "name": "Model Context Protocol",
+    "symbol": "MCP",
+    "category": "Cloud & Architecture",
+    "color": "#6f56d9",
+    "shortDescription": "Expose tools, resources, and prompts to AI applications through a standard protocol and the official C# SDK.",
+    "keywords": ["MCP", "Model Context Protocol", "AI agents", "tools", "resources", "prompts", "C# SDK", "stdio", "HTTP"],
+    "overview": "Model Context Protocol (MCP) standardizes how AI applications discover and invoke external tools, read contextual resources, and use reusable prompts.",
+    "detail": "The official C# SDK lets .NET applications act as MCP servers or clients. Servers publish capabilities such as tools, resources, and prompts over transports including standard input/output and HTTP, while clients negotiate capabilities and invoke them through a consistent protocol. MCP improves interoperability, but every exposed capability remains a security boundary that needs validation, authorization, consent, timeouts, and auditability.",
+    "concepts": [
+      {"title": "Servers and clients", "description": "An MCP server publishes capabilities; an MCP client connects, negotiates supported features, and makes those capabilities available to an AI host."},
+      {"title": "Tools", "description": "Model-invocable operations have typed inputs and outputs and can perform actions such as querying an order or creating a support ticket."},
+      {"title": "Resources and prompts", "description": "Resources expose contextual data through URIs, while prompts provide reusable, parameterized interaction templates."},
+      {"title": "Transports and lifecycle", "description": "Stdio suits local process integration, while HTTP supports remote services; initialization, capability negotiation, cancellation, and errors are protocol concerns."}
+    ],
+    "architecture": {"description": "An AI host uses an MCP client to discover server capabilities, then invokes narrowly scoped tools or reads resources through a negotiated transport.", "nodes": ["AI host", "MCP client", "Transport", "MCP server capabilities"], "colors": ["#6f56d9", "#5b5fc7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A small stdio server registers attributed tools from the assembly so compatible clients can discover and call the order-status capability.", "code": "using System.ComponentModel;\nusing Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Hosting;\nusing ModelContextProtocol.Server;\n\nvar builder = Host.CreateApplicationBuilder(args);\nbuilder.Services\n    .AddMcpServer()\n    .WithStdioServerTransport()\n    .WithToolsFromAssembly();\n\nawait builder.Build().RunAsync();\n\n[McpServerToolType]\npublic static class OrderTools\n{\n    [McpServerTool, Description(\"Gets the current status of an order.\")]\n    public static string GetOrderStatus(\n        [Description(\"The public order identifier.\")] string orderId)\n    {\n        // Replace with an authorized application-service call.\n        return $\"Order {orderId} is being prepared.\";\n    }\n}"},
+    "bestPractices": ["Expose small, intention-revealing tools with strict schemas instead of giving a model generic database, shell, or network access.", "Authenticate clients, authorize every capability and target resource, and require confirmation for destructive or financially meaningful actions.", "Validate inputs and outputs, apply cancellation and timeouts, and return structured errors that do not reveal secrets or internal topology.", "Log capability identity, caller, result, latency, and correlation data while redacting prompts, credentials, and sensitive payloads."],
+    "interviewQuestions": [
+      {"question": "How is MCP different from function calling?", "answer": "Function calling is usually a model-provider feature for requesting a named function. MCP standardizes discovery, schemas, invocation, resources, prompts, transports, and lifecycle between AI hosts and external capability servers."},
+      {"question": "When should an MCP server use stdio instead of HTTP?", "answer": "Stdio is a good fit when the host starts and owns a local child process. HTTP is appropriate for independently deployed or remotely shared servers that need network authentication, scaling, and operations."},
+      {"question": "What is the main security risk of MCP tools?", "answer": "A model can turn untrusted instructions into real side effects. Tools must enforce the same authentication, authorization, validation, least privilege, and confirmation rules as any other application endpoint."}
+    ],
+    "note": "MCP standardizes integration mechanics; it does not decide whether a tool call is safe, permitted, or correct for a particular user.",
+    "tip": "Start with one read-only tool and test discovery, schema clarity, cancellations, and audit logs before exposing write operations.",
+    "warning": "Never expose an unrestricted shell, SQL executor, or broad cloud credential as an MCP tool.",
+    "sampleId": "ai-orchestrator", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on MCP servers, clients, tools, resources, and security"
+  },
+  {
+    "slug": "api-security-owasp",
+    "name": "API Security & OWASP",
+    "symbol": "SEC",
+    "category": "Web & Data",
+    "color": "#c5485c",
+    "shortDescription": "Design and test ASP.NET Core APIs against common authorization, resource-consumption, configuration, and integration risks.",
+    "keywords": ["API security", "OWASP", "BOLA", "authorization", "rate limiting", "SSRF", "security headers", "threat modeling"],
+    "overview": "API security applies identity, authorization, input boundaries, abuse controls, secure configuration, and continuous verification to every exposed operation and object.",
+    "detail": "The OWASP API Security Top 10 highlights recurring risks including broken object-level authorization, broken authentication, unrestricted resource consumption, sensitive business-flow abuse, server-side request forgery, security misconfiguration, poor API inventory, and unsafe consumption of upstream APIs. ASP.NET Core supplies useful controls, but secure design begins with explicit assets, actors, trust boundaries, deny-by-default policy, and negative tests.",
+    "concepts": [
+      {"title": "Object-level authorization", "description": "Every request for a specific record must verify the caller can access that object; a valid token alone does not prevent identifier-based data exposure."},
+      {"title": "Abuse and resource controls", "description": "Rate limits, request-size limits, pagination, timeouts, quotas, and workflow-specific rules protect compute and sensitive business flows."},
+      {"title": "Input and output boundaries", "description": "Purpose-built request and response models, validation, allowlists, and minimal serialization reduce mass assignment and excessive data exposure."},
+      {"title": "Inventory and dependencies", "description": "Teams must know which API versions and hosts exist, patch them, retire stale endpoints, and treat upstream API responses as untrusted input."}
+    ],
+    "architecture": {"description": "Traffic passes through edge protections and ASP.NET Core security controls before resource-aware authorization permits application logic to access protected data and dependencies.", "nodes": ["Client + edge", "Authentication + limits", "Resource authorization", "Data + upstream APIs"], "colors": ["#c5485c", "#d18415", "#5b5fc7", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderEndpoints.cs", "introduction": "The endpoint requires authentication and rate limiting, loads the target resource, then performs resource-aware authorization before returning a minimal response.", "code": "app.MapGet(\"/api/orders/{id:guid}\", async (\n    Guid id,\n    ClaimsPrincipal user,\n    IOrderRepository orders,\n    IAuthorizationService authorization,\n    CancellationToken ct) =>\n{\n    var order = await orders.FindAsync(id, ct);\n    if (order is null)\n        return Results.NotFound();\n\n    var decision = await authorization.AuthorizeAsync(\n        user, order, \"CanReadOrder\");\n\n    return decision.Succeeded\n        ? Results.Ok(new OrderResponse(order.Id, order.Status))\n        : Results.Forbid();\n})\n.RequireAuthorization()\n.RequireRateLimiting(\"authenticated-api\");"},
+    "bestPractices": ["Threat-model APIs by asset, actor, trust boundary, and abuse case, then turn the findings into authorization and negative-test requirements.", "Authorize the requested resource and tenant on the server for every operation; never trust a client-supplied owner, role, price, or workflow state.", "Bound request size, query complexity, page size, concurrency, duration, and outbound destinations instead of relying on one global rate limit.", "Maintain an API inventory, remove obsolete versions, patch dependencies, scan configuration, and test security controls in the deployed environment."],
+    "interviewQuestions": [
+      {"question": "What is broken object-level authorization (BOLA)?", "answer": "It occurs when an API accepts an object identifier but does not verify that the authenticated caller is allowed to act on that specific object, allowing access by changing identifiers."},
+      {"question": "Why is rate limiting not a complete authorization control?", "answer": "Rate limiting controls volume, not permission. A caller below the limit can still access the wrong tenant, object, function, or business workflow unless authorization is enforced separately."},
+      {"question": "How should an API consume an upstream API safely?", "answer": "Authenticate the dependency, restrict destinations, set timeouts and size limits, validate responses, avoid blindly following redirects, and treat returned data as untrusted."}
+    ],
+    "note": "The OWASP list is an awareness and prioritization aid, not a substitute for a system-specific threat model.",
+    "tip": "For every happy-path integration test, add anonymous, wrong-tenant, wrong-owner, oversized-input, and repeated-request cases.",
+    "warning": "A globally authenticated API can still be critically vulnerable when object and function authorization are missing.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 13, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide aligned with the OWASP API Security Top 10"
+  },
+  {
+    "slug": "azure-key-vault",
+    "name": "Azure Key Vault & Secrets",
+    "symbol": "KV",
+    "category": "Cloud & Architecture",
+    "color": "#1876c9",
+    "shortDescription": "Protect application secrets, keys, and certificates with managed identity, Azure RBAC, rotation, and auditable access.",
+    "keywords": ["Azure Key Vault", "secrets", "managed identity", "DefaultAzureCredential", "Azure RBAC", "rotation", "certificates"],
+    "overview": "Azure Key Vault centralizes secrets, cryptographic keys, and certificates while Microsoft Entra ID and Azure RBAC control who or what can use them.",
+    "detail": "A .NET application can load Key Vault secrets through the ASP.NET Core configuration provider or use Azure SDK clients for explicit operations. DefaultAzureCredential supports developer identity locally and managed identity in Azure, avoiding deployed client secrets. Production design must also cover least-privilege data-plane roles, network access, rotation, caching, version behavior, diagnostics, recovery, and separation between environments.",
+    "concepts": [
+      {"title": "Vault object types", "description": "Secrets hold sensitive values, keys support cryptographic operations, and certificates manage certificate material and lifecycle."},
+      {"title": "Managed identity", "description": "An Azure-hosted workload obtains short-lived Entra tokens without storing a client secret in source code or application configuration."},
+      {"title": "Azure RBAC", "description": "Separate control-plane and data-plane roles grant narrowly scoped management or object access and can be audited centrally."},
+      {"title": "Versions and rotation", "description": "Updating a secret creates a version; applications need an intentional refresh, rollout, fallback, and rollback strategy."}
+    ],
+    "architecture": {"description": "The .NET workload uses its Entra identity to request narrowly authorized Key Vault data, while diagnostics and rotation processes govern access throughout the secret lifecycle.", "nodes": [".NET workload", "Managed identity", "Azure Key Vault", "Audit + rotation"], "colors": ["#1876c9", "#5b5fc7", "#d18415", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "The application adds Key Vault as a configuration source and uses the same credential chain for local development and managed identity in Azure.", "code": "using Azure.Identity;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nvar vaultUri = builder.Configuration[\"KeyVault:Uri\"];\nif (!string.IsNullOrWhiteSpace(vaultUri))\n{\n    builder.Configuration.AddAzureKeyVault(\n        new Uri(vaultUri),\n        new DefaultAzureCredential());\n}\n\nbuilder.Services.Configure<PaymentOptions>(\n    builder.Configuration.GetSection(\"Payments\"));\n\nvar app = builder.Build();\napp.Run();\n\npublic sealed record PaymentOptions\n{\n    public required string ApiKey { get; init; }\n}"},
+    "bestPractices": ["Use managed identity for Azure workloads and developer identity or approved local secret storage during development; never commit credentials.", "Prefer Azure RBAC data-plane roles, least privilege, separate vaults or strong boundaries per environment, and just-in-time administration.", "Design secret rotation with overlapping validity, refresh behavior, observability, rollback, and dependency coordination before an emergency.", "Enable diagnostics and alerts, protect recovery settings, restrict network access where appropriate, and avoid logging resolved secret values."],
+    "interviewQuestions": [
+      {"question": "Why use managed identity with Key Vault?", "answer": "It removes the need to distribute and rotate an application credential for accessing the vault; Azure issues short-lived tokens to the workload identity."},
+      {"question": "What is the difference between the Key Vault control plane and data plane?", "answer": "The control plane manages the vault resource and settings, while the data plane operates on secrets, keys, and certificates. Permissions should be scoped separately."},
+      {"question": "Does rotating a Key Vault secret automatically update every running application?", "answer": "No. A new version becomes available, but each integration has its own caching and refresh behavior. Applications need a tested strategy for observing and adopting the new value."}
+    ],
+    "note": "Key Vault protects stored secret material, but callers can still leak a retrieved value through logs, exceptions, telemetry, or overly broad process access.",
+    "tip": "Test rotation in a non-production environment using two valid credential versions before relying on the process during an incident.",
+    "warning": "Do not replace one embedded application secret with another embedded credential used to access the vault.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on managed identity, RBAC, and secret rotation"
+  },
+  {
+    "slug": "internal-developer-platforms",
+    "name": "Internal Developer Platforms",
+    "symbol": "IDP",
+    "category": "Delivery & Operations",
+    "color": "#168c78",
+    "shortDescription": "Create product-minded golden paths that give development teams secure, governed, observable self-service delivery.",
+    "keywords": ["internal developer platform", "platform engineering", "golden paths", "self-service", "developer experience", ".NET Aspire", "templates"],
+    "overview": "An internal developer platform (IDP) combines self-service workflows, reusable platform capabilities, and governance to reduce developer cognitive load from idea to production.",
+    "detail": "Platform engineering treats developers as customers and the platform as a product. An IDP connects templates, source control, CI/CD, infrastructure, secrets, policy, observability, documentation, and service ownership into supported golden paths. For .NET teams, Aspire can standardize local orchestration, service discovery, health checks, telemetry, and deployment models, but it is one building block rather than the entire platform.",
+    "concepts": [
+      {"title": "Golden paths", "description": "Recommended, supported routes encode proven defaults for common workloads while allowing documented escape hatches for genuine exceptions."},
+      {"title": "Self-service interfaces", "description": "Portals, CLIs, APIs, templates, and automation let teams provision and operate services without ticket-driven handoffs."},
+      {"title": "Platform as a product", "description": "A platform team researches developer needs, owns a roadmap and support model, and measures adoption and outcomes rather than mandating tools."},
+      {"title": "Governance by design", "description": "Security, cost, reliability, ownership, and compliance controls are built into reusable workflows with early feedback."}
+    ],
+    "architecture": {"description": "Developers use a portal, CLI, or template to invoke platform APIs that coordinate engineering systems and provision governed runtime capabilities with feedback and telemetry.", "nodes": ["Developer interface", "Platform APIs + templates", "Delivery + infrastructure", "Runtime feedback"], "colors": ["#168c78", "#5b5fc7", "#2678c8", "#d18415"]},
+    "code": {"language": "csharp", "label": "AppHost.cs", "introduction": "A reusable Aspire composition can form part of a .NET golden path by wiring dependencies, health, service discovery, and local orchestration consistently.", "code": "var builder = DistributedApplication.CreateBuilder(args);\n\nvar postgres = builder.AddPostgres(\"postgres\")\n    .WithDataVolume();\nvar catalogDb = postgres.AddDatabase(\"catalogdb\");\n\nvar api = builder.AddProject<Projects.Catalog_Api>(\"catalog-api\")\n    .WithReference(catalogDb)\n    .WaitFor(catalogDb)\n    .WithHttpHealthCheck(\"/health\");\n\nbuilder.AddProject<Projects.Catalog_Web>(\"catalog-web\")\n    .WithReference(api)\n    .WaitFor(api);\n\nbuilder.Build().Run();"},
+    "bestPractices": ["Start with a thin, high-friction developer journey and build the smallest viable golden path with teams that will use it.", "Provide APIs, automation, documentation, support, and escape hatches; a catalog page alone is not a developer platform.", "Encode secure defaults and policy feedback early, while keeping ownership boundaries and failure recovery visible to product teams.", "Measure lead time, onboarding time, reliability, adoption, support load, and developer satisfaction instead of output such as template count."],
+    "interviewQuestions": [
+      {"question": "How is an internal developer platform different from a developer portal?", "answer": "A portal is one possible user interface. An IDP includes the underlying APIs, automation, templates, policies, infrastructure capabilities, ownership model, and operational feedback."},
+      {"question": "What is a golden path?", "answer": "It is a supported route for a common workload that packages good defaults and automation to reduce cognitive load without forbidding justified alternatives."},
+      {"question": "Where does .NET Aspire fit in platform engineering?", "answer": "Aspire can standardize application composition, local dependencies, service discovery, health, telemetry, and deployment representations for .NET workloads, but CI/CD, cloud provisioning, policy, identity, catalogs, and product ownership still require a broader platform."}
+    ],
+    "note": "Successful platforms earn adoption by removing friction; they do not merely centralize control or rename an operations ticket queue.",
+    "tip": "Interview developers and map one delivery journey before selecting portal or infrastructure products.",
+    "warning": "A mandatory big-bang platform built without product-team feedback can increase cognitive load and create a new bottleneck.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 13, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on golden paths, self-service, governance, and Aspire"
+  },
+  {
+    "slug": "dapper",
+    "name": "Dapper",
+    "symbol": "SQL",
+    "category": "Web & Data",
+    "color": "#d26a2e",
+    "shortDescription": "Map parameterized SQL to .NET objects with a small, fast API built on standard ADO.NET connections.",
+    "keywords": ["Dapper", "micro ORM", "SQL", "ADO.NET", "QueryAsync", "ExecuteAsync", "CQRS", "mapping"],
+    "overview": "Dapper is a lightweight object mapper that extends ADO.NET database connections with APIs for executing parameterized SQL and mapping result rows to .NET types.",
+    "detail": "Dapper deliberately leaves SQL, connections, transactions, schema evolution, and aggregate persistence decisions to the application. Query, Execute, QuerySingle, multi-mapping, multiple result sets, stored procedures, and asynchronous APIs cover common data-access needs with little abstraction. It is especially useful for explicit read models and performance-sensitive queries, and can coexist with EF Core when boundaries and transaction ownership are clear.",
+    "concepts": [
+      {"title": "Explicit SQL", "description": "The application owns query text, joins, projections, indexes, and provider behavior rather than relying on a LINQ translator."},
+      {"title": "Parameter binding", "description": "Anonymous objects, POCOs, dictionaries, and DynamicParameters bind values safely and support input, output, and return parameters."},
+      {"title": "Row mapping", "description": "Column names map to typed objects, while multi-mapping and QueryMultiple handle joined objects and multiple result grids."},
+      {"title": "Transaction ownership", "description": "Dapper uses the supplied DbConnection and DbTransaction, so application code controls lifetime, atomicity, and coordination."}
+    ],
+    "architecture": {"description": "A query service owns explicit SQL and parameters, Dapper executes through an ADO.NET connection, and projected rows become focused read models.", "nodes": ["Query service", "SQL + parameters", "Dapper + DbConnection", "Read model"], "colors": ["#d26a2e", "#5b5fc7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderQueries.cs", "introduction": "A query object sends parameterized SQL through a provider connection and maps only the columns needed by the read model.", "code": "using System.Data;\nusing Dapper;\n\npublic sealed class OrderQueries(IDbConnection connection)\n{\n    public async Task<IReadOnlyList<OrderSummary>> GetOpenAsync(\n        Guid customerId, CancellationToken ct)\n    {\n        const string sql = \"\"\"\n            select id, created_at as CreatedAt, total\n            from orders\n            where customer_id = @CustomerId\n              and status = 'Open'\n            order by created_at desc\n            limit @Limit;\n            \"\"\";\n\n        var command = new CommandDefinition(\n            sql,\n            new { CustomerId = customerId, Limit = 100 },\n            cancellationToken: ct);\n\n        return (await connection.QueryAsync<OrderSummary>(command)).AsList();\n    }\n}"},
+    "bestPractices": ["Always bind changing values as parameters; never concatenate user input, sort expressions, identifiers, or filter fragments into SQL.", "Project only required columns, bound result sizes, inspect query plans, and add indexes based on measured production-shaped queries.", "Open connections late, dispose them predictably, pass explicit transactions when operations must be atomic, and propagate cancellation.", "Keep SQL and mapping tests close to the target database provider because syntax, types, casing, and query plans are provider-specific."],
+    "interviewQuestions": [
+      {"question": "How is Dapper different from EF Core?", "answer": "Dapper maps explicit SQL over ADO.NET and provides little unit-of-work or change-tracking behavior. EF Core supplies LINQ translation, identity and change tracking, relationships, migrations, and a richer ORM model."},
+      {"question": "Can Dapper and EF Core be used together?", "answer": "Yes. A common CQRS approach uses EF Core for transactional writes and Dapper for explicit read projections, provided connection and transaction ownership are coordinated when atomicity is required."},
+      {"question": "Does using Dapper automatically prevent SQL injection?", "answer": "No. Dapper makes parameter binding convenient, but dynamic SQL built by concatenating untrusted input is still vulnerable. Dynamic identifiers and sort choices require allowlists."}
+    ],
+    "note": "Dapper reduces mapping ceremony, not the need to understand SQL, transactions, indexes, connection pooling, and provider behavior.",
+    "tip": "Use a dedicated read-model type whose property names intentionally match aliased result columns.",
+    "warning": "A fast mapper cannot rescue an unbounded query, missing index, long transaction, or unsafe SQL construction.",
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on explicit SQL, mapping, transactions, and EF Core coexistence"
   }
 ]
