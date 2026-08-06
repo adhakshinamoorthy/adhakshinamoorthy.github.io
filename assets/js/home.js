@@ -40,7 +40,7 @@ function renderBlobs(technologies) {
     blob.href = `technologies/${technology.slug}.html`;
     blob.textContent = technology.name;
     blob.style.setProperty('--blob-color', technology.color);
-    blob.style.setProperty('--blob-size', `${sizes[index]}px`);
+    blob.style.setProperty('--blob-size', `${sizes[index % sizes.length]}px`);
     blob.style.setProperty('--float-speed', `${6 + (index % 5)}s`);
     blob.setAttribute('aria-label', `Open ${technology.name} guide`);
     return blob;

@@ -1298,5 +1298,189 @@
     "tip": "Use a dedicated read-model type whose property names intentionally match aliased result columns.",
     "warning": "A fast mapper cannot rescue an unbounded query, missing index, long transaction, or unsafe SQL construction.",
     "sampleId": "ride-sharing-cqrs", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on explicit SQL, mapping, transactions, and EF Core coexistence"
+  },
+  {
+    "slug": "azure-well-architected",
+    "name": "Azure Well-Architected Framework",
+    "symbol": "WAF",
+    "category": "Azure Well-Architected",
+    "color": "#0078d4",
+    "shortDescription": "Evaluate Azure workload quality across reliability, security, cost, operations, and performance with explicit tradeoffs.",
+    "keywords": ["Azure Well-Architected Framework", "WAF", "Well-Architected Review", "pillars", "architecture assessment", "tradeoffs", "maturity model"],
+    "overview": "The Azure Well-Architected Framework is a design framework for improving workload quality through five connected pillars of architectural excellence.",
+    "detail": "The framework helps workload teams reason about Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency from requirements through production learning. Each pillar supplies design principles, checklists, key strategies, tradeoffs, patterns, and a maturity model. The goal is not a perfect score or a one-time review: teams make intentional tradeoffs, record risks, prioritize improvements, and repeat the free Azure Well-Architected Review as the workload and business context evolve.",
+    "concepts": [
+      {"title": "Five connected pillars", "description": "Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency provide distinct lenses on one workload."},
+      {"title": "Requirements and tradeoffs", "description": "Business criticality, compliance, budget, and time-to-market determine priorities; improving one pillar can introduce costs or risks in another."},
+      {"title": "Review and improve", "description": "The Well-Architected Review identifies risks and produces recommendations that teams can prioritize, own, and reassess over time."},
+      {"title": "Layered guidance", "description": "Pillar guidance establishes fundamentals, while workload, service, and design guides apply them to specific architectures and Azure choices."}
+    ],
+    "architecture": {"description": "Business requirements and workload context drive a five-pillar review, which produces prioritized risks and an iterative improvement backlog.", "nodes": ["Business requirements", "Five-pillar review", "Risk + tradeoff decisions", "Improvement backlog"], "colors": ["#0078d4", "#5b5fc7", "#d18415", "#168c78"]},
+    "code": {"language": "csharp", "label": "WorkloadTargets.cs", "introduction": "Architecture discussions become actionable when the team records measurable workload targets before choosing services or patterns.", "code": "public sealed record WorkloadTargets(\n    decimal AvailabilityTarget,\n    TimeSpan RecoveryTimeObjective,\n    TimeSpan RecoveryPointObjective,\n    TimeSpan P95Latency,\n    decimal MonthlyCostLimit);\n\nvar productionTargets = new WorkloadTargets(\n    AvailabilityTarget: 99.9m,\n    RecoveryTimeObjective: TimeSpan.FromMinutes(30),\n    RecoveryPointObjective: TimeSpan.FromMinutes(5),\n    P95Latency: TimeSpan.FromMilliseconds(300),\n    MonthlyCostLimit: 12_000m);\n\n// Record the evidence, owner, and tradeoff behind every target.\nConsole.WriteLine(productionTargets);"},
+    "bestPractices": ["Define workload boundaries, critical user flows, measurable targets, constraints, and accountable owners before starting the review.", "Evaluate all five pillars together and document accepted tradeoffs instead of optimizing one dimension in isolation.", "Turn findings into a prioritized backlog with risk, impact, effort, owner, due date, and verification evidence.", "Repeat the review after material architecture changes and on a regular cadence; treat the score as a moving indicator, not a compliance badge."],
+    "interviewQuestions": [
+      {"question": "What is the Azure Well-Architected Framework?", "answer": "It is Microsoft guidance for improving Azure workload quality across Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency through principles, checklists, strategies, tradeoffs, patterns, and assessments."},
+      {"question": "What is the Azure Well-Architected Review and when should you run it?", "answer": "It is a free assessment that compares workload design choices with framework recommendations. Run it during design, before major releases, after material changes, and periodically in production."},
+      {"question": "Can a workload maximize every pillar at the same time?", "answer": "Usually not. Higher availability, stronger controls, or lower latency can add cost and operational complexity, so teams must make business-aligned tradeoffs and record accepted risks."}
+    ],
+    "note": "The framework evaluates a workload, not an entire Azure estate or landing zone. Portfolio governance and platform readiness require complementary guidance such as the Cloud Adoption Framework.",
+    "tip": "Start with critical flows and the highest business risks, then use the review recommendations to build a small, owned improvement backlog.",
+    "warning": "Do not treat a Well-Architected score as proof of production readiness; validate recommendations with tests, telemetry, drills, and operational evidence.",
+    "resources": [
+      {"label": "Framework overview", "url": "https://learn.microsoft.com/en-us/azure/well-architected/what-is-well-architected-framework"},
+      {"label": "Five pillars", "url": "https://learn.microsoft.com/en-us/azure/well-architected/pillars"},
+      {"label": "Start the WAF Review", "url": "https://learn.microsoft.com/en-us/assessments/azure-architecture-review/"}
+    ],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Foundation", "updated": "2026-08-06", "latestNote": "New foundation guide to the five pillars and Well-Architected Review"
+  },
+  {
+    "slug": "azure-waf-reliability",
+    "name": "WAF: Reliability",
+    "symbol": "REL",
+    "category": "Azure Well-Architected",
+    "color": "#2b88d8",
+    "shortDescription": "Design critical flows to withstand faults, recover within business targets, and remain operable under real failure conditions.",
+    "keywords": ["reliability", "resilience", "availability", "SLA", "SLO", "RTO", "RPO", "availability zones", "chaos engineering", "disaster recovery"],
+    "overview": "The Reliability pillar focuses on resiliency, availability, recovery, and the workload's ability to return to a functioning state after failure.",
+    "detail": "Reliable design begins with business requirements and critical flows, then translates them into availability targets, recovery time objectives, recovery point objectives, and service-level indicators. Teams use redundancy, fault isolation, retries, timeouts, health models, backups, disaster recovery, and controlled fault testing to meet those targets. Simplicity matters: every resilience mechanism adds state, cost, dependencies, and failure modes that operators must understand.",
+    "concepts": [
+      {"title": "Targets and critical flows", "description": "Availability SLOs, RTO, RPO, and dependency objectives must be derived from business impact for the flows that matter most."},
+      {"title": "Redundancy and fault isolation", "description": "Availability zones, scale units, partitioning, and independent failure domains reduce the blast radius of component or datacenter failures."},
+      {"title": "Self-healing and recovery", "description": "Timeouts, bounded retries, circuit breakers, health endpoints, failover, backups, and tested restore procedures return service safely."},
+      {"title": "Failure testing", "description": "Load tests, chaos experiments, game days, and disaster-recovery drills verify assumptions before an uncontrolled incident does."}
+    ],
+    "architecture": {"description": "Traffic is routed across isolated instances while health signals, resilience policies, and recovery data support detection, failover, and restoration.", "nodes": ["Global routing", "Zone-redundant service", "Resilient dependencies", "Backup + recovery"], "colors": ["#2b88d8", "#0078d4", "#5b5fc7", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "ASP.NET Core health checks and the standard HTTP resilience handler provide observable readiness plus bounded retries, timeouts, and circuit breaking for an outbound dependency.", "code": "var builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddHealthChecks()\n    .AddCheck<OrdersReadinessCheck>(\"orders-ready\");\n\nbuilder.Services.AddHttpClient<InventoryClient>(client =>\n    client.BaseAddress = new Uri(builder.Configuration[\"Inventory:Url\"]!))\n    .AddStandardResilienceHandler();\n\nvar app = builder.Build();\napp.MapHealthChecks(\"/health/live\", new()\n{\n    Predicate = _ => false\n});\napp.MapHealthChecks(\"/health/ready\");\napp.Run();"},
+    "bestPractices": ["Set reliability targets per critical flow and include dependency availability in the end-to-end model.", "Prefer bounded retries with jitter and idempotent operations; combine them with timeouts and circuit breaking to avoid retry storms.", "Use availability zones or regions only when business targets justify the extra cost and operational complexity, and test failover regularly.", "Back up data according to RPO, restore according to RTO, and prove both through automated validation and scheduled recovery drills."],
+    "interviewQuestions": [
+      {"question": "How does designing for 99.9% availability differ from 99.99%?", "answer": "99.99% allows roughly one tenth of the downtime of 99.9%, often requiring stronger redundancy, faster detection and recovery, fewer maintenance interruptions, stricter dependency targets, more automation, and higher cost."},
+      {"question": "What is the difference between RTO and RPO?", "answer": "RTO is the maximum acceptable time to restore a service after disruption. RPO is the maximum acceptable data-loss window measured backward from the failure."},
+      {"question": "Why can retries make an outage worse?", "answer": "Unbounded or synchronized retries multiply traffic against a failing dependency, exhaust resources, and delay recovery. Retries need limits, backoff, jitter, time budgets, and idempotency."}
+    ],
+    "note": "An Azure service SLA is an input to workload reliability; it is not the workload's end-to-end SLO.",
+    "tip": "Build a failure-mode analysis for one critical flow and map every dependency, detection signal, mitigation, and recovery owner.",
+    "warning": "A backup that has never been restored under realistic conditions is an unverified recovery assumption.",
+    "resources": [{"label": "Reliability guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 13, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New pillar guide on targets, fault isolation, resilience, and recovery"
+  },
+  {
+    "slug": "azure-waf-security",
+    "name": "WAF: Security",
+    "symbol": "SEC",
+    "category": "Azure Well-Architected",
+    "color": "#c43e4d",
+    "shortDescription": "Protect workload confidentiality, integrity, and availability through zero trust, defense in depth, and continuous improvement.",
+    "keywords": ["security", "zero trust", "Entra ID", "managed identity", "encryption", "threat modeling", "Defender for Cloud", "OWASP", "least privilege"],
+    "overview": "The Security pillar protects data and systems through risk-aware controls for confidentiality, integrity, availability, detection, and response.",
+    "detail": "Security is a continuous workload discipline rather than a perimeter feature. Teams establish a baseline, classify assets and data, model threats, verify identity explicitly, grant least privilege, segment components, encrypt data, harden resources, protect secrets, monitor suspicious behavior, test controls, and prepare incident response. Azure services such as Microsoft Entra ID, managed identities, Key Vault, Private Link, Azure Policy, and Microsoft Defender for Cloud support the strategy, but the workload team remains accountable for secure application behavior.",
+    "concepts": [
+      {"title": "Zero Trust identity", "description": "Authenticate and authorize every request using explicit identity, least privilege, short-lived credentials, and contextual policy rather than network location alone."},
+      {"title": "Data protection", "description": "Classify data, minimize collection, encrypt in transit and at rest, protect keys, and control where sensitive values can flow."},
+      {"title": "Threat-driven design", "description": "Threat models identify assets, actors, trust boundaries, abuse cases, mitigations, and residual risks before implementation choices harden."},
+      {"title": "Detection and response", "description": "Security telemetry, Defender for Cloud, alert triage, playbooks, evidence retention, and exercises reduce time to contain incidents."}
+    ],
+    "architecture": {"description": "Identity-aware edge and application controls protect segmented workload components, while centralized security telemetry supports detection and response.", "nodes": ["Identity + edge", "Policy enforcement", "Segmented workload", "Security monitoring"], "colors": ["#c43e4d", "#5b5fc7", "#2678c8", "#d18415"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A fallback authorization policy makes authenticated access the default while a named policy requires an explicit application permission for sensitive endpoints.", "code": "using Microsoft.AspNetCore.Authorization;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddAuthentication(\"Bearer\")\n    .AddJwtBearer(\"Bearer\", options =>\n    {\n        options.Authority = builder.Configuration[\"Identity:Authority\"];\n        options.Audience = builder.Configuration[\"Identity:Audience\"];\n    });\n\nbuilder.Services.AddAuthorizationBuilder()\n    .SetFallbackPolicy(new AuthorizationPolicyBuilder()\n        .RequireAuthenticatedUser()\n        .Build())\n    .AddPolicy(\"Orders.Read\", policy =>\n        policy.RequireClaim(\"permissions\", \"orders.read\"));\n\nvar app = builder.Build();\napp.UseAuthentication();\napp.UseAuthorization();\napp.MapGet(\"/orders\", GetOrders).RequireAuthorization(\"Orders.Read\");\napp.Run();"},
+    "bestPractices": ["Create and maintain a threat model for critical flows, trust boundaries, privileged actions, and third-party integrations.", "Use managed identities and workload identity federation, apply least-privilege roles, and eliminate long-lived application credentials where possible.", "Encrypt transport and storage, centralize key and secret management, and design rotation and revocation before production.", "Integrate secure coding, dependency scanning, configuration policy, penetration testing, security monitoring, and incident exercises into the delivery lifecycle."],
+    "interviewQuestions": [
+      {"question": "How does Zero Trust change Azure workload design?", "answer": "It removes implicit trust based on network location. Every access is explicitly authenticated, authorized with least privilege, evaluated in context, logged, and assumed potentially hostile."},
+      {"question": "What is the difference between Azure Policy and Microsoft Defender for Cloud?", "answer": "Azure Policy evaluates and can enforce resource configuration rules. Defender for Cloud combines posture recommendations with workload protection and threat detection; the services complement each other."},
+      {"question": "Why is encryption not enough to secure data?", "answer": "Encryption protects specific states and paths, but compromised identities, excessive permissions, application flaws, exposed keys, logs, backups, or decrypted processing can still disclose or alter data."}
+    ],
+    "note": "Security controls must preserve workload availability; aggressive blocking without safe recovery paths can create a denial of service.",
+    "tip": "Use managed identity for every supported Azure-to-Azure connection and review the remaining credential inventory as explicit security debt.",
+    "warning": "Do not rely on a private network as the authorization boundary; compromised or misconfigured internal callers still require identity and policy checks.",
+    "resources": [{"label": "Security guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/security/"}],
+    "sampleId": "ai-gatekeeper", "readingMinutes": 14, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New pillar guide on Zero Trust, data protection, and threat response"
+  },
+  {
+    "slug": "azure-waf-cost-optimization",
+    "name": "WAF: Cost Optimization",
+    "symbol": "COST",
+    "category": "Azure Well-Architected",
+    "color": "#498205",
+    "shortDescription": "Build financial accountability into architecture with cost models, usage and rate optimization, budgets, and continuous FinOps feedback.",
+    "keywords": ["cost optimization", "FinOps", "budgets", "Azure Cost Management", "right-sizing", "reservations", "savings plans", "autoscaling", "unit economics"],
+    "overview": "The Cost Optimization pillar sustains workload return on investment by modeling cost, setting guardrails, reducing waste, and optimizing usage and rates.",
+    "detail": "Cost-efficient architecture connects spending to business value. Teams establish ownership and budgets, model expected demand, allocate costs with tags and subscriptions, measure unit economics, right-size resources, scale with usage, choose appropriate pricing commitments, remove waste, and revisit decisions as demand and Azure pricing change. Cost is balanced with reliability, security, operational effort, and performance rather than minimized in isolation.",
+    "concepts": [
+      {"title": "Cost model and guardrails", "description": "Forecast workload components, environments, data, traffic, support, and growth; then use budgets and alerts to expose variance early."},
+      {"title": "Usage optimization", "description": "Right-sizing, autoscaling, scheduling, storage lifecycle, efficient queries, and removing idle resources align consumption with real demand."},
+      {"title": "Rate optimization", "description": "Reservations, savings plans, Azure Hybrid Benefit, tiers, and negotiated pricing reduce unit rates only when usage is understood."},
+      {"title": "FinOps feedback", "description": "Engineering, finance, and product teams share ownership through allocation, unit metrics, anomaly review, forecasting, and prioritized action."}
+    ],
+    "architecture": {"description": "Tagged workload usage flows into cost allocation and unit metrics, which drive budgets, alerts, forecasts, and architecture optimization decisions.", "nodes": ["Tagged resources", "Usage + cost data", "Budgets + unit metrics", "Optimization backlog"], "colors": ["#498205", "#168c78", "#0078d4", "#d18415"]},
+    "code": {"language": "csharp", "label": "UsageMetrics.cs", "introduction": "Low-cardinality business usage metrics let teams compare Azure spend with delivered value instead of looking only at a monthly total.", "code": "using System.Diagnostics.Metrics;\n\npublic static class UsageMetrics\n{\n    private static readonly Meter Meter = new(\"Storefront.Usage\");\n    private static readonly Counter<long> Orders =\n        Meter.CreateCounter<long>(\"orders.completed\");\n\n    public static void RecordCompletedOrder(string region, string tier)\n    {\n        Orders.Add(1,\n            new KeyValuePair<string, object?>(\"region\", region),\n            new KeyValuePair<string, object?>(\"service.tier\", tier));\n    }\n}\n\n// Combine this usage signal with allocated Azure cost to track cost per order."},
+    "bestPractices": ["Assign cost ownership and allocation metadata to every resource, environment, shared service, and data path.", "Track business-aligned unit costs such as cost per order or tenant alongside total spend and technical utilization.", "Right-size and autoscale from measured demand, then use pricing commitments only for a stable, well-understood baseline.", "Review anomalies, idle assets, data growth, egress, license benefits, and forecast variance on a regular engineering and finance cadence."],
+    "interviewQuestions": [
+      {"question": "What is the difference between usage optimization and rate optimization?", "answer": "Usage optimization reduces or reshapes consumed resources. Rate optimization lowers the price paid for expected consumption through commitments, benefits, or tier choices."},
+      {"question": "When can an Azure reservation increase cost?", "answer": "A commitment can waste money when demand falls, workloads move, the chosen scope or SKU is wrong, or teams reserve capacity before establishing a stable baseline."},
+      {"question": "How do you balance cost optimization with reliability?", "answer": "Start from business targets and critical flows, quantify the cost and risk of redundancy or recovery options, optimize noncritical paths differently, and record accepted tradeoffs."}
+    ],
+    "note": "The cheapest architecture is not necessarily cost-efficient if it misses business outcomes or consumes disproportionate engineering time.",
+    "tip": "Create one unit-cost dashboard that joins allocated Azure cost with a stable business usage metric and review its trend, not just its current value.",
+    "warning": "Do not purchase long-term commitments to hide idle capacity; eliminate waste and establish a stable usage baseline first.",
+    "resources": [{"label": "Cost Optimization guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/cost-optimization/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 13, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New pillar guide on cost models, FinOps, usage, and rate optimization"
+  },
+  {
+    "slug": "azure-waf-operational-excellence",
+    "name": "WAF: Operational Excellence",
+    "symbol": "OPS",
+    "category": "Azure Well-Architected",
+    "color": "#8764b8",
+    "shortDescription": "Operate and evolve workloads through DevOps culture, standards, automation, observability, and safe deployment practices.",
+    "keywords": ["operational excellence", "DevOps", "observability", "infrastructure as code", "deployment rings", "runbooks", "Azure Monitor", "safe deployment"],
+    "overview": "The Operational Excellence pillar uses standardized processes, team cohesion, observability, automation, and safe delivery to sustain workload quality.",
+    "detail": "Operational excellence connects how a workload is built, released, observed, supported, and improved. Teams define ownership and standards, automate repeatable work, manage infrastructure as code, build a trustworthy supply chain, collect actionable telemetry, deploy progressively, maintain runbooks, learn from incidents, and reduce toil. The objective is not maximum tooling; it is consistent, low-risk change and fast learning across development and operations.",
+    "concepts": [
+      {"title": "DevOps culture and ownership", "description": "Cross-functional teams share responsibility for design, delivery, production health, support, learning, and continuous improvement."},
+      {"title": "Automation and IaC", "description": "Versioned infrastructure, policy, tests, pipelines, and repeatable runbooks reduce drift and manual error while preserving reviewability."},
+      {"title": "Holistic observability", "description": "Correlated logs, metrics, traces, health models, dashboards, and alerts explain user impact and support diagnosis."},
+      {"title": "Safe deployment", "description": "Small changes, deployment rings, health gates, feature flags, rollback or roll-forward plans, and post-deployment observation limit blast radius."}
+    ],
+    "architecture": {"description": "A versioned supply chain promotes tested artifacts and infrastructure through guarded deployment rings while telemetry and incident learning feed improvements back to source.", "nodes": ["Source + IaC", "Tested artifact", "Deployment rings", "Telemetry + learning"], "colors": ["#8764b8", "#5b5fc7", "#0078d4", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "OpenTelemetry creates correlated traces and metrics that can be exported to an observability backend and used by deployment health gates.", "code": "using OpenTelemetry.Metrics;\nusing OpenTelemetry.Trace;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddOpenTelemetry()\n    .WithTracing(tracing => tracing\n        .AddAspNetCoreInstrumentation()\n        .AddHttpClientInstrumentation())\n    .WithMetrics(metrics => metrics\n        .AddAspNetCoreInstrumentation()\n        .AddHttpClientInstrumentation()\n        .AddRuntimeInstrumentation())\n    .UseOtlpExporter();\n\nbuilder.Services.AddHealthChecks();\n\nvar app = builder.Build();\napp.MapHealthChecks(\"/health\");\napp.Run();"},
+    "bestPractices": ["Keep application and infrastructure definitions versioned, reviewable, reproducible, and promoted from the same tested artifacts.", "Define service ownership, health models, actionable alerts, runbooks, escalation paths, and incident roles before production.", "Release through progressive rings with automated quality and health gates, an explicit rollback or roll-forward path, and adequate observation time.", "Run blameless incident reviews, track corrective actions to completion, and automate recurring operational toil."],
+    "interviewQuestions": [
+      {"question": "What makes an alert actionable?", "answer": "It represents meaningful user or system impact, has a clear owner and urgency, includes diagnostic context, and links to a tested response or escalation path."},
+      {"question": "Why use deployment rings?", "answer": "Rings expose a change to progressively larger and more representative audiences, limiting blast radius while health signals validate the release before wider promotion."},
+      {"question": "How is observability different from monitoring?", "answer": "Monitoring checks known conditions. Observability uses rich telemetry and system context to investigate both known and previously unanticipated internal states from external signals."}
+    ],
+    "note": "Operational excellence is a property of the sociotechnical system: ownership, incentives, processes, and learning matter as much as tools.",
+    "tip": "Choose one critical service and verify that an on-call engineer can identify impact, find the owning change, and execute the recovery runbook from its alert.",
+    "warning": "Automation without safe defaults, approvals, idempotency, auditability, and recovery can accelerate failure instead of improving operations.",
+    "resources": [{"label": "Operational Excellence guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 14, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New pillar guide on DevOps, observability, IaC, and safe delivery"
+  },
+  {
+    "slug": "azure-waf-performance-efficiency",
+    "name": "WAF: Performance Efficiency",
+    "symbol": "PERF",
+    "category": "Azure Well-Architected",
+    "color": "#d83b01",
+    "shortDescription": "Meet changing workload demand efficiently with measurable targets, suitable services, scaling, partitioning, caching, and testing.",
+    "keywords": ["performance efficiency", "scalability", "load testing", "autoscaling", "caching", "CDN", "partitioning", "async", "capacity planning"],
+    "overview": "The Performance Efficiency pillar helps workloads meet demand efficiently through realistic targets, scalable design, measurement, testing, and continuous optimization.",
+    "detail": "Performance efficiency begins with critical flows and measurable latency, throughput, concurrency, and capacity targets. Teams choose services and SKUs that fit access patterns, scale horizontally, partition data and work, cache intentionally, use asynchronous processing, reduce network distance, and validate behavior with production-shaped load tests. Cloud elasticity reduces the need for fixed long-term capacity predictions, but effective autoscaling still needs leading signals, safe limits, warm-up behavior, and cost awareness.",
+    "concepts": [
+      {"title": "Performance targets", "description": "Percentile latency, throughput, concurrency, saturation, and freshness targets should be measurable per critical flow and tied to user outcomes."},
+      {"title": "Scaling and partitioning", "description": "Horizontal scale, stateless compute, partition keys, queues, and independent scale units distribute work while containing hotspots."},
+      {"title": "Caching and edge delivery", "description": "Application caches, distributed caches, output caching, CDNs, and data locality reduce repeated work when freshness and invalidation are explicit."},
+      {"title": "Testing and optimization", "description": "Baseline, load, stress, soak, and failover tests expose bottlenecks; telemetry and profiles guide changes instead of intuition."}
+    ],
+    "architecture": {"description": "Edge caching and load distribution feed horizontally scalable services, which use partitioned data and asynchronous work while telemetry drives autoscaling and optimization.", "nodes": ["CDN + cache", "Scaled application", "Partitioned data + queues", "Performance telemetry"], "colors": ["#d83b01", "#0078d4", "#5b5fc7", "#168c78"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "HybridCache reduces repeated dependency work and coordinates concurrent cache misses while preserving cancellation and a bounded freshness window.", "code": "using Microsoft.Extensions.Caching.Hybrid;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddHybridCache();\nbuilder.Services.AddScoped<ProductRepository>();\n\nvar app = builder.Build();\n\napp.MapGet(\"/products/{id:guid}\", async (\n    Guid id, HybridCache cache, ProductRepository products, CancellationToken ct) =>\n{\n    var product = await cache.GetOrCreateAsync(\n        $\"product:{id}\",\n        token => products.FindAsync(id, token),\n        new HybridCacheEntryOptions\n        {\n            Expiration = TimeSpan.FromMinutes(5)\n        },\n        cancellationToken: ct);\n\n    return product is null ? Results.NotFound() : Results.Ok(product);\n});\n\napp.Run();"},
+    "bestPractices": ["Define percentile latency, throughput, concurrency, saturation, and capacity targets for critical flows before selecting optimizations.", "Load test with realistic data, request mixes, dependency behavior, warm-up, cache state, and failure conditions in an environment representative of production.", "Scale on signals that lead user impact, set minimum and maximum capacity, and test scale-out, scale-in, cold start, and hotspot behavior.", "Cache only with an explicit key strategy, freshness requirement, invalidation approach, size boundary, miss behavior, and observability."],
+    "interviewQuestions": [
+      {"question": "Why use p95 or p99 latency instead of only averages?", "answer": "Averages hide slow-tail experiences. Percentiles show the latency threshold experienced by most users and expose outliers that often indicate saturation, retries, or uneven partitions."},
+      {"question": "What makes a good autoscaling signal?", "answer": "It correlates with demand or impending saturation, arrives early enough to add capacity, avoids excessive noise, and is paired with tested limits, cooldowns, and failure behavior."},
+      {"question": "How can caching harm performance or correctness?", "answer": "Poor keys, stale data, unbounded memory, synchronized expiry, cache stampedes, expensive serialization, and dependency failure on misses can increase latency or return incorrect results."}
+    ],
+    "note": "Performance efficiency is not maximum speed at any cost; it is meeting workload targets with proportionate resources and sustainable operations.",
+    "tip": "Establish a production-shaped baseline before optimization, then change one bottleneck at a time and compare the same percentiles and resource signals.",
+    "warning": "Autoscaling cannot compensate for a hard database bottleneck, hot partition, serialized critical section, or dependency quota.",
+    "resources": [{"label": "Performance Efficiency guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/performance-efficiency/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New pillar guide on targets, scaling, caching, partitioning, and load testing"
   }
 ]

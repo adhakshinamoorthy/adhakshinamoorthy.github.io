@@ -101,6 +101,29 @@ try {
     );
   }
 
+  const wafCategory = page.locator('.sidebar-group[aria-label="Azure Well-Architected"] .sidebar-link');
+  check(await wafCategory.count() === 6, 'Azure Well-Architected category does not contain six guides');
+  check(
+    JSON.stringify(await wafCategory.allInnerTexts()) === JSON.stringify([
+      'Azure Well-Architected Framework',
+      'WAF: Reliability',
+      'WAF: Security',
+      'WAF: Cost Optimization',
+      'WAF: Operational Excellence',
+      'WAF: Performance Efficiency'
+    ]),
+    'Azure Well-Architected guides are not in the expected learning order'
+  );
+
+  await page.goto(`${baseUrl}/technologies/azure-well-architected.html`, { waitUntil: 'networkidle' });
+  check(await page.locator('.official-resource-links a').count() === 3, 'WAF overview does not show all official resources');
+  check(
+    await page.locator('.official-resource-links a').evaluateAll(links =>
+      links.every(link => link.href.startsWith('https://learn.microsoft.com/') && link.target === '_blank' && link.rel.includes('noreferrer'))
+    ),
+    'WAF official resources are not safe external Microsoft links'
+  );
+
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
 
   await page.locator('.copy-button').click();

@@ -27,6 +27,9 @@ for (const topic of technologies) {
   if (topic.bestPractices?.length < 4) errors.push(`${topic.slug} needs at least four best practices`);
   if (topic.interviewQuestions?.length < 3) errors.push(`${topic.slug} needs at least three interview questions`);
   if (topic.architecture?.nodes?.length < 3) errors.push(`${topic.slug} needs an architecture flow`);
+  for (const resource of topic.resources || []) {
+    if (!resource.label || !/^https:\/\//.test(resource.url || '')) errors.push(`${topic.slug} has an invalid official resource`);
+  }
   try { await access(join(projectRoot, 'technologies', `${topic.slug}.html`)); }
   catch { errors.push(`Missing generated page for ${topic.slug}`); }
 }

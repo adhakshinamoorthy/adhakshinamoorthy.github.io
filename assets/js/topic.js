@@ -44,7 +44,7 @@ function renderArticle(topic, technologies, samples) {
       <p class="article-lede">${escapeHtml(topic.overview)}</p>
       <div class="article-meta"><span>⏱ ${topic.readingMinutes} min read</span><span>Updated ${formatDate(topic.updated)}</span><span>Level: ${escapeHtml(topic.level)}</span></div>
     </header>
-    <section id="overview" class="article-section"><h2>Overview</h2><p>${escapeHtml(topic.detail)}</p></section>
+    <section id="overview" class="article-section"><h2>Overview</h2><p>${escapeHtml(topic.detail)}</p><div class="official-resources"></div></section>
     <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"></div></section>
     <section id="architecture" class="article-section"><h2>Architecture</h2><p>${escapeHtml(topic.architecture.description)}</p><div class="architecture-placeholder"><div class="diagram-flow"></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
     <section id="code-example" class="article-section"><h2>Code example</h2><p>${escapeHtml(topic.code.introduction)}</p><div class="code-host"></div></section>
@@ -61,6 +61,27 @@ function renderArticle(topic, technologies, samples) {
     card.append(title, body);
     return card;
   }));
+
+  const resources = article.querySelector('.official-resources');
+  if (topic.resources?.length) {
+    const label = document.createElement('strong');
+    label.textContent = 'Official resources';
+    const links = document.createElement('div');
+    links.className = 'official-resource-links';
+    links.replaceChildren(...topic.resources.map(resource => {
+      const link = document.createElement('a');
+      link.className = 'button button-secondary button-small';
+      link.href = resource.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = resource.label;
+      link.setAttribute('aria-label', `${resource.label} (opens in a new tab)`);
+      return link;
+    }));
+    resources.append(label, links);
+  } else {
+    resources.remove();
+  }
 
   const diagram = article.querySelector('.diagram-flow');
   topic.architecture.nodes.forEach((node, index) => {
