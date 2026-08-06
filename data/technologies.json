@@ -1300,6 +1300,336 @@
     "sampleId": "ride-sharing-cqrs", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on explicit SQL, mapping, transactions, and EF Core coexistence"
   },
   {
+    "slug": "solution-architecture-fundamentals",
+    "name": "Solution Architecture Fundamentals",
+    "symbol": "ARCH",
+    "category": "Architecture Practice",
+    "color": "#5b5fc7",
+    "shortDescription": "Turn business outcomes and quality requirements into explicit system boundaries, views, tradeoffs, and evolutionary decisions.",
+    "keywords": ["solution architecture", "quality attributes", "architecture styles", "constraints", "tradeoffs", "architecture views", "requirements"],
+    "overview": "Solution architecture connects business goals, stakeholder concerns, quality requirements, and constraints to a coherent design that teams can build and operate.",
+    "detail": "A solution architect clarifies the problem before selecting technology. The work includes identifying stakeholders and critical flows, expressing measurable quality attributes, defining system context and boundaries, comparing architecture styles, documenting significant decisions, designing for operations and security, and validating the architecture through prototypes, reviews, tests, and production evidence. Diagrams are communication tools; the architecture is the set of decisions and constraints that shape the system throughout its life.",
+    "concepts": [
+      {"title": "Drivers and constraints", "description": "Business outcomes, critical user journeys, compliance, budget, schedule, existing systems, and team capabilities define the feasible design space."},
+      {"title": "Quality attributes", "description": "Reliability, security, performance, operability, cost, and maintainability become measurable scenarios rather than vague goals."},
+      {"title": "Boundaries and views", "description": "Context, container, component, deployment, data, and runtime views explain different stakeholder concerns without one overloaded diagram."},
+      {"title": "Tradeoffs and evolution", "description": "Styles and technologies are selected against requirements, recorded as decisions, validated early, and revisited as evidence or constraints change."}
+    ],
+    "architecture": {"description": "Stakeholder outcomes and constraints shape measurable requirements, which guide architecture decisions and views that delivery teams validate through implementation and operations.", "nodes": ["Outcomes + constraints", "Quality scenarios", "Decisions + views", "Delivery + feedback"], "colors": ["#5b5fc7", "#0078d4", "#8764b8", "#168c78"]},
+    "code": {"language": "csharp", "label": "QualityScenario.cs", "introduction": "A small quality-scenario record forces an architecture requirement to name its stimulus, operating condition, expected response, and measurable target.", "code": "public sealed record QualityScenario(\n    string Source,\n    string Stimulus,\n    string Environment,\n    string Response,\n    string Measure);\n\nvar checkoutAvailability = new QualityScenario(\n    Source: \"A dependency failure\",\n    Stimulus: \"Payment confirmation times out\",\n    Environment: \"During peak traffic\",\n    Response: \"Preserve the order and retry safely\",\n    Measure: \"99.9% of accepted orders complete without duplication\");\n\nConsole.WriteLine(checkoutAvailability);"},
+    "bestPractices": ["Start with business outcomes, stakeholders, critical flows, constraints, and measurable quality scenarios before choosing services or patterns.", "Use a small set of complementary views and keep every diagram scoped, labeled, versioned, and connected to decisions.", "Evaluate options against explicit criteria, record material tradeoffs, and prototype the assumptions with the highest cost of being wrong.", "Include deployment, observability, security, data ownership, failure recovery, cost, and team ownership in the architecture from the start."],
+    "interviewQuestions": [
+      {"question": "What is the difference between architecture and design?", "answer": "Architecture focuses on system-shaping structures, constraints, quality attributes, and costly-to-reverse decisions. Design also includes the many local implementation choices made within those boundaries."},
+      {"question": "How do you choose an architecture style?", "answer": "Compare styles against business drivers, quality scenarios, constraints, operational model, data needs, team capabilities, and migration path; then validate the riskiest assumptions."},
+      {"question": "How do you know an architecture is working?", "answer": "Define measurable fitness criteria for critical qualities, test them before release, observe them in production, review incidents and costs, and change decisions when evidence no longer supports them."}
+    ],
+    "note": "Architecture documentation should make important reasoning discoverable, not attempt to predict every implementation detail.",
+    "tip": "Write the three most important quality scenarios and use them as evaluation criteria in every architecture review.",
+    "warning": "A polished diagram without measurable requirements, ownership, tradeoffs, or validation is not an executable architecture.",
+    "resources": [{"label": "Azure architecture styles", "url": "https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/"}, {"label": "Solution architect fundamentals", "url": "https://learn.microsoft.com/en-us/azure/well-architected/architect-role/fundamentals"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Foundation", "updated": "2026-08-06", "latestNote": "New guide on requirements, views, tradeoffs, and architecture validation"
+  },
+  {
+    "slug": "architecture-decision-records",
+    "name": "Architecture Decision Records",
+    "symbol": "ADR",
+    "category": "Architecture Practice",
+    "color": "#6b69d6",
+    "shortDescription": "Capture architecturally significant choices with their context, considered options, consequences, ownership, and lifecycle.",
+    "keywords": ["ADR", "architecture decision record", "decision log", "tradeoffs", "context", "consequences", "governance"],
+    "overview": "An Architecture Decision Record documents why a significant design choice was made and what consequences the team accepts.",
+    "detail": "An ADR is a short, version-controlled record for a decision that shapes structure, quality attributes, constraints, or future options. It captures the context and forces, the decision, alternatives considered, expected positive and negative consequences, status, owners, and links to evidence. ADRs form a chronological decision log: accepted decisions are not silently rewritten when direction changes; a new record supersedes the old one and preserves the reasoning available at the time.",
+    "concepts": [
+      {"title": "Architectural significance", "description": "Record choices that affect system structure, key qualities, organizational boundaries, or options that are expensive to reverse."},
+      {"title": "Context and options", "description": "State the problem, drivers, constraints, assumptions, and credible alternatives so the decision can be understood independently."},
+      {"title": "Consequences", "description": "Document benefits, costs, risks, operational effects, follow-up work, and the conditions that would trigger reconsideration."},
+      {"title": "Decision lifecycle", "description": "Use proposed, accepted, rejected, deprecated, and superseded states with owners, dates, and links to later decisions."}
+    ],
+    "architecture": {"description": "A significant concern is evaluated against drivers and options, accepted through review, and preserved in a versioned decision log that informs delivery and later reassessment.", "nodes": ["Concern + drivers", "Options + evidence", "Accepted ADR", "Implementation + review"], "colors": ["#6b69d6", "#0078d4", "#168c78", "#d18415"]},
+    "code": {"language": "text", "label": "docs/adr/0007-api-gateway.md", "introduction": "A compact template keeps records comparable while leaving room for evidence and explicit tradeoffs.", "code": "# ADR-0007: Use a managed API gateway\n\n- Status: Accepted\n- Date: 2026-08-06\n- Owners: Platform Architecture\n\n## Context\nPublic APIs need consistent authentication, quotas, version routing,\nand telemetry across independently deployed services.\n\n## Decision\nUse Azure API Management as the external gateway.\n\n## Alternatives\n- Application-owned gateway\n- Direct exposure through an ingress controller\n\n## Consequences\nCentral policy and analytics improve consistency, but APIM adds cost,\nlatency, operational dependencies, and tier-specific constraints.\n\n## Revisit when\nTraffic, regions, or gateway availability targets materially change."},
+    "bestPractices": ["Keep ADRs concise, immutable after acceptance except for status and links, and store them beside the code or architecture documentation they govern.", "Record only significant decisions and state the context, options, decision, consequences, owners, date, and review trigger.", "Use lightweight peer review and include links to prototypes, measurements, threat models, cost estimates, and diagrams that support the choice.", "Supersede an obsolete ADR with a new record instead of erasing history, and review the decision log during major changes and incidents."],
+    "interviewQuestions": [
+      {"question": "Which decisions deserve an ADR?", "answer": "Decisions that materially shape the system, affect important quality attributes or organizational boundaries, impose constraints, or are difficult and expensive to reverse."},
+      {"question": "Why should an accepted ADR not simply be edited?", "answer": "Editing destroys the historical reasoning and makes it unclear what teams implemented. A superseding ADR preserves chronology while documenting the new context and decision."},
+      {"question": "How do ADRs avoid becoming bureaucracy?", "answer": "Use a short template, record only significant choices, keep review close to normal code workflows, assign ownership, and link each record to delivery or validation evidence."}
+    ],
+    "note": "An ADR explains a decision; it does not replace diagrams, API contracts, threat models, runbooks, or implementation documentation.",
+    "tip": "Start a brownfield decision log by reconstructing only the few choices currently constraining change, then record new decisions as they occur.",
+    "warning": "A decision log that records only the selected option and omits context, alternatives, and consequences cannot support future reassessment.",
+    "resources": [{"label": "Microsoft ADR guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on concise, versioned architecture decisions"
+  },
+  {
+    "slug": "api-design-best-practices",
+    "name": "API Design Best Practices",
+    "symbol": "API",
+    "category": "Architecture Practice",
+    "color": "#0078d4",
+    "shortDescription": "Design stable, secure, observable HTTP contracts around resources, standard semantics, compatibility, and predictable failure behavior.",
+    "keywords": ["API design", "REST", "HTTP", "resources", "idempotency", "pagination", "versioning", "Problem Details", "OpenAPI"],
+    "overview": "Good API design creates a clear, loosely coupled contract that clients can use correctly and evolve with safely.",
+    "detail": "An HTTP API should model business resources and workflows rather than database tables or implementation methods. Consistent URIs, HTTP methods, status codes, media types, validation errors, pagination, filtering, concurrency controls, idempotency, asynchronous operations, versioning, security, and observability make behavior predictable. Contract-first review and compatibility tests help providers and consumers evolve independently while explicit deprecation policies prevent permanent support for accidental behavior.",
+    "concepts": [
+      {"title": "Resource-oriented contracts", "description": "Stable nouns, representations, relationships, and workflow resources describe the domain without exposing internal storage or service boundaries."},
+      {"title": "HTTP semantics", "description": "Methods, safety, idempotency, status codes, headers, caching, conditional requests, and content negotiation communicate standard behavior."},
+      {"title": "Scale and resilience", "description": "Pagination, filtering, field selection, rate limits, timeouts, idempotency keys, and asynchronous operations bound work and support retries."},
+      {"title": "Evolution and governance", "description": "OpenAPI review, compatibility checks, explicit versioning, deprecation windows, security defaults, and telemetry protect clients over time."}
+    ],
+    "architecture": {"description": "Clients use a versioned contract through security and policy controls; resource handlers enforce domain rules while telemetry and compatibility checks govern evolution.", "nodes": ["Clients + SDKs", "Contract + policy", "Resource handlers", "Domain + telemetry"], "colors": ["#0078d4", "#5b5fc7", "#168c78", "#d18415"]},
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A resource endpoint uses a constrained route, typed outcomes, cancellation, and a standard validation problem response.", "code": "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddProblemDetails();\n\nvar app = builder.Build();\napp.UseExceptionHandler();\n\napp.MapPost(\"/orders\", async (\n    CreateOrder request, OrderService orders, CancellationToken ct) =>\n{\n    if (request.Lines.Count == 0)\n        return Results.ValidationProblem(new Dictionary<string, string[]>\n        {\n            [\"lines\"] = [\"At least one order line is required.\"]\n        });\n\n    var order = await orders.CreateAsync(request, ct);\n    return Results.Created($\"/orders/{order.Id}\", order);\n});\n\napp.Run();"},
+    "bestPractices": ["Design from consumer workflows and domain resources, publish an OpenAPI contract, and review it before implementation.", "Apply standard HTTP semantics consistently, return Problem Details for machine-readable errors, and document every status and retry behavior.", "Bound collections and work with pagination, filters, payload limits, quotas, timeouts, cancellation, and asynchronous patterns for long operations.", "Define compatibility, versioning, deprecation, security, idempotency, concurrency, and observability policies as part of the contract."],
+    "interviewQuestions": [
+      {"question": "What makes an HTTP operation idempotent?", "answer": "Repeating the same request has the same intended effect on server state as making it once. GET, PUT, DELETE, HEAD, and safe retry mechanisms should respect that property even if response codes differ."},
+      {"question": "When should an API return 202 Accepted?", "answer": "When work has been accepted but will complete asynchronously. The response should identify a status resource or operation URL and document polling, completion, failure, and cancellation behavior."},
+      {"question": "How can an API evolve without breaking clients?", "answer": "Prefer additive changes, tolerant readers, contract compatibility tests, explicit policies for breaking versions, usage telemetry, and a communicated deprecation window."}
+    ],
+    "note": "REST is one useful interaction style, not a requirement for every internal or event-driven interface; choose the style from consumer and system needs.",
+    "tip": "Review a proposed API using only its OpenAPI document and example errors; hidden assumptions discovered there are cheaper to fix than deployed contracts.",
+    "warning": "Exposing database tables directly couples clients to internal storage, expands the attack surface, and makes later redesign unnecessarily breaking.",
+    "resources": [{"label": "REST API design guidance", "url": "https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design"}, {"label": "Web API implementation guidance", "url": "https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-implementation"}],
+    "sampleId": "ai-gatekeeper", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on HTTP contracts, evolution, reliability, and governance"
+  },
+  {
+    "slug": "multi-tenancy-patterns",
+    "name": "Multi-Tenancy Patterns",
+    "symbol": "SaaS",
+    "category": "Architecture Practice",
+    "color": "#8764b8",
+    "shortDescription": "Balance tenant isolation, scale, cost, customization, and operations across identity, compute, data, messaging, and deployment.",
+    "keywords": ["multitenancy", "multi-tenant", "SaaS", "tenant isolation", "deployment stamps", "noisy neighbor", "tenant routing", "control plane"],
+    "overview": "Multitenant architecture serves multiple customers from a solution while deliberately controlling isolation, scale, cost, performance, and customization.",
+    "detail": "Multitenancy is not one binary infrastructure choice. Each component can be pooled, partitioned, stamped, or dedicated according to data sensitivity, performance, geography, commercial tier, and operational requirements. Tenant identity must be derived from trusted authentication context and enforced through every data and cache path. A control plane automates onboarding, placement, configuration, lifecycle, and metering while quotas, partitioning, observability, and tests protect tenants from leakage and noisy neighbors.",
+    "concepts": [
+      {"title": "Isolation models", "description": "Shared, partitioned, deployment-stamp, and dedicated models trade cost and density against security, performance, customization, and operational independence."},
+      {"title": "Tenant context", "description": "Trusted identity claims establish tenant context, which authorization, routing, data filters, cache keys, logs, metrics, and messages must propagate safely."},
+      {"title": "Control plane", "description": "Automated onboarding, provisioning, placement, configuration, billing, offboarding, and capacity management keep tenant lifecycle work repeatable."},
+      {"title": "Scale and fairness", "description": "Quotas, rate limits, partition keys, workload isolation, capacity signals, and per-tenant telemetry contain noisy neighbors and support service tiers."}
+    ],
+    "architecture": {"description": "Trusted identity establishes tenant context at the edge, a control plane manages placement and lifecycle, and isolated data-plane stamps serve tenant traffic with per-tenant policy and telemetry.", "nodes": ["Tenant identity", "Routing + policy", "Shared or stamped compute", "Isolated data + telemetry"], "colors": ["#8764b8", "#0078d4", "#168c78", "#d18415"]},
+    "code": {"language": "csharp", "label": "TenantContextMiddleware.cs", "introduction": "Tenant context is derived from an authenticated claim and stored in a scoped service instead of trusting a caller-supplied tenant header.", "code": "public sealed class TenantContext\n{\n    public required string TenantId { get; set; }\n}\n\npublic sealed class TenantContextMiddleware(RequestDelegate next)\n{\n    public async Task InvokeAsync(HttpContext http, TenantContext tenant)\n    {\n        var tenantId = http.User.FindFirst(\"tenant_id\")?.Value;\n        if (string.IsNullOrWhiteSpace(tenantId))\n        {\n            http.Response.StatusCode = StatusCodes.Status403Forbidden;\n            return;\n        }\n\n        tenant.TenantId = tenantId;\n        await next(http);\n    }\n}\n\nbuilder.Services.AddScoped<TenantContext>();"},
+    "bestPractices": ["Define isolation, residency, performance, recovery, customization, and commercial requirements per component before choosing a tenancy model.", "Derive tenant context from authenticated identity, authorize it centrally, and include it in every query, cache key, event, job, log, and metric.", "Automate onboarding, provisioning, placement, migration, metering, suspension, and deletion through an idempotent control plane.", "Test cross-tenant access, cache separation, noisy-neighbor limits, stamp failure, tenant migration, and offboarding with production-shaped scale."],
+    "interviewQuestions": [
+      {"question": "What are the main multitenancy isolation models?", "answer": "Resources can be fully shared, logically partitioned, grouped into deployment stamps, or dedicated per tenant. Real solutions often mix models by tier and component."},
+      {"question": "How do you prevent cross-tenant data leakage?", "answer": "Establish tenant identity from trusted authentication, enforce authorization and tenant filters at multiple layers, partition data deliberately, scope caches and messages, and run automated negative isolation tests."},
+      {"question": "What problem does a multitenant control plane solve?", "answer": "It automates tenant lifecycle and infrastructure management, including onboarding, provisioning, configuration, placement, scaling, metering, migration, suspension, and deletion."}
+    ],
+    "note": "A product can be multitenant at the business layer while using a mixture of shared and dedicated infrastructure underneath.",
+    "tip": "Create a component-by-component tenancy matrix showing isolation, scale unit, data boundary, failure blast radius, and cost owner.",
+    "warning": "Never authorize a tenant solely from an unverified request header, route value, or query parameter supplied by the caller.",
+    "resources": [{"label": "Azure multitenant guidance", "url": "https://learn.microsoft.com/en-us/azure/architecture/guide/multitenant/overview"}, {"label": "Multitenant architecture approaches", "url": "https://learn.microsoft.com/en-us/azure/architecture/guide/multitenant/approaches/overview"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 16, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on SaaS isolation, tenant context, control planes, and scale"
+  },
+  {
+    "slug": "saga-pattern",
+    "name": "Saga Pattern",
+    "symbol": "SAGA",
+    "category": "Architecture Practice",
+    "color": "#c239b3",
+    "shortDescription": "Coordinate distributed business transactions as local commits with durable progress, idempotent messages, and explicit compensation.",
+    "keywords": ["saga", "distributed transaction", "compensation", "orchestration", "choreography", "idempotency", "outbox", "eventual consistency"],
+    "overview": "The Saga pattern maintains business consistency across independently owned services by coordinating local transactions and compensating completed work when later steps fail.",
+    "detail": "A saga decomposes a distributed workflow into local transactions. Each successful step durably records its state and triggers the next action through a command or event. Failures invoke business-specific compensating actions where reversal is possible. Choreography distributes coordination across event handlers; orchestration gives one durable coordinator an explicit state machine. Both require idempotency, duplicate handling, correlation, timeouts, retries, observability, and reconciliation because messages and failures can occur at any boundary.",
+    "concepts": [
+      {"title": "Local transactions", "description": "Each participant commits only its own data and publishes progress reliably, commonly through a transactional outbox."},
+      {"title": "Compensation and pivot", "description": "Compensable steps have semantic undo actions; the pivot is the point after which the remaining retryable steps must complete."},
+      {"title": "Orchestration or choreography", "description": "An orchestrator centralizes workflow state, while choreography reacts to events with less central control but harder end-to-end visibility."},
+      {"title": "Delivery correctness", "description": "Correlation IDs, idempotent handlers, inbox or deduplication state, retries, timeouts, ordering rules, and reconciliation make at-least-once delivery safe."}
+    ],
+    "architecture": {"description": "A durable saga state coordinates commands to service-owned local transactions; replies advance the workflow, while failures trigger compensation and telemetry supports reconciliation.", "nodes": ["Saga state", "Commands + events", "Local transactions", "Compensation + reconcile"], "colors": ["#c239b3", "#5b5fc7", "#0078d4", "#d18415"]},
+    "code": {"language": "csharp", "label": "PlaceOrderSaga.cs", "introduction": "An explicit state record makes successful steps and compensation progress durable and safe to retry.", "code": "public sealed record PlaceOrderSaga(\n    Guid SagaId,\n    Guid OrderId,\n    bool InventoryReserved,\n    bool PaymentCaptured,\n    string Status);\n\npublic static IEnumerable<object> Decide(\n    PlaceOrderSaga state, object message) => message switch\n{\n    InventoryReserved when !state.PaymentCaptured =>\n        [new CapturePayment(state.SagaId, state.OrderId)],\n\n    PaymentFailed when state.InventoryReserved =>\n        [new ReleaseInventory(state.SagaId, state.OrderId)],\n\n    PaymentCaptured =>\n        [new ConfirmOrder(state.SagaId, state.OrderId)],\n\n    _ => [] // Duplicate or already handled message\n};"},
+    "bestPractices": ["Model the workflow, invariants, compensable actions, pivot, retryable actions, timeouts, and terminal states explicitly with domain owners.", "Persist saga progress durably and use transactional outbox and inbox or deduplication mechanisms for reliable, idempotent message handling.", "Give every saga and message correlation and causation identifiers, structured telemetry, deadlines, and an operator-visible reconciliation path.", "Test duplicate, delayed, reordered, lost, and poison messages plus compensation failure and coordinator restart before production."],
+    "interviewQuestions": [
+      {"question": "How is saga choreography different from orchestration?", "answer": "Choreography has participants react to events without one coordinator. Orchestration uses a central state machine that commands steps and handles replies, improving visibility but concentrating workflow coupling."},
+      {"question": "Is a compensating action the same as a database rollback?", "answer": "No. Compensation is a new business operation that semantically offsets a committed action; it may be partial, fail independently, require approval, or be impossible after a pivot."},
+      {"question": "Why must saga handlers be idempotent?", "answer": "Brokers and retries commonly produce duplicate delivery. Idempotent handlers ensure processing the same message again does not repeat charges, reservations, or other side effects."}
+    ],
+    "note": "A saga provides eventual business consistency, not ACID isolation across services; users and downstream processes may observe intermediate states.",
+    "tip": "Draw the happy path and every compensation in one state-transition diagram before implementing handlers.",
+    "warning": "Do not describe a chain of best-effort HTTP calls as a saga unless workflow state, recovery, idempotency, and compensation are durable and explicit.",
+    "resources": [{"label": "Azure Saga pattern", "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/saga"}],
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 16, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New standalone guide on distributed workflow consistency and compensation"
+  },
+  {
+    "slug": "legacy-modernization",
+    "name": "Legacy Modernization",
+    "symbol": "6R",
+    "category": "Architecture Practice",
+    "color": "#d83b01",
+    "shortDescription": "Modernize applications incrementally through portfolio assessment, rationalization, strangler delivery, data transition, and measurable outcomes.",
+    "keywords": ["legacy modernization", "application modernization", "6 Rs", "strangler fig", "rehost", "replatform", "refactor", "migration"],
+    "overview": "Legacy modernization improves business value and system qualities through evidence-based portfolio decisions and controlled, incremental change.",
+    "detail": "Modernization begins with business outcomes, portfolio inventory, dependency discovery, risk, cost, and operational evidence. Each workload or capability can be retained, retired, rehosted, replatformed, refactored, or rebuilt rather than receiving one strategy for the entire estate. Incremental patterns such as strangler routing, anti-corruption layers, change-data capture, parallel runs, and reversible cutovers reduce migration risk while automated tests and observability create a safety net.",
+    "concepts": [
+      {"title": "Assessment and outcomes", "description": "Inventory applications, dependencies, ownership, costs, risks, usage, data, and quality gaps, then define measurable business outcomes."},
+      {"title": "Rationalization strategies", "description": "Retain, retire, rehost, replatform, refactor, and rebuild decisions are applied per workload or capability using value, risk, and feasibility."},
+      {"title": "Incremental replacement", "description": "Strangler routing and anti-corruption adapters let new capabilities replace bounded legacy behavior without a single big-bang cutover."},
+      {"title": "Data and operating transition", "description": "Data ownership, synchronization, reconciliation, observability, support, rollback, and team skills are migrated alongside application code."}
+    ],
+    "architecture": {"description": "A routing facade directs selected capabilities to modern services while an anti-corruption layer protects the new model and synchronized data enables gradual, observable cutover.", "nodes": ["Clients + facade", "Legacy or modern route", "Anti-corruption layer", "Data transition + telemetry"], "colors": ["#d83b01", "#5b5fc7", "#0078d4", "#168c78"]},
+    "code": {"language": "csharp", "label": "LegacyCustomerAdapter.cs", "introduction": "An anti-corruption adapter translates a legacy contract into the new domain vocabulary and prevents old representations from spreading.", "code": "public sealed class LegacyCustomerAdapter(HttpClient legacy)\n{\n    public async Task<Customer?> FindAsync(Guid id, CancellationToken ct)\n    {\n        var dto = await legacy.GetFromJsonAsync<LegacyCustomerDto>(\n            $\"customers/{id}\", ct);\n\n        if (dto is null) return null;\n\n        return new Customer(\n            CustomerId.From(dto.CustomerNumber),\n            PersonName.Create(dto.Surname, dto.GivenName),\n            EmailAddress.Create(dto.Email));\n    }\n}\n\npublic sealed record LegacyCustomerDto(\n    string CustomerNumber, string Surname, string GivenName, string Email);"},
+    "bestPractices": ["Define business outcomes and baseline cost, reliability, security, delivery, performance, and usage before selecting a modernization strategy.", "Map dependencies and data ownership, then modernize bounded capabilities in thin, reversible slices with explicit exit and rollback criteria.", "Build characterization tests, contract tests, telemetry, reconciliation, and parallel-run evidence before redirecting critical traffic.", "Plan operating model, skills, security, compliance, support, decommissioning, and data retention as first-class parts of the program."],
+    "interviewQuestions": [
+      {"question": "How do you choose among modernization strategies?", "answer": "Assess business value, urgency, technical health, dependencies, risk, compliance, cost, team skills, target qualities, and migration feasibility per workload or capability."},
+      {"question": "What is the Strangler Fig pattern?", "answer": "A facade gradually routes selected capabilities from a legacy system to new implementations until the old behavior can be safely retired."},
+      {"question": "Why do modernization programs fail despite new technology?", "answer": "Common causes include unclear outcomes, hidden dependencies, big-bang scope, weak test and telemetry safety nets, ignored data migration, unchanged operating practices, and no funded decommissioning."}
+    ],
+    "note": "Modernization can improve the existing system in place; migration to a public cloud is one option, not the definition of modernization.",
+    "tip": "Choose one valuable, weakly coupled capability and prove the assessment-to-cutover path before scaling the program.",
+    "warning": "A rewrite that preserves unclear requirements, coupling, data problems, and operating practices can recreate the legacy system on a newer stack.",
+    "resources": [{"label": "Azure app modernization guidance", "url": "https://learn.microsoft.com/en-us/azure/app-modernization-guidance/"}, {"label": "Modernization planning and 6 Rs", "url": "https://learn.microsoft.com/en-us/azure/app-modernization-guidance/plan/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 16, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on assessment, 6 Rs, strangler delivery, and safe cutover"
+  },
+  {
+    "slug": "azure-api-management",
+    "name": "Azure API Management",
+    "symbol": "APIM",
+    "category": "Cloud Platforms",
+    "color": "#0078d4",
+    "shortDescription": "Publish, secure, transform, observe, and govern APIs through a managed gateway, control plane, developer experience, and policy model.",
+    "keywords": ["Azure API Management", "APIM", "API gateway", "policies", "rate limiting", "JWT validation", "developer portal", "API lifecycle"],
+    "overview": "Azure API Management is a managed platform for exposing and governing APIs across Azure, on-premises, hybrid, and multicloud environments.",
+    "detail": "API Management separates the gateway data plane from the management plane used to configure APIs, products, subscriptions, policies, analytics, and the developer portal. The gateway routes requests, validates credentials, enforces quotas and rate limits, transforms messages, caches selected responses, and emits telemetry. Architecture choices include service tier, regional deployment, network connectivity, gateway availability, self-hosted gateways, policy scope, backend resilience, secret management, and disaster recovery.",
+    "concepts": [
+      {"title": "Gateway data plane", "description": "The managed or self-hosted gateway proxies traffic, authenticates callers, applies policies, routes to backends, and emits runtime telemetry."},
+      {"title": "Management plane", "description": "APIs, operations, products, subscriptions, named values, versions, revisions, workspaces, and policies define the governed API lifecycle."},
+      {"title": "Policy pipeline", "description": "Inbound, backend, outbound, and on-error policies compose authentication, transformation, caching, quotas, routing, and failure behavior."},
+      {"title": "Reliability and topology", "description": "Tier capabilities, zones, regions, networking, capacity, backend health, deployment automation, and recovery targets shape production design."}
+    ],
+    "architecture": {"description": "Consumers call an APIM gateway that applies identity and traffic policies, routes to protected backend APIs, and exports telemetry while the management plane controls configuration.", "nodes": ["API consumers", "APIM gateway + policy", "Backend APIs", "Telemetry + control plane"], "colors": ["#0078d4", "#5b5fc7", "#168c78", "#d18415"]},
+    "code": {"language": "xml", "label": "inbound-policy.xml", "introduction": "An inbound policy validates an Entra-issued JWT, limits calls per authenticated subject, and adds a correlation identifier before forwarding the request.", "code": "<policies>\n  <inbound>\n    <base />\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\">\n      <openid-config url=\"{{entra-openid-config}}\" />\n      <audiences><audience>{{orders-api-audience}}</audience></audiences>\n    </validate-jwt>\n    <rate-limit-by-key calls=\"120\" renewal-period=\"60\"\n      counter-key=\"@(context.Principal?.Identity?.Name ?? context.Request.IpAddress)\" />\n    <set-header name=\"x-correlation-id\" exists-action=\"skip\">\n      <value>@(context.RequestId.ToString())</value>\n    </set-header>\n  </inbound>\n  <backend><base /></backend>\n  <outbound><base /></outbound>\n  <on-error><base /></on-error>\n</policies>"},
+    "bestPractices": ["Select a tier and topology from required capacity, availability zones or regions, private connectivity, certificates, self-hosting, and recovery objectives.", "Keep policies small, scoped, version-controlled, tested, and deployed through infrastructure as code; use named values backed by Key Vault for secrets.", "Authenticate callers and backends, allowlist exposure, bound payloads and rates, and avoid treating subscription keys as user authorization.", "Monitor gateway capacity, latency, failures, policy errors, backend health, quotas, certificates, and regional behavior with actionable ownership."],
+    "interviewQuestions": [
+      {"question": "What is the difference between the APIM gateway and management plane?", "answer": "The gateway is the runtime data plane that processes API traffic and policies. The management plane configures APIs, products, subscriptions, policies, users, and operational settings."},
+      {"question": "Where should authentication and authorization happen with APIM?", "answer": "APIM can validate tokens and enforce coarse API policy, while backends should still enforce resource and domain authorization. The gateway must not become the only trust boundary."},
+      {"question": "How do you design APIM for high availability?", "answer": "Match service tier and deployment to zone and region targets, design backend and DNS failover, automate configuration, monitor capacity and certificates, and test gateway and dependency failure paths."}
+    ],
+    "note": "API Management governs API exposure; it does not replace careful API contract design, backend authorization, service resilience, or lifecycle ownership.",
+    "tip": "Treat every APIM policy as production code with source control, review, automated deployment, test calls, and observability.",
+    "warning": "Tier capabilities and networking behavior differ materially; validate current limits and availability features before committing an architecture.",
+    "resources": [{"label": "APIM gateway overview", "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-gateways-overview"}, {"label": "APIM architecture best practices", "url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-api-management"}],
+    "sampleId": "ai-gatekeeper", "readingMinutes": 15, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on managed gateways, policies, security, and topology"
+  },
+  {
+    "slug": "azure-functions-serverless",
+    "name": "Azure Functions & Serverless",
+    "symbol": "Fx",
+    "category": "Cloud Platforms",
+    "color": "#0063b1",
+    "shortDescription": "Build event-driven .NET workloads with triggers, bindings, isolated workers, elastic hosting, durable workflows, and production-safe operations.",
+    "keywords": ["Azure Functions", "serverless", ".NET isolated worker", "triggers", "bindings", "Durable Functions", "Flex Consumption", "event-driven"],
+    "overview": "Azure Functions runs event-driven code on managed, elastic compute and integrates .NET handlers with HTTP, schedules, queues, streams, storage, and other services.",
+    "detail": "A function app groups functions that share deployment, configuration, scaling, and hosting. Triggers start executions and bindings integrate data, while the .NET isolated worker uses the standard hosting and dependency-injection model outside the Functions host process. Hosting plan, scale behavior, cold starts, concurrency, retries, poison handling, idempotency, networking, identity, observability, package deployment, and execution duration all affect whether a serverless design meets its workload goals.",
+    "concepts": [
+      {"title": "Triggers and bindings", "description": "One trigger starts a function; input and output bindings connect supported services, while SDK clients handle advanced operations explicitly."},
+      {"title": ".NET isolated worker", "description": "A separate .NET process provides modern target-framework control, middleware, dependency injection, configuration, and familiar hosting patterns."},
+      {"title": "Hosting and scale", "description": "Flex Consumption, Premium, dedicated, and container options differ in scale, networking, cold-start, duration, instance, and cost behavior."},
+      {"title": "Delivery correctness", "description": "At-least-once events require idempotency, retry policies, poison handling, checkpoint awareness, correlation, and durable workflow state."}
+    ],
+    "architecture": {"description": "Events enter through Functions triggers, isolated .NET workers execute stateless handlers and call managed dependencies, while durable state, retries, and telemetry support reliable scale.", "nodes": ["HTTP + events", "Functions trigger", "Isolated .NET worker", "Services + telemetry"], "colors": ["#0063b1", "#5b5fc7", "#168c78", "#d18415"]},
+    "code": {"language": "csharp", "label": "CreateOrderFunction.cs", "introduction": "An isolated-worker HTTP function uses constructor injection, structured logging, cancellation, and an explicit response contract.", "code": "using Microsoft.Azure.Functions.Worker;\nusing Microsoft.Azure.Functions.Worker.Http;\nusing Microsoft.Extensions.Logging;\nusing System.Net;\n\npublic sealed class CreateOrderFunction(\n    OrderService orders, ILogger<CreateOrderFunction> logger)\n{\n    [Function(nameof(CreateOrder))]\n    public async Task<HttpResponseData> CreateOrder(\n        [HttpTrigger(AuthorizationLevel.Function, \"post\", Route = \"orders\")]\n        HttpRequestData request, CancellationToken ct)\n    {\n        var command = await request.ReadFromJsonAsync<CreateOrder>(ct);\n        var orderId = await orders.CreateAsync(command!, ct);\n\n        logger.LogInformation(\"Created order {OrderId}\", orderId);\n        var response = request.CreateResponse(HttpStatusCode.Created);\n        await response.WriteAsJsonAsync(new { orderId }, ct);\n        return response;\n    }\n}"},
+    "bestPractices": ["Use the .NET isolated worker for new C# function apps, pin supported runtime and extension versions, and automate infrastructure and package deployment.", "Design event handlers as idempotent operations with bounded retries, poison-message handling, timeouts, cancellation, and correlation.", "Choose hosting from measured latency, scale, networking, duration, concurrency, availability, and cost requirements rather than the serverless label alone.", "Use managed identity, least privilege, centralized configuration, OpenTelemetry or Application Insights, health signals, and production-shaped load tests."],
+    "interviewQuestions": [
+      {"question": "What is the .NET isolated worker model?", "answer": "Function code runs in a separate .NET process from the Functions host, enabling independent framework targeting and familiar dependency injection, middleware, configuration, and hosting patterns."},
+      {"question": "Why must queue-triggered functions be idempotent?", "answer": "Event delivery and retries can invoke a handler more than once. Idempotency prevents duplicate charges, writes, notifications, or other side effects."},
+      {"question": "When might Azure Functions be the wrong compute choice?", "answer": "When workloads need highly predictable always-warm latency, unusual host control, very long or specialized compute, incompatible networking, or a stable load whose economics favor another hosting model."}
+    ],
+    "note": "Serverless transfers server management and scaling responsibilities; it does not remove capacity limits, distributed-systems behavior, security, or operations.",
+    "tip": "Load test cold and warm executions with real bindings and observe instance scale, dependency pressure, retries, and end-to-end latency.",
+    "warning": "Do not assume exactly-once event delivery; build handlers and downstream effects to tolerate duplicates and partial failure.",
+    "resources": [{"label": "Azure Functions documentation", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/"}, {"label": ".NET isolated worker guide", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide"}],
+    "sampleId": "ai-orchestrator", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on isolated workers, event delivery, hosting, and scale"
+  },
+  {
+    "slug": "azure-data-factory-etl",
+    "name": "Azure Data Factory & ETL",
+    "symbol": "ETL",
+    "category": "Cloud Platforms",
+    "color": "#2d7d9a",
+    "shortDescription": "Orchestrate secure batch data movement and transformation through pipelines, activities, datasets, linked services, and integration runtimes.",
+    "keywords": ["Azure Data Factory", "ADF", "ETL", "ELT", "pipeline", "integration runtime", "data flow", "linked service", "data ingestion"],
+    "overview": "Azure Data Factory is a managed data-integration service for orchestrating movement and transformation across cloud and on-premises data stores.",
+    "detail": "ADF pipelines group activities into repeatable workflows. Linked services define connections, datasets describe data shape or location, and integration runtimes provide movement, activity dispatch, and SSIS execution across network boundaries. Copy activity moves data; mapping data flows and external compute perform transformations. Parameters, metadata-driven patterns, triggers, incremental watermarks, managed identity, Key Vault, monitoring, retries, validation, and reconciliation make pipelines maintainable at scale. New analytics programs should also evaluate Data Factory in Microsoft Fabric while existing ADF workloads remain supported.",
+    "concepts": [
+      {"title": "Pipeline orchestration", "description": "Pipelines compose copy, transformation, control-flow, notebook, stored-procedure, and custom activities with dependencies and parameters."},
+      {"title": "Connections and data", "description": "Linked services describe connection information while datasets identify the input and output data used by activities."},
+      {"title": "Integration runtime", "description": "Azure, self-hosted, and Azure-SSIS runtimes provide compute and network reach for data movement, activity dispatch, and package execution."},
+      {"title": "Incremental reliability", "description": "Watermarks, change tracking, partitioning, retries, idempotent sinks, validation, lineage, alerts, and reconciliation support repeatable ingestion."}
+    ],
+    "architecture": {"description": "Triggers start parameterized ADF pipelines, an integration runtime reaches source systems, activities move or transform data, and validated results land in governed analytical storage.", "nodes": ["Triggers + metadata", "ADF pipeline", "Integration runtime", "Curated data + monitoring"], "colors": ["#2d7d9a", "#5b5fc7", "#0078d4", "#168c78"]},
+    "code": {"language": "json", "label": "pipeline-copy-orders.json", "introduction": "A parameterized Copy activity passes a watermark to the source dataset and writes through a configured sink dataset.", "code": "{\n  \"name\": \"CopyOrdersIncrementally\",\n  \"properties\": {\n    \"parameters\": {\n      \"watermark\": { \"type\": \"String\" }\n    },\n    \"activities\": [\n      {\n        \"name\": \"CopyChangedOrders\",\n        \"type\": \"Copy\",\n        \"inputs\": [\n          { \"referenceName\": \"OrdersSource\", \"type\": \"DatasetReference\",\n            \"parameters\": { \"watermark\": \"@pipeline().parameters.watermark\" } }\n        ],\n        \"outputs\": [\n          { \"referenceName\": \"OrdersLake\", \"type\": \"DatasetReference\" }\n        ],\n        \"policy\": { \"retry\": 3, \"retryIntervalInSeconds\": 30 }\n      }\n    ]\n  }\n}"},
+    "bestPractices": ["Use metadata-driven, parameterized pipelines and reusable datasets or linked services instead of cloning environment-specific workflows.", "Prefer managed identity, Key Vault references, private connectivity where required, least privilege, and a self-hosted runtime only when network reach demands it.", "Design incremental loads with durable watermarks, idempotent sinks, partitioning, schema handling, validation, reconciliation, and replay procedures.", "Deploy through source control and CI/CD, separate environments, monitor activity and data-quality outcomes, and track lineage, throughput, retries, and cost."],
+    "interviewQuestions": [
+      {"question": "What is an integration runtime in Azure Data Factory?", "answer": "It is the compute and network bridge used for data movement, dispatching supported activities, transformations, and SSIS execution. Azure, self-hosted, and Azure-SSIS types serve different needs."},
+      {"question": "What is the difference between ETL and ELT?", "answer": "ETL transforms data before loading the target. ELT loads data first and uses the target analytical engine for transformation; the best choice depends on scale, governance, latency, and engine capabilities."},
+      {"question": "How do you make an incremental pipeline restartable?", "answer": "Persist a committed watermark separately from in-flight work, make writes idempotent or transactional, partition work, validate counts and quality, and advance the watermark only after successful reconciliation."}
+    ],
+    "note": "ADF is primarily an orchestration and integration service; complex transformations may be better executed by specialized engines it coordinates.",
+    "tip": "Track both pipeline success and data correctness—row counts, freshness, schema, duplicates, and reconciliation can fail independently of activity status.",
+    "warning": "Never advance an incremental watermark before the target write and validation are durably complete, or failed data can be skipped permanently.",
+    "resources": [{"label": "Azure Data Factory introduction", "url": "https://learn.microsoft.com/en-us/azure/data-factory/introduction"}, {"label": "Azure Data Factory FAQ", "url": "https://learn.microsoft.com/en-us/azure/data-factory/frequently-asked-questions"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on pipelines, integration runtimes, incremental ETL, and operations"
+  },
+  {
+    "slug": "cloud-adoption-framework",
+    "name": "Cloud Adoption Framework",
+    "symbol": "CAF",
+    "category": "Cloud Platforms",
+    "color": "#498205",
+    "shortDescription": "Align Azure adoption with business outcomes through strategy, planning, landing zones, workload adoption, governance, security, and management.",
+    "keywords": ["Cloud Adoption Framework", "CAF", "Strategy", "Plan", "Ready", "Adopt", "Govern", "Secure", "Manage", "landing zone"],
+    "overview": "Microsoft's Cloud Adoption Framework provides an organization-wide roadmap for adopting Azure and integrating it into business, platform, governance, security, and operations.",
+    "detail": "CAF organizes cloud adoption into connected methodologies. Strategy defines motivations and outcomes; Plan prepares people, skills, inventory, costs, and a roadmap; Ready establishes the Azure environment and landing zones; Adopt migrates, modernizes, or builds cloud-native workloads. Govern, Secure, and Manage operate continuously across the estate. CAF complements the workload-focused Well-Architected Framework and implementation patterns in the Azure Architecture Center.",
+    "concepts": [
+      {"title": "Strategy and Plan", "description": "Business outcomes, financial justification, operating model, skills, digital estate, prioritization, and an actionable adoption backlog set direction."},
+      {"title": "Ready and landing zones", "description": "Tenant, identity, management groups, subscriptions, networking, policy, security, and platform automation create a governed environment for workloads."},
+      {"title": "Adopt workloads", "description": "Teams choose migration, modernization, or cloud-native paths and onboard workloads through repeatable application landing zones and delivery practices."},
+      {"title": "Govern, Secure, and Manage", "description": "Continuous controls, security posture, operations, cost, compliance, ownership, and improvement keep the cloud estate aligned as it grows."}
+    ],
+    "architecture": {"description": "Business strategy becomes an adoption plan and landing-zone foundation; workload teams then migrate or build while governance, security, and management operate continuously across the estate.", "nodes": ["Strategy + Plan", "Ready landing zone", "Adopt workloads", "Govern + Secure + Manage"], "colors": ["#498205", "#0078d4", "#5b5fc7", "#168c78"]},
+    "code": {"language": "bicep", "label": "application-landing-zone.bicep", "introduction": "A small application landing-zone module exposes ownership and environment metadata as required deployment inputs instead of adding them manually later.", "code": "targetScope = 'subscription'\n\n@allowed([\n  'dev'\n  'test'\n  'prod'\n])\nparam environment string\nparam workloadName string\nparam owner string\nparam location string\n\nresource workloadGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {\n  name: '${workloadName}-${environment}'\n  location: location\n  tags: {\n    workload: workloadName\n    environment: environment\n    owner: owner\n    managedBy: 'platform-landing-zone'\n  }\n}"},
+    "bestPractices": ["Tie adoption to measurable business outcomes, named owners, funding, risk, and an operating model rather than a technology migration target alone.", "Use enterprise-scale landing-zone principles but tailor implementation to organizational size, compliance, connectivity, and platform capabilities.", "Automate subscription and application landing-zone vending, policy, identity, networking, budgets, observability, and workload onboarding as platform products.", "Run Govern, Secure, and Manage continuously, and assess individual workloads with the Well-Architected Framework throughout their lifecycle."],
+    "interviewQuestions": [
+      {"question": "How is CAF different from the Azure Well-Architected Framework?", "answer": "CAF guides organization-wide cloud adoption, platform readiness, governance, security, and management. WAF evaluates the design and operation of individual workloads across five quality pillars."},
+      {"question": "What is an Azure landing zone?", "answer": "It is a scalable, governed Azure environment and operating foundation covering identity, resource organization, subscriptions, networking, policy, security, management, and automation for workload onboarding."},
+      {"question": "Why are Govern, Secure, and Manage continuous?", "answer": "The estate, threats, regulations, costs, services, and workloads keep changing, so controls and operations must evolve throughout adoption rather than occur once at the end."}
+    ],
+    "note": "CAF is adaptable guidance, not a mandate to implement every enterprise control before the first workload can learn and deliver value.",
+    "tip": "Map each CAF methodology to a concrete outcome, accountable team, evidence artifact, and next review date.",
+    "warning": "A landing zone built without an adoption backlog and workload-team feedback can become an expensive platform with no successful consumers.",
+    "resources": [{"label": "Cloud Adoption Framework overview", "url": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/overview"}, {"label": "Cloud Adoption Framework guidance", "url": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on cloud strategy, landing zones, adoption, and operations"
+  },
+  {
+    "slug": "aws-for-dotnet",
+    "name": "AWS for .NET",
+    "symbol": "AWS",
+    "category": "Cloud Platforms",
+    "color": "#e87918",
+    "shortDescription": "Build and operate .NET workloads on AWS with the SDK, dependency injection, identity roles, managed compute, observability, and infrastructure as code.",
+    "keywords": ["AWS for .NET", "AWS SDK for .NET", "Amazon S3", "Lambda", "ECS", "App Runner", "DynamoDB", "CloudWatch", "IAM"],
+    "overview": ".NET applications can use AWS SDK clients and managed services across serverless, containers, web hosting, data, messaging, observability, and infrastructure automation.",
+    "detail": "The AWS SDK for .NET provides service clients, credential and region resolution, retries, pagination, waiters, and dependency-injection integrations. Workloads can run on Lambda, App Runner, Elastic Beanstalk, ECS, EKS, EC2, or other compute selected from latency, scaling, control, networking, and cost needs. IAM roles and temporary credentials, Secrets Manager or Parameter Store, CloudWatch and OpenTelemetry, resilient SDK configuration, infrastructure as code, and multi-account governance form the production foundation.",
+    "concepts": [
+      {"title": "SDK clients", "description": "Service-specific clients expose AWS APIs with asynchronous calls, pagination, retries, region selection, credential resolution, and configurable HTTP behavior."},
+      {"title": "Compute choices", "description": "Lambda, App Runner, Elastic Beanstalk, ECS, EKS, and EC2 trade operational control, scale behavior, startup, portability, networking, and cost."},
+      {"title": "Identity and configuration", "description": "IAM roles, temporary credentials, least privilege, workload identity, Secrets Manager, Parameter Store, and KMS avoid embedded long-lived secrets."},
+      {"title": "Operations and delivery", "description": "CloudWatch, OpenTelemetry, health checks, deployment strategies, CDK or CloudFormation, tagging, budgets, and multi-account boundaries support production."}
+    ],
+    "architecture": {"description": "A .NET workload obtains temporary role credentials, calls AWS services through reusable SDK clients, and emits correlated telemetry while infrastructure and policy are deployed as code.", "nodes": [".NET workload", "IAM role + SDK", "AWS managed services", "CloudWatch + IaC"], "colors": ["#e87918", "#5b5fc7", "#0078d4", "#168c78"]},
+    "code": {"language": "csharp", "label": "DocumentStore.cs", "introduction": "A reusable S3 client relies on the default AWS credential and region chain, allowing local profiles and deployed IAM roles without secrets in code.", "code": "using Amazon.S3;\nusing Amazon.S3.Model;\n\npublic sealed class DocumentStore(IAmazonS3 s3, IConfiguration config)\n{\n    private readonly string bucket = config[\"Storage:Bucket\"]\n        ?? throw new InvalidOperationException(\"Storage bucket is required.\");\n\n    public async Task PutAsync(\n        string key, Stream content, CancellationToken ct)\n    {\n        await s3.PutObjectAsync(new PutObjectRequest\n        {\n            BucketName = bucket,\n            Key = key,\n            InputStream = content,\n            ServerSideEncryptionMethod = ServerSideEncryptionMethod.AES256\n        }, ct);\n    }\n}\n\n// Registration: builder.Services.AddAWSService<IAmazonS3>();"},
+    "bestPractices": ["Use IAM roles and temporary credentials with least-privilege policies; never embed access keys in source, images, logs, or application settings.", "Reuse injected SDK clients, propagate cancellation, configure timeouts and retries deliberately, paginate results, and make retried side effects idempotent.", "Choose compute and data services from workload requirements, team capabilities, recovery targets, networking, portability, and measured total cost.", "Deploy accounts, networks, policy, alarms, dashboards, budgets, and application infrastructure as code with tags and tested rollback or roll-forward paths."],
+    "interviewQuestions": [
+      {"question": "How does the AWS SDK for .NET find credentials?", "answer": "It follows a credential provider chain that can use explicit configuration, environment sources, local shared profiles, and workload role credentials. Production workloads should normally use temporary IAM role credentials."},
+      {"question": "When would you choose Lambda versus ECS for a .NET workload?", "answer": "Lambda suits event-driven, bounded executions with elastic demand and minimal host management. ECS suits longer-running services, custom containers, steady processes, and workloads needing more control over runtime and networking."},
+      {"question": "How should a .NET service handle AWS API throttling?", "answer": "Use SDK retry behavior with bounded backoff and jitter, respect cancellation and timeouts, reduce concurrency or batch requests, monitor quotas, and ensure retried mutations are idempotent."}
+    ],
+    "note": "The AWS SDK for .NET is independent of the compute host; the same application can call AWS services from AWS, on-premises, another cloud, or local development when identity and networking permit.",
+    "tip": "Test locally with a named profile, but deploy with an IAM role and verify the exact permissions through an integration test in a nonproduction account.",
+    "warning": "Do not rely on broad managed IAM policies for convenience in production; scope actions and resources and monitor denied access while refining least privilege.",
+    "resources": [{"label": "AWS SDK for .NET documentation", "url": "https://docs.aws.amazon.com/sdk-for-net/"}, {"label": "AWS SDK for .NET V4 guide", "url": "https://docs.aws.amazon.com/sdk-for-net/v4/developer-guide/welcome.html"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on AWS SDK clients, compute, IAM, observability, and delivery"
+  },
+  {
     "slug": "azure-well-architected",
     "name": "Azure Well-Architected Framework",
     "symbol": "WAF",

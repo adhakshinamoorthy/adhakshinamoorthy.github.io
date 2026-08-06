@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$BaseUrl = "https://adhakshinamoorthy.github.io"
+    [string]$BaseUrl = "https://adhakshinamoorthy.github.io",
+    [switch]$OnlyMissing
 )
 
 $ErrorActionPreference = "Stop"
@@ -8,6 +9,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $technologyPath = Join-Path $projectRoot "data\technologies.json"
 $outputDirectory = Join-Path $projectRoot "technologies"
 $technologies = Get-Content -Raw -LiteralPath $technologyPath | ConvertFrom-Json
+$utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
 
 New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 
@@ -63,7 +65,10 @@ foreach ($technology in $technologies) {
 </body>
 </html>
 "@
-    Set-Content -LiteralPath (Join-Path $outputDirectory "$slug.html") -Value $page -Encoding UTF8
+    $pagePath = Join-Path $outputDirectory "$slug.html"
+    if (-not $OnlyMissing -or -not (Test-Path -LiteralPath $pagePath)) {
+        [System.IO.File]::WriteAllText($pagePath, ($page + [Environment]::NewLine), $utf8WithoutBom)
+    }
 }
 
 $urls = @("$BaseUrl/") + ($technologies | ForEach-Object { "$BaseUrl/technologies/$($_.slug).html" })
@@ -74,6 +79,6 @@ $sitemap = @"
 $($urlEntries -join "`n")
 </urlset>
 "@
-Set-Content -LiteralPath (Join-Path $projectRoot "sitemap.xml") -Value $sitemap -Encoding UTF8
+[System.IO.File]::WriteAllText((Join-Path $projectRoot "sitemap.xml"), ($sitemap + [Environment]::NewLine), $utf8WithoutBom)
 
 Write-Host "Generated $($technologies.Count) topic pages and sitemap.xml"

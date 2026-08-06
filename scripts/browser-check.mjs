@@ -115,6 +115,33 @@ try {
     'Azure Well-Architected guides are not in the expected learning order'
   );
 
+  const architecturePractice = page.locator('.sidebar-group[aria-label="Architecture Practice"] .sidebar-link');
+  check(await architecturePractice.count() === 6, 'Architecture Practice category does not contain six guides');
+  check(
+    JSON.stringify(await architecturePractice.allInnerTexts()) === JSON.stringify([
+      'Solution Architecture Fundamentals',
+      'Architecture Decision Records',
+      'API Design Best Practices',
+      'Multi-Tenancy Patterns',
+      'Saga Pattern',
+      'Legacy Modernization'
+    ]),
+    'Architecture Practice guides are not in the expected learning order'
+  );
+
+  const cloudPlatforms = page.locator('.sidebar-group[aria-label="Cloud Platforms"] .sidebar-link');
+  check(await cloudPlatforms.count() === 5, 'Cloud Platforms category does not contain five guides');
+  check(
+    JSON.stringify(await cloudPlatforms.allInnerTexts()) === JSON.stringify([
+      'Azure API Management',
+      'Azure Functions & Serverless',
+      'Azure Data Factory & ETL',
+      'Cloud Adoption Framework',
+      'AWS for .NET'
+    ]),
+    'Cloud Platforms guides are not in the expected learning order'
+  );
+
   await page.goto(`${baseUrl}/technologies/azure-well-architected.html`, { waitUntil: 'networkidle' });
   check(await page.locator('.official-resource-links a').count() === 3, 'WAF overview does not show all official resources');
   check(
