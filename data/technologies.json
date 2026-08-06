@@ -492,4 +492,295 @@
     "warning": "Do not claim production scale, security, or resilience that you only inferred from a successful build or local demo.",
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 8, "level": "All levels", "updated": "2026-08-02", "latestNote": "Answer framework added"
   }
+,
+  {
+    "slug": "background-services",
+    "name": "Background & Hosted Services",
+    "symbol": "BG",
+    "category": "Delivery & Operations",
+    "color": "#c98a1f",
+    "shortDescription": "Run recurring, queued, and long-lived work outside the request path with hosted services and job schedulers.",
+    "keywords": ["Hangfire", "IHostedService", "BackgroundService", "queues", "scheduled jobs", "workers"],
+    "overview": "Background processing lets an application do meaningful work—emails, media pipelines, cleanup, retries—without blocking a request or depending on a client staying connected.",
+    "detail": "ASP.NET Core exposes IHostedService and BackgroundService for long-lived in-process workers, while a job scheduler such as Hangfire adds persistence, retries, and visibility for fire-and-forget, delayed, recurring, and continuation jobs backed by a durable store.",
+    "concepts": [
+      {"title": "Hosted services", "description": "IHostedService and BackgroundService integrate long-lived workers with the application's startup, shutdown, and dependency injection lifecycle."},
+      {"title": "Durable job scheduling", "description": "Hangfire and similar schedulers persist job state to a store so work survives restarts, deployments, and process crashes."},
+      {"title": "Idempotent processing", "description": "A retried or redelivered job must produce the same outcome as a single successful run, usually enforced with a processed-work record."},
+      {"title": "Claim-based concurrency", "description": "Database-native locking—unique constraints and a LockedUntil column—lets multiple workers pick up jobs safely without an in-app mutex."}
+    ],
+    "architecture": {"description": "A producer enqueues durable job records; one or more workers claim and process them, writing results back to the same store they were claimed from.", "nodes": ["Producer", "Durable job store", "Worker process", "Result / next step"], "colors": ["#c98a1f", "#d9a441", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "ExportModule.cs", "introduction": "Register a recurring job alongside its dependencies so scheduling and business logic stay in one discoverable place.", "code": "public static class ExportModule\n{\n    public static IServiceCollection AddExportJobs(this IServiceCollection services)\n    {\n        services.AddScoped<IReportExporter, ReportExporter>();\n        return services;\n    }\n\n    public static void MapExportJobs(this IRecurringJobManager jobs)\n    {\n        jobs.AddOrUpdate<IReportExporter>(\n            \"nightly-export\",\n            exporter => exporter.ExportAsync(CancellationToken.None),\n            Cron.Daily(hour: 2));\n    }\n}"},
+    "bestPractices": ["Make every job handler idempotent; assume at-least-once delivery and possible redelivery.", "Keep job payloads small and serializable; pass identifiers, not full domain objects.", "Set explicit retry limits and a dead-letter or failed-job review path instead of retrying forever.", "Emit structured logs and metrics per job run so stuck or slow jobs are visible before they become an incident."],
+    "interviewQuestions": [
+      {"question": "What is the difference between IHostedService and a job scheduler like Hangfire?", "answer": "IHostedService is an in-process, code-driven worker tied to the application's own lifetime; a scheduler like Hangfire persists job state externally, so scheduling, retries, and visibility survive restarts and can be distributed across workers."},
+      {"question": "Why does at-least-once delivery matter for background jobs?", "answer": "Most schedulers retry on failure or after a crash, so a handler can run more than once for the same logical job; without idempotency this can double-charge, double-send, or corrupt state."},
+      {"question": "How would you stop two worker instances from processing the same job?", "answer": "Use the job store's own concurrency control—row-level locking, a unique claim constraint, or a LockedUntil column—rather than an in-memory lock, since workers may run in separate processes or machines."}
+    ],
+    "note": "A hosted service and a durable job scheduler solve different problems: use the former for lightweight in-process loops and the latter when work must survive restarts or run on a schedule.",
+    "tip": "Add a dashboard or admin view for scheduled and failed jobs early; debugging background work without visibility is expensive.",
+    "warning": "Do not rely on in-memory queues or timers for anything that must not be lost on deploy or crash; use a durable store.",
+    "sampleId": "ai-orchestrator", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide covering hosted services and durable scheduling"
+  },
+  {
+    "slug": "observability",
+    "name": "Observability & OpenTelemetry",
+    "symbol": "OTel",
+    "category": "Delivery & Operations",
+    "color": "#2f8fae",
+    "shortDescription": "Connect traces, metrics, and logs across services so production behavior is diagnosable, not guessed at.",
+    "keywords": ["OpenTelemetry", "tracing", "metrics", "logs", "correlation", "dashboards"],
+    "overview": "Observability means being able to ask new questions about a running system without shipping new code—usually by combining correlated traces, metrics, and structured logs.",
+    "detail": "OpenTelemetry provides a vendor-neutral way to emit traces, metrics, and logs from .NET applications. A trace follows one logical operation across service boundaries, metrics summarize behavior over time, and structured logs give point-in-time detail—together they turn an incident from guesswork into evidence.",
+    "concepts": [
+      {"title": "Traces and spans", "description": "A trace represents one logical operation; spans are its timed steps, connected across process and network boundaries by a shared trace context."},
+      {"title": "Metrics", "description": "Counters, histograms, and gauges summarize behavior—request rate, latency distribution, queue depth—over time without per-event detail."},
+      {"title": "Correlated logs", "description": "Attaching trace and span identifiers to log lines lets you jump from a slow trace straight to the log lines that explain it."},
+      {"title": "Exporters and collectors", "description": "The OpenTelemetry Collector receives telemetry from applications and routes it to one or more backends without coupling code to a specific vendor."}
+    ],
+    "architecture": {"description": "Instrumented code emits traces, metrics, and logs to a collector, which routes them to a backend where they can be correlated and queried.", "nodes": ["Instrumented service", "OpenTelemetry SDK", "Collector", "Observability backend"], "colors": ["#2f8fae", "#2678c8", "#6e5bd7", "#168c78"]},
+    "code": {"language": "csharp", "label": "Telemetry.cs", "introduction": "Registering OpenTelemetry once at startup instruments ASP.NET Core, HttpClient, and EF Core without touching business code.", "code": "builder.Services.AddOpenTelemetry()\n    .ConfigureResource(resource => resource.AddService(\"orders-api\"))\n    .WithTracing(tracing => tracing\n        .AddAspNetCoreInstrumentation()\n        .AddHttpClientInstrumentation()\n        .AddEntityFrameworkCoreInstrumentation()\n        .AddOtlpExporter())\n    .WithMetrics(metrics => metrics\n        .AddAspNetCoreInstrumentation()\n        .AddRuntimeInstrumentation()\n        .AddOtlpExporter());"},
+    "bestPractices": ["Propagate trace context across every HTTP call, queue message, and background job, not just synchronous requests.", "Instrument at the edges first—HTTP, database, messaging—before adding custom spans for business logic.", "Keep high-cardinality values like user IDs on span attributes, not on metric labels, to avoid metric explosion.", "Alert on symptoms users feel—latency, error rate, saturation—not only on infrastructure metrics."],
+    "interviewQuestions": [
+      {"question": "What problem does distributed tracing solve that logs alone do not?", "answer": "Logs are scoped to one process; a trace stitches together the spans from every service a single request touched, showing where time was actually spent across the whole call graph."},
+      {"question": "Why is metric cardinality a concern?", "answer": "Metrics backends aggregate by label combination; labels with unbounded values such as user ID or request ID can create a new time series per value and overwhelm the backend."},
+      {"question": "What role does the OpenTelemetry Collector play?", "answer": "It decouples instrumented applications from a specific observability vendor by receiving telemetry once and routing, batching, and exporting it to one or more backends."}
+    ],
+    "note": "Observability is a property of the system's design, not a dashboard added after an incident.",
+    "tip": "Pick a small set of golden signals—latency, traffic, errors, saturation—per service and make sure they are wired end to end before adding anything fancier.",
+    "warning": "Sampling every trace at high volume can be expensive and slow; use head- or tail-based sampling once traffic grows, but keep error traces at full fidelity.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 11, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on tracing, metrics, and correlated logs"
+  },
+  {
+    "slug": "cicd-dotnet",
+    "name": "CI/CD for .NET",
+    "symbol": "CI",
+    "category": "Delivery & Operations",
+    "color": "#4c9a4c",
+    "shortDescription": "Automate build, test, and deployment so every change is verified and shipped the same way, every time.",
+    "keywords": ["GitHub Actions", "pipelines", "build", "test", "deploy", "artifacts"],
+    "overview": "A CI/CD pipeline turns ‘it works on my machine’ into a repeatable, observable process: restore, build, test, package, and deploy the same way for every change.",
+    "detail": "Continuous integration validates every change automatically—restore, build, run tests, and check quality gates. Continuous deployment extends that pipeline to package and ship the validated artifact, ideally through progressively more production-like environments with clear rollback.",
+    "concepts": [
+      {"title": "Pipeline stages", "description": "Restore, build, test, and publish run in order so a fast failure in an early stage avoids wasting time on later ones."},
+      {"title": "Artifacts", "description": "A pipeline should build one deployable artifact once and promote that same artifact through environments, not rebuild per environment."},
+      {"title": "Quality gates", "description": "Required checks—tests, coverage thresholds, static analysis, vulnerability scans—block a merge or deployment until they pass."},
+      {"title": "Environments and promotion", "description": "Separate environments with their own configuration and approval rules let a change move from validation toward production deliberately."}
+    ],
+    "architecture": {"description": "A commit triggers a pipeline that restores, builds, and tests the change, then packages and promotes one artifact through environments toward production.", "nodes": ["Commit / PR", "Build & test", "Artifact", "Deploy & promote"], "colors": ["#4c9a4c", "#2678c8", "#d17a2d", "#168c78"]},
+    "code": {"language": "yaml", "label": ".github/workflows/ci.yml", "introduction": "A focused workflow restores, builds, and tests on every pull request before anything is published.", "code": "name: ci\non:\n  pull_request:\n  push:\n    branches: [main]\njobs:\n  build-and-test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-dotnet@v4\n        with:\n          dotnet-version: '10.0.x'\n      - run: dotnet restore\n      - run: dotnet build --no-restore -c Release\n      - run: dotnet test --no-build -c Release --logger trx"},
+    "bestPractices": ["Fail fast: run restore, build, and unit tests before anything slow like integration tests or container builds.", "Build the deployable artifact once and reuse it across every environment instead of rebuilding per stage.", "Pin tool and action versions so a pipeline behaves the same today and in six months.", "Keep secrets in the platform's secret store, never in workflow files or environment variables checked into source."],
+    "interviewQuestions": [
+      {"question": "What is the difference between continuous delivery and continuous deployment?", "answer": "Continuous delivery means every change is automatically verified and ready to release, with a manual approval to actually deploy; continuous deployment removes that manual gate and ships automatically once checks pass."},
+      {"question": "Why build one artifact and promote it, instead of rebuilding for each environment?", "answer": "Rebuilding per environment risks shipping code that differs from what was tested—different dependency versions, timestamps, or compiler output—so promoting one immutable artifact keeps what you tested and what you ship identical."},
+      {"question": "How should a pipeline handle a failing quality gate?", "answer": "It should block the merge or deployment, report the specific failure clearly, and leave the previous known-good artifact in place rather than partially deploying a change."}
+    ],
+    "note": "A pipeline is production code: version it, review changes to it, and test that it still does what you expect.",
+    "tip": "Cache dependency restores between runs, but invalidate the cache on lockfile changes so a stale cache never hides a real dependency problem.",
+    "warning": "A pipeline that deploys on green tests but has no rollback plan turns every bad merge into a production incident.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on pipeline stages and artifact promotion"
+  },
+  {
+    "slug": "dotnet-aspire",
+    "name": ".NET Aspire",
+    "symbol": "ASPR",
+    "category": "Cloud & Architecture",
+    "color": "#8a4fd6",
+    "shortDescription": "Orchestrate multi-project .NET applications locally with service discovery, dashboards, and consistent configuration.",
+    "keywords": ["Aspire", "orchestration", "service discovery", "local development", "cloud-native", "dashboard"],
+    "overview": ".NET Aspire is an opinionated stack for building observable, cloud-native applications, giving multi-service solutions a consistent way to run, wire together, and inspect locally before they reach the cloud.",
+    "detail": "An AppHost project declares the services, databases, and resources an application needs; Aspire wires up service discovery, connection strings, and telemetry automatically and starts everything together with a dashboard for logs, traces, and metrics—removing a lot of local orchestration scripts and README setup steps.",
+    "concepts": [
+      {"title": "AppHost", "description": "A dedicated project declares the application's resources—APIs, databases, caches, queues—and how they depend on each other."},
+      {"title": "Service discovery", "description": "Dependent projects receive resolved endpoints for the resources they reference instead of hardcoded URLs or ports."},
+      {"title": "Integrations", "description": "Aspire components wrap common resources such as Postgres, Redis, and messaging with sensible defaults, health checks, and telemetry."},
+      {"title": "Dashboard", "description": "A local dashboard shows structured logs, traces, and metrics for every running resource without extra tooling."}
+    ],
+    "architecture": {"description": "The AppHost starts and wires together each declared resource, injecting configuration and endpoints while the dashboard observes all of them together.", "nodes": ["AppHost project", "Declared resources", "Running services", "Aspire dashboard"], "colors": ["#8a4fd6", "#6e5bd7", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "AppHost.cs", "introduction": "The AppHost project describes resources once; dependent projects reference them by name instead of configuring connection strings manually.", "code": "var builder = DistributedApplication.CreateBuilder(args);\n\nvar postgres = builder.AddPostgres(\"postgres\").AddDatabase(\"orders\");\nvar cache = builder.AddRedis(\"cache\");\n\nvar api = builder.AddProject<Projects.Orders_Api>(\"orders-api\")\n    .WithReference(postgres)\n    .WithReference(cache);\n\nbuilder.AddProject<Projects.Orders_Web>(\"orders-web\")\n    .WithReference(api);\n\nbuilder.Build().Run();"},
+    "bestPractices": ["Keep the AppHost declarative; let it describe resources and references instead of embedding business logic.", "Use the dashboard during development to check traces and logs before reaching for a debugger.", "Treat local resource definitions as a starting point, not a production topology—review managed service choices separately for the cloud.", "Reference resources by name through WithReference instead of hardcoding hostnames, ports, or connection strings."],
+    "interviewQuestions": [
+      {"question": "What problem does .NET Aspire solve that Docker Compose does not fully cover?", "answer": "It adds .NET-aware service discovery, typed resource references, and built-in OpenTelemetry wiring across projects, so dependent services and dashboards work with less manual configuration than a generic container definition."},
+      {"question": "Is Aspire a hosting platform?", "answer": "No. It is an application model and local orchestration/tooling experience; deployment still targets your chosen hosting platform, using Aspire's manifest to describe the resources needed."},
+      {"question": "How does a project get another resource's connection details?", "answer": "Through WithReference in the AppHost, which injects configuration and environment variables that the referencing project's client integration reads automatically."}
+    ],
+    "note": "Aspire's biggest early win is usually local development: one command starts every dependent service with wired-up configuration and a shared dashboard.",
+    "tip": "Start with the AppHost even for a single API and one database; adding services later is far easier once the pattern is established.",
+    "warning": "Aspire's local resource definitions are for development convenience; they are not a substitute for a real infrastructure-as-code deployment story.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on AppHost orchestration and the dashboard"
+  },
+  {
+    "slug": "cqrs-mediatr",
+    "name": "CQRS & MediatR",
+    "symbol": "CQ",
+    "category": "Cloud & Architecture",
+    "color": "#cf7a4a",
+    "shortDescription": "Separate the shapes and paths used to change state from the ones used to read it, and route both through a mediator.",
+    "keywords": ["CQRS", "MediatR", "commands", "queries", "read models", "pipeline behaviors"],
+    "overview": "Command Query Responsibility Segregation splits an application's write model, optimized for enforcing invariants, from its read model, optimized for the shapes a UI or report actually needs.",
+    "detail": "Commands express intent to change state and return little more than an identifier or acknowledgment; queries return read-optimized projections and never mutate anything. A mediator library like MediatR routes each command or query to exactly one handler and lets cross-cutting behavior—validation, logging, transactions—wrap every request in one place.",
+    "concepts": [
+      {"title": "Commands vs queries", "description": "Commands express an intent to change state and stay narrow; queries return data shaped for a specific read need and never mutate anything."},
+      {"title": "Single handler per request", "description": "Each command or query type is matched to exactly one handler, keeping request-to-behavior mapping explicit and easy to locate."},
+      {"title": "Pipeline behaviors", "description": "Cross-cutting concerns—validation, logging, transactions, authorization—wrap every request through a shared pipeline instead of being repeated per handler."},
+      {"title": "Read models", "description": "Query handlers can read from denormalized or differently shaped projections instead of the same model the write side uses."}
+    ],
+    "architecture": {"description": "A mediator routes each command or query to its handler; write handlers change the domain model while read handlers return projections shaped for their caller.", "nodes": ["Caller", "Mediator", "Command handler / Query handler", "Domain model / Read model"], "colors": ["#cf7a4a", "#6556c8", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "PlaceOrderCommand.cs", "introduction": "A command and its handler stay narrow, returning only what the caller needs to continue.", "code": "public sealed record PlaceOrderCommand(Guid CustomerId, IReadOnlyList<OrderLine> Lines)\n    : IRequest<Guid>;\n\npublic sealed class PlaceOrderHandler(IOrderRepository orders, IUnitOfWork unitOfWork)\n    : IRequestHandler<PlaceOrderCommand, Guid>\n{\n    public async Task<Guid> Handle(PlaceOrderCommand command, CancellationToken ct)\n    {\n        var order = Order.Place(command.CustomerId, command.Lines);\n        await orders.AddAsync(order, ct);\n        await unitOfWork.SaveChangesAsync(ct);\n        return order.Id;\n    }\n}"},
+    "bestPractices": ["Keep command handlers focused on one business outcome; split a handler that is doing two unrelated things.", "Let query handlers bypass the domain model and read directly from a projection when that projection already exists.", "Put validation, logging, and transaction handling in pipeline behaviors instead of repeating them in every handler.", "Version read models independently from the write model once their shapes genuinely diverge."],
+    "interviewQuestions": [
+      {"question": "What does CQRS actually require—separate databases?", "answer": "No. CQRS is about separating responsibility and models for reads and writes; it can be implemented with one database and different query and command paths, and only needs physically separate stores when read and write scaling or consistency needs diverge."},
+      {"question": "What problem do pipeline behaviors solve?", "answer": "They let cross-cutting concerns like validation, logging, and transactions wrap every command or query in one place, instead of being copy-pasted into each handler."},
+      {"question": "When is CQRS not worth the complexity?", "answer": "When an application's read and write needs are simple and aligned—a single model with straightforward CRUD often serves the domain better than the extra indirection of separate command and query paths."}
+    ],
+    "note": "CQRS is a separation of responsibility, not automatically a separation of databases or an event-sourced write model.",
+    "tip": "Introduce CQRS at the boundary where reads and writes have genuinely different shapes or scaling needs, not uniformly across every feature.",
+    "warning": "Splitting commands and queries without addressing how the read side stays in sync just moves the consistency problem instead of solving it.",
+    "sampleId": "ride-sharing-cqrs", "readingMinutes": 11, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on commands, queries, and pipeline behaviors"
+  },
+  {
+    "slug": "event-driven-messaging",
+    "name": "Event-Driven Messaging",
+    "symbol": "MQ",
+    "category": "Cloud & Architecture",
+    "color": "#3fa88a",
+    "shortDescription": "Coordinate independently deployed services through durable, asynchronous events instead of synchronous calls.",
+    "keywords": ["events", "outbox", "Service Bus", "RabbitMQ", "idempotent consumers", "sagas"],
+    "overview": "Event-driven messaging lets services react to what happened elsewhere without a direct, blocking call, trading immediate consistency for looser coupling and better resilience to partial failure.",
+    "detail": "A publisher records that something happened; a broker such as Service Bus or RabbitMQ delivers that event to one or more subscribers, each processing it independently. Because delivery can be delayed, duplicated, or reordered, the pattern's real difficulty is not publishing—it is designing durable delivery, idempotent handling, and workflows that tolerate partial completion.",
+    "concepts": [
+      {"title": "Events vs commands", "description": "An event states a fact that already happened and may have many subscribers; a command requests a specific action and expects exactly one handler."},
+      {"title": "Transactional outbox", "description": "Writing a business change and its outgoing event in the same local transaction avoids the dual-write problem of updating a database and publishing separately."},
+      {"title": "Idempotent consumers", "description": "A handler records which message identifiers it has already processed so redelivery does not repeat side effects."},
+      {"title": "Sagas", "description": "A saga coordinates a multi-step workflow across services using events and compensating actions instead of a distributed transaction."}
+    ],
+    "architecture": {"description": "A service commits a business change and an outbox record in one transaction; a relay publishes the event to a broker, which delivers it to independent, idempotent subscribers.", "nodes": ["Service + outbox", "Relay", "Broker", "Idempotent subscribers"], "colors": ["#3fa88a", "#e07036", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "OutboxRelay.cs", "introduction": "A background relay publishes outbox rows written in the same transaction as the business change, then marks them sent.", "code": "public async Task RelayPendingAsync(CancellationToken ct)\n{\n    var pending = await db.OutboxMessages\n        .Where(message => message.SentAtUtc == null)\n        .OrderBy(message => message.CreatedAtUtc)\n        .Take(50)\n        .ToListAsync(ct);\n\n    foreach (var message in pending)\n    {\n        await bus.PublishAsync(message.Type, message.Payload, ct);\n        message.SentAtUtc = clock.UtcNow;\n    }\n\n    await db.SaveChangesAsync(ct);\n}"},
+    "bestPractices": ["Write the outbox row in the same transaction as the business change it describes, never as a separate call.", "Design every consumer to be safe against duplicate delivery before trusting the broker's delivery guarantees.", "Version event contracts additively and keep old consumers working through a compatibility window.", "Model multi-step workflows as explicit sagas with compensating actions instead of implicit chains of event handlers."],
+    "interviewQuestions": [
+      {"question": "What is the dual-write problem and how does the outbox pattern fix it?", "answer": "Dual-write happens when a service updates its database and publishes an event as two separate operations that can fail independently, leaving them out of sync; the outbox pattern writes the event as a row in the same local transaction as the business change, then relays it asynchronously, so the two are always consistent."},
+      {"question": "Why can't most message brokers guarantee exactly-once delivery?", "answer": "Coordinating exactly-once delivery across a network requires distributed consensus that most brokers avoid for performance and availability reasons, so they offer at-least-once delivery and expect consumers to handle duplicates."},
+      {"question": "What is a saga, and why not just use a distributed transaction?", "answer": "A saga coordinates a multi-step process across services using a sequence of local transactions and compensating actions on failure; distributed transactions need every participant to be available and lock resources together, which does not scale or fit independently deployed services."}
+    ],
+    "note": "Ordering and duplication are the default in most messaging systems, not the exception; design consumers assuming both.",
+    "tip": "Give every event a stable, versioned schema and a unique identifier from the start—retrofitting either is painful once consumers exist.",
+    "warning": "Publishing an event before the related database transaction commits can let subscribers react to a change that gets rolled back.",
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on outbox delivery and idempotent consumers"
+  },
+  {
+    "slug": "grpc",
+    "name": "gRPC",
+    "symbol": "gRPC",
+    "category": "Web & Data",
+    "color": "#1a9e9e",
+    "shortDescription": "Define strongly typed service contracts and exchange compact binary messages over HTTP/2, including streaming.",
+    "keywords": ["Protobuf", "HTTP/2", "streaming", "service contracts", "code generation"],
+    "overview": "gRPC uses Protocol Buffers to define a service contract once, generating strongly typed client and server code for fast, compact, binary communication over HTTP/2.",
+    "detail": "A .proto file describes services and messages; tooling generates client stubs and server base classes so the two sides never hand-write serialization or drift on shape. Beyond simple request-response, gRPC natively supports server, client, and bidirectional streaming, making it a strong fit for internal service-to-service calls and real-time data flows.",
+    "concepts": [
+      {"title": "Protocol Buffers", "description": "A compact, schema-first binary format defines message shapes once and generates typed code for multiple languages."},
+      {"title": "Service contracts", "description": "A .proto file declares RPC methods and their request/response types, acting as the single source of truth between client and server."},
+      {"title": "HTTP/2 transport", "description": "Multiplexed streams over one connection let gRPC support concurrent calls and native streaming without HTTP/1.1's per-request overhead."},
+      {"title": "Streaming modes", "description": "Server, client, and bidirectional streaming let either side send a sequence of messages over one long-lived call."}
+    ],
+    "architecture": {"description": "A shared .proto contract generates client and server code; the client calls generated stubs, and the server implements the matching generated base class.", "nodes": [".proto contract", "Generated client", "HTTP/2 channel", "Generated server"], "colors": ["#1a9e9e", "#2678c8", "#6e5bd7", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderGrpcService.cs", "introduction": "A generated base class exposes strongly typed request and response messages, so the implementation stays focused on behavior.", "code": "public sealed class OrderGrpcService(IOrderQueries queries) : OrderService.OrderServiceBase\n{\n    public override async Task<OrderReply> GetOrder(\n        OrderRequest request, ServerCallContext context)\n    {\n        var order = await queries.FindAsync(Guid.Parse(request.OrderId), context.CancellationToken);\n        if (order is null)\n            throw new RpcException(new Status(StatusCode.NotFound, \"Order not found\"));\n\n        return new OrderReply { OrderId = order.Id.ToString(), Total = (double)order.Total };\n    }\n}"},
+    "bestPractices": ["Version .proto contracts additively—add new fields and methods rather than reusing or removing field numbers.", "Keep gRPC for internal service-to-service calls where both ends can share the contract; expose REST or GraphQL at the public edge if broader client compatibility is needed.", "Set deadlines on every call so a slow downstream service cannot hold client resources indefinitely.", "Use streaming only where it fits the workload—many small independent requests are often simpler as unary calls."],
+    "interviewQuestions": [
+      {"question": "Why is gRPC often faster than a typical JSON REST API?", "answer": "It uses Protocol Buffers, a compact binary format, over HTTP/2, which supports multiplexed streams on one connection—together this reduces both payload size and connection overhead compared to text-based JSON over HTTP/1.1."},
+      {"question": "When would you choose REST over gRPC?", "answer": "When the API needs to be broadly consumable by browsers and third parties without generated clients, or when human-readable payloads and simple tooling matter more than raw performance."},
+      {"question": "What are the three streaming modes gRPC supports beyond unary calls?", "answer": "Server streaming, where the server sends multiple responses to one request; client streaming, where the client sends multiple requests for one response; and bidirectional streaming, where both sides send messages independently over the same call."}
+    ],
+    "note": "A .proto file is a contract between teams as much as a code-generation input; treat changes to it with the same care as a public API.",
+    "tip": "Generate client and server code as part of the build so the contract and the implementation can never silently drift apart.",
+    "warning": "Browsers cannot call raw gRPC directly; use grpc-web or a gateway if browser clients need to reach a gRPC service.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on contracts, HTTP/2, and streaming modes"
+  },
+  {
+    "slug": "signalr",
+    "name": "SignalR",
+    "symbol": "SR",
+    "category": "Web & Data",
+    "color": "#9450c9",
+    "shortDescription": "Push real-time updates from server to client over WebSockets, with automatic fallback and connection management.",
+    "keywords": ["real-time", "WebSockets", "hubs", "groups", "notifications", "SignalR"],
+    "overview": "SignalR lets a server push messages to connected clients as events happen, instead of clients repeatedly polling for changes.",
+    "detail": "A hub is a strongly typed entry point both sides can call methods on. SignalR negotiates the best available transport—WebSockets, Server-Sent Events, or long polling—and manages reconnection, while groups let the server target subsets of connected clients such as one user's devices or one tenant's dashboard viewers.",
+    "concepts": [
+      {"title": "Hubs", "description": "A hub is a server-side class clients connect to and call methods on; the server can call back to connected clients through the same hub."},
+      {"title": "Transport negotiation", "description": "SignalR automatically selects WebSockets when available and falls back to other transports, so application code does not manage the transport directly."},
+      {"title": "Groups and users", "description": "Connections can be organized into groups or targeted by user identifier, letting the server send updates to exactly the right audience."},
+      {"title": "Backplane", "description": "A backplane such as Redis fans messages out across multiple server instances so clients connected to different servers still receive the same broadcasts."}
+    ],
+    "architecture": {"description": "Clients connect to a hub over a negotiated transport; the server calls back to individual connections, groups, or all clients as events occur.", "nodes": ["Client connection", "Hub", "Groups / users", "Backplane (multi-instance)"], "colors": ["#9450c9", "#7851b8", "#2678c8", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderStatusHub.cs", "introduction": "A hub method adds a caller to a group; a separate service call notifies just that group when an order's status changes.", "code": "public sealed class OrderStatusHub : Hub\n{\n    public Task SubscribeToOrder(string orderId) =>\n        Groups.AddToGroupAsync(Context.ConnectionId, $\"order:{orderId}\");\n}\n\npublic sealed class OrderNotifier(IHubContext<OrderStatusHub> hub)\n{\n    public Task NotifyStatusChangedAsync(Guid orderId, string status) =>\n        hub.Clients.Group($\"order:{orderId}\").SendAsync(\"statusChanged\", status);\n}"},
+    "bestPractices": ["Scope broadcasts to groups instead of sending to all clients, so unrelated connections don't receive irrelevant traffic.", "Add a backplane before scaling to multiple server instances, or clients on different instances will miss messages.", "Design the client for reconnection—buffer or re-fetch state on reconnect instead of assuming no messages were missed.", "Keep hub methods thin; delegate business logic to application services the same way an API controller would."],
+    "interviewQuestions": [
+      {"question": "How does SignalR decide which transport to use?", "answer": "It negotiates with the client and prefers WebSockets when both the browser and any intermediate proxies support it, falling back to Server-Sent Events or long polling otherwise, without the application needing to choose a transport explicitly."},
+      {"question": "Why is a backplane needed when scaling SignalR horizontally?", "answer": "Each server instance only knows about the connections it holds directly; a backplane like Redis relays messages between instances so a broadcast reaches clients connected anywhere, not just on the server that triggered it."},
+      {"question": "What is a SignalR group used for?", "answer": "It lets the server send a message to a named subset of connections—for example everyone viewing one order—without tracking connection IDs manually in application code."}
+    ],
+    "note": "SignalR handles the transport and connection lifecycle; your application still owns deciding who should receive which message.",
+    "tip": "Send small, specific payloads over the hub and let the client fetch full detail through a normal API call if needed, rather than pushing large objects.",
+    "warning": "A dropped connection does not guarantee the client missed nothing or everything; design reconnect logic to reconcile state rather than assume.",
+    "sampleId": "authentication-demo", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on hubs, groups, and scaling with a backplane"
+  },
+  {
+    "slug": "resilience-rate-limiting",
+    "name": "Resilience & Rate Limiting",
+    "symbol": "RL",
+    "category": "Web & Data",
+    "color": "#d9534f",
+    "shortDescription": "Protect a service and its callers from cascading failure with retries, circuit breakers, timeouts, and rate limits.",
+    "keywords": ["Polly", "retries", "circuit breaker", "rate limiting", "timeouts", "backpressure"],
+    "overview": "Resilience policies decide how a call behaves when something downstream is slow or failing; rate limiting decides how much load a service accepts in the first place.",
+    "detail": "Polly composes retry, circuit breaker, timeout, and bulkhead policies around outbound calls so transient failures are absorbed without hammering a struggling dependency. ASP.NET Core's built-in rate limiter protects the service itself from being overwhelmed, using algorithms such as fixed window, sliding window, token bucket, or concurrency limits.",
+    "concepts": [
+      {"title": "Retry with backoff", "description": "Retrying a transient failure after an increasing delay, ideally with jitter, avoids hammering a struggling dependency at a fixed interval."},
+      {"title": "Circuit breaker", "description": "After enough failures, a circuit breaker stops sending calls for a cooldown period, giving a struggling dependency room to recover."},
+      {"title": "Timeouts and bulkheads", "description": "Timeouts stop a call from waiting indefinitely; bulkheads cap concurrent calls to one dependency so it cannot exhaust shared resources."},
+      {"title": "Rate limiting algorithms", "description": "Fixed window, sliding window, token bucket, and concurrency limiters trade off burst tolerance, fairness, and memory cost differently."}
+    ],
+    "architecture": {"description": "Outbound calls pass through composed resilience policies before reaching a dependency, while inbound requests pass through a rate limiter before reaching application code.", "nodes": ["Inbound request", "Rate limiter", "Application", "Resilience-wrapped outbound call"], "colors": ["#d9534f", "#2678c8", "#6e5bd7", "#168c78"]},
+    "code": {"language": "csharp", "label": "ResilientClient.cs", "introduction": "A named HttpClient gets a standard resilience pipeline once, so every call through it is protected consistently.", "code": "builder.Services.AddHttpClient<IPaymentsClient, PaymentsClient>()\n    .AddResilienceHandler(\"payments\", pipeline =>\n    {\n        pipeline.AddRetry(new HttpRetryStrategyOptions { MaxRetryAttempts = 3 });\n        pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions());\n        pipeline.AddTimeout(TimeSpan.FromSeconds(5));\n    });\n\nbuilder.Services.AddRateLimiter(options =>\n    options.AddFixedWindowLimiter(\"api\", limiter =>\n    {\n        limiter.PermitLimit = 100;\n        limiter.Window = TimeSpan.FromMinutes(1);\n    }));"},
+    "bestPractices": ["Only retry operations known to be safe to repeat, or make them idempotent first.", "Add jitter to retry backoff so many clients retrying together don't synchronize into a new spike.", "Return a clear 429 response with a Retry-After header when rate limiting a client, instead of silently dropping the request.", "Tune circuit breaker thresholds using real failure data, not guessed defaults, and monitor when it opens."],
+    "interviewQuestions": [
+      {"question": "Why can naive retries make an outage worse?", "answer": "If every client retries immediately and at the same interval after a failure, the retries can synchronize into a load spike that keeps overwhelming the struggling dependency—jittered backoff and circuit breakers exist specifically to prevent this."},
+      {"question": "What is the difference between a circuit breaker and a retry policy?", "answer": "A retry policy repeats a single call after failure; a circuit breaker tracks failures over time and, once a threshold is crossed, stops sending calls entirely for a cooldown period so a struggling dependency gets room to recover."},
+      {"question": "Why rate limit your own API instead of just scaling it?", "answer": "Scaling has limits and cost; rate limiting protects shared resources like a database or downstream dependency from being overwhelmed by a burst, and gives predictable, fair behavior under load instead of an uncontrolled failure."}
+    ],
+    "note": "Resilience policies manage how you call others; rate limiting manages how others call you—most production APIs need both.",
+    "tip": "Test resilience policies by actually injecting failures and latency in a lower environment, not just by reading the configuration.",
+    "warning": "Stacking retries at multiple layers—client, gateway, and service—without coordination can multiply load on a struggling dependency instead of protecting it.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on Polly policies and ASP.NET Core rate limiting"
+  },
+  {
+    "slug": "structured-logging",
+    "name": "Structured Logging",
+    "symbol": "LOG",
+    "category": "Quality & Growth",
+    "color": "#4a6fa5",
+    "shortDescription": "Emit machine-queryable log events with consistent fields instead of formatted strings that are hard to search.",
+    "keywords": ["Serilog", "structured logging", "correlation", "log levels", "sinks"],
+    "overview": "Structured logging captures each log event as a set of named fields rather than a formatted sentence, making logs searchable, filterable, and aggregable at production scale.",
+    "detail": "Serilog and similar libraries let you write a log message template with named properties; each property is captured as structured data alongside the rendered text. Enrichers attach context such as a correlation ID or environment to every event, and sinks route events to one or more destinations—console, file, or a centralized platform.",
+    "concepts": [
+      {"title": "Message templates", "description": "A log call captures named properties as structured data, not just an interpolated string, so fields remain queryable after the fact."},
+      {"title": "Enrichers", "description": "Enrichers attach consistent context—correlation ID, environment, version—to every log event without repeating it at each call site."},
+      {"title": "Log levels", "description": "Verbose, Debug, Information, Warning, Error, and Fatal levels let you control noise and route events differently by severity."},
+      {"title": "Sinks", "description": "A sink defines where events go—console, file, or a centralized log platform—and multiple sinks can run at once with different filters."}
+    ],
+    "architecture": {"description": "A log call captures structured properties, enrichers attach shared context, and the pipeline writes the enriched event to one or more sinks.", "nodes": ["Log call", "Enrichers", "Formatted event", "Sinks"], "colors": ["#4a6fa5", "#2678c8", "#6e5bd7", "#168c78"]},
+    "code": {"language": "csharp", "label": "LoggingSetup.cs", "introduction": "Structured properties in the message template stay queryable; the enricher attaches a correlation ID to every event automatically.", "code": "Log.Logger = new LoggerConfiguration()\n    .Enrich.WithCorrelationId()\n    .Enrich.FromLogContext()\n    .WriteTo.Console(new CompactJsonFormatter())\n    .CreateLogger();\n\nlogger.LogInformation(\n    \"Order {OrderId} placed for {CustomerId} with total {Total}\",\n    order.Id, order.CustomerId, order.Total);"},
+    "bestPractices": ["Log named properties through the message template, not string interpolation, so fields stay structured and queryable.", "Attach a correlation ID to every request early and flow it through logs, traces, and outbound calls.", "Set log levels deliberately per environment; verbose logging in production is expensive and can leak sensitive detail.", "Never log secrets, tokens, or full payloads containing personal data; redact or omit them explicitly."],
+    "interviewQuestions": [
+      {"question": "What is the difference between structured logging and just writing formatted strings to a file?", "answer": "Structured logging captures each log call's properties as separate, typed fields alongside the message, so a log platform can filter, aggregate, and query on those fields directly instead of parsing free-text strings."},
+      {"question": "Why use a message template with named placeholders instead of string interpolation?", "answer": "Named placeholders preserve each value as a distinct property in the structured event; string interpolation collapses everything into one opaque string before logging, losing that structure."},
+      {"question": "What is a correlation ID and why does it matter across services?", "answer": "It is an identifier generated at the start of a request and passed through every downstream call and log line, letting you find every log event related to one logical operation across multiple services."}
+    ],
+    "note": "Logs are a queryable data source, not just text for a human to scroll through during an incident.",
+    "tip": "Log at the boundary of a meaningful business event—order placed, payment failed—rather than logging every internal method call.",
+    "warning": "Logging full request or response bodies by default is a common way secrets and personal data end up in a log platform.",
+    "sampleId": "ai-gatekeeper", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on message templates, enrichers, and sinks"
+  }
 ]

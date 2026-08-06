@@ -33,7 +33,7 @@ async function start() {
 
 function renderBlobs(technologies) {
   const cloud = document.getElementById('blob-cloud');
-  const sizes = [118, 94, 132, 104, 88, 116, 98, 126, 92, 110, 88, 120, 102, 92, 114, 98, 124];
+  const sizes = [118, 94, 132, 104, 88, 116, 98, 126, 92, 110, 88, 120, 102, 92, 114, 98, 124, 106, 90, 128, 100, 118, 96, 122, 108, 92, 114];
   cloud.replaceChildren(...technologies.map((technology, index) => {
     const blob = document.createElement('a');
     blob.className = 'tech-blob';

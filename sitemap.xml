@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://adhakshinamoorthy.github.io/</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/dotnet.html</loc></url>
@@ -18,4 +18,14 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/testing.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/performance.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/interview-questions.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/background-services.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/observability.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/cicd-dotnet.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/dotnet-aspire.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/cqrs-mediatr.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/event-driven-messaging.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/grpc.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/signalr.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/resilience-rate-limiting.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/structured-logging.html</loc></url>
 </urlset>

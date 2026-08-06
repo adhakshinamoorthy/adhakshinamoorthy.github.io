@@ -4,7 +4,7 @@ A modern, responsive static learning portal for the Microsoft .NET ecosystem. It
 
 ## What is included
 
-- 17 technology guides with overview, key concepts, architecture, code, practices, interview questions, and a related sample
+- 27 technology guides with overview, key concepts, architecture, code, practices, interview questions, and a related sample
 - Light and dark themes with system detection and persisted manual selection
 - Responsive sticky navigation, collapsible mobile sidebar, global search, and keyboard shortcuts
 - Animated, accessible technology blob cloud
