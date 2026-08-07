@@ -42,6 +42,10 @@ try {
     await page.locator('.tech-blob').count() === await page.locator('.sidebar-link').count(),
     'Home page technology blobs do not match the sidebar topics'
   );
+  check(
+    Number(await page.locator('#technology-guide-count').innerText()) === await page.locator('.sidebar-link').count(),
+    'Home page technology guide total does not match the sidebar topics'
+  );
   check(await page.locator('#featured-samples .github-card').count() === 3, 'Home page does not render three featured samples');
   check(await page.locator('#hero-title').isVisible(), 'Hero heading is not visible');
   check(await page.locator('.hero-actions .button-primary').isVisible(), 'Primary hero action is not visible');
@@ -143,16 +147,35 @@ try {
   );
 
   const cloudPlatforms = page.locator('.sidebar-group[aria-label="Cloud Platforms"] .sidebar-link');
-  check(await cloudPlatforms.count() === 5, 'Cloud Platforms category does not contain five guides');
+  check(await cloudPlatforms.count() === 6, 'Cloud Platforms category does not contain six guides');
   check(
     JSON.stringify((await cloudPlatforms.allTextContents()).map(text => text.trim())) === JSON.stringify([
       'Azure API Management',
       'Azure Functions & Serverless',
       'Azure Data Factory & ETL',
       'Cloud Adoption Framework',
-      'AWS for .NET'
+      'AWS for .NET',
+      'Azure Container Apps'
     ]),
     'Cloud Platforms guides are not in the expected learning order'
+  );
+
+  const expectedBatchTopics = [
+    'Event Sourcing',
+    'Azure Container Apps',
+    'Redis & Distributed Caching',
+    'Architecture Testing',
+    'Testcontainers for .NET',
+    'Webhook Patterns',
+    'Infrastructure as Code (Bicep)',
+    'Health Checks',
+    'YARP — Reverse Proxy',
+    'GraphQL in .NET'
+  ];
+  const sidebarLabels = (await page.locator('.sidebar-link').allTextContents()).map(text => text.trim());
+  check(
+    expectedBatchTopics.every(topic => sidebarLabels.includes(topic)),
+    'One or more supplied batch topics are missing from the sidebar'
   );
 
   await page.goto(`${baseUrl}/technologies/azure-well-architected.html`, { waitUntil: 'networkidle' });

@@ -491,8 +491,7 @@
     "tip": "For every portfolio repository, prepare a two-minute architecture story and one concrete defect or trade-off you worked through.",
     "warning": "Do not claim production scale, security, or resilience that you only inferred from a successful build or local demo.",
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 8, "level": "All levels", "updated": "2026-08-02", "latestNote": "Answer framework added"
-  }
-,
+  },
   {
     "slug": "background-services",
     "name": "Background & Hosted Services",
@@ -782,6 +781,142 @@
     "tip": "Log at the boundary of a meaningful business event—order placed, payment failed—rather than logging every internal method call.",
     "warning": "Logging full request or response bodies by default is a common way secrets and personal data end up in a log platform.",
     "sampleId": "ai-gatekeeper", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on message templates, enrichers, and sinks"
+  },
+  {
+    "slug": "architecture-testing",
+    "name": "Architecture Testing",
+    "symbol": "ARC",
+    "category": "Quality & Growth",
+    "color": "#6b3fa0",
+    "shortDescription": "Enforce dependency rules, naming conventions, and layer boundaries automatically in CI using NetArchTest and custom Roslyn analysers.",
+    "keywords": ["NetArchTest", "architecture tests", "dependency rules", "clean architecture", "fitness functions", "layer boundaries", "namespace rules", "Roslyn analysers"],
+    "overview": "Architecture tests verify that structural rules — which layers may reference which, how types must be named, what may not depend on what — are enforced automatically rather than relying on code review alone.",
+    "detail": "Clean Architecture, DDD, Vertical Slice Architecture, and Modular Monolith patterns all depend on dependency direction being respected. Without automated enforcement those boundaries erode silently as teams grow and deadlines approach. NetArchTest provides a fluent API for asserting structural rules against compiled assemblies in ordinary xUnit or NUnit tests. The tests run in CI and fail a pull request the moment a forbidden dependency appears, turning a convention into a contract.",
+    "concepts": [
+      {
+        "title": "Fitness functions",
+        "description": "An architectural fitness function is any automated check that evaluates a structural property of the system — dependency direction, naming, accessibility, coupling — on every build."
+      },
+      {
+        "title": "Dependency direction rules",
+        "description": "Tests assert that inner layers such as Domain and Application never reference outer layers such as Infrastructure or Web, preserving the dependency rule at compile time."
+      },
+      {
+        "title": "Naming and accessibility conventions",
+        "description": "Rules can verify that every class in a given namespace implements an expected interface, follows a naming suffix, or has the correct accessibility — catching drift from team conventions automatically."
+      },
+      {
+        "title": "Module boundary enforcement",
+        "description": "In a Modular Monolith, tests assert that one module's internal types are not referenced directly by another module, keeping cross-module coupling explicit and intentional."
+      }
+    ],
+    "architecture": {
+      "description": "Architecture tests run alongside unit and integration tests in CI; they inspect compiled assemblies and fail the build when a structural rule is violated, before code reaches main.",
+      "nodes": ["Compiled assemblies", "NetArchTest rules", "CI quality gate", "Pull request feedback"],
+      "colors": ["#6b3fa0", "#2678c8", "#168c78", "#e07036"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "ArchitectureTests.cs",
+      "introduction": "Three focused tests enforce Clean Architecture dependency direction, naming conventions, and module isolation — all failing at CI rather than in a code review comment.",
+      "code": "using NetArchTest.Rules;\n\npublic sealed class ArchitectureTests\n{\n    private const string DomainNamespace      = \"Orders.Domain\";\n    private const string ApplicationNamespace = \"Orders.Application\";\n    private const string InfraNamespace       = \"Orders.Infrastructure\";\n    private const string WebNamespace         = \"Orders.Web\";\n\n    [Fact]\n    public void Domain_must_not_reference_application_or_outer_layers()\n    {\n        var result = Types.InAssembly(typeof(Orders.Domain.Order).Assembly)\n            .Should()\n            .NotHaveDependencyOnAny(\n                ApplicationNamespace,\n                InfraNamespace,\n                WebNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Domain layer has forbidden outward dependency:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n\n    [Fact]\n    public void Application_must_not_reference_infrastructure_or_web()\n    {\n        var result = Types.InAssembly(typeof(Orders.Application.PlaceOrderCommand).Assembly)\n            .Should()\n            .NotHaveDependencyOnAny(InfraNamespace, WebNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Application layer has forbidden outward dependency:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n\n    [Fact]\n    public void Repositories_must_implement_IRepository_and_live_in_infrastructure()\n    {\n        var result = Types.InCurrentDomain()\n            .That().ImplementInterface(typeof(IRepository<>))\n            .Should()\n            .ResideInNamespace(InfraNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Repository implementation found outside Infrastructure:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n}"
+    },
+    "bestPractices": [
+      "Run architecture tests in the same CI pipeline as unit tests so a forbidden dependency blocks a pull request before merge, not after.",
+      "Write one test per meaningful architectural rule and name it as a sentence — Domain_must_not_reference_infrastructure reads clearly to a reviewer who has never seen NetArchTest.",
+      "Include the list of failing type names in the assertion message so the developer knows exactly which class violated the rule without re-running locally.",
+      "Add architecture tests at the start of a project or module — retrofitting them onto a large codebase reveals many violations at once, which is discouraging; fix them in batches grouped by boundary."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is an architectural fitness function and why is it useful?",
+        "answer": "A fitness function is any automated check that measures a structural property of the system on every build — dependency direction, naming, coupling, accessibility. It is useful because it turns a convention documented in a README into a failing build, catching drift as soon as it is introduced rather than during an architectural review months later."
+      },
+      {
+        "question": "How does NetArchTest differ from a Roslyn analyser?",
+        "answer": "NetArchTest inspects compiled assemblies at test time using reflection — it runs as an ordinary unit test and is easy to add to any project. A Roslyn analyser runs inside the compiler and reports violations as warnings or errors during the build or in the IDE. Analysers give faster feedback but are harder to write; NetArchTest tests are simpler and sufficient for most structural enforcement needs."
+      },
+      {
+        "question": "What happens when architecture tests reveal many violations in an existing codebase?",
+        "answer": "Do not try to fix them all at once. Introduce the tests with the current violations captured as a known baseline using a predicate or exclusion list, then fix violations in small batches as part of normal work. This gives the safety net without blocking the team with a wall of red tests on day one."
+      }
+    ],
+    "note": "Architecture tests verify structure, not behaviour — they complement unit and integration tests rather than replace them, and they only catch the violations that the rules you write describe.",
+    "tip": "Start with three rules that match your chosen architecture style: domain does not reference infrastructure, application does not reference web, and infrastructure does not reference web. Those three cover the most common drift patterns in Clean Architecture projects.",
+    "warning": "Overly granular rules — asserting the exact namespace of every type — make tests brittle and expensive to maintain as the codebase evolves; focus on the boundaries that matter architecturally, not on folder organisation.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 10,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on fitness functions, NetArchTest rules, and CI enforcement of layer boundaries"
+  },
+  {
+    "slug": "testcontainers",
+    "name": "Testcontainers for .NET",
+    "symbol": "TC",
+    "category": "Quality & Growth",
+    "color": "#1d6fa5",
+    "shortDescription": "Spin up real PostgreSQL, Redis, RabbitMQ, and other dependencies as Docker containers inside integration tests — no mocks, no shared test servers.",
+    "keywords": ["Testcontainers", "integration tests", "Docker", "PostgreSQL", "Redis", "RabbitMQ", "WebApplicationFactory", "database testing", "container tests"],
+    "overview": "Testcontainers for .NET starts real infrastructure — databases, message brokers, caches — as short-lived Docker containers for the duration of a test, then tears them down automatically.",
+    "detail": "In-memory database substitutes miss SQL translation bugs, provider-specific constraints, migration behaviour, and real transaction semantics. Testcontainers solves this by pulling and starting actual Docker images — PostgreSQL, Redis, RabbitMQ, Azurite, and hundreds more — directly from test code. Each container gets its own mapped port so tests run in parallel without conflict. Combined with WebApplicationFactory in ASP.NET Core, the full HTTP stack including middleware, auth, and EF Core migrations runs against a real database in a repeatable, isolated environment.",
+    "concepts": [
+      {
+        "title": "Container lifecycle",
+        "description": "Containers start before the first test in a collection and stop after the last, controlled by IAsyncLifetime or a shared fixture — start once per class or once per assembly depending on isolation needs."
+      },
+      {
+        "title": "Pre-built module builders",
+        "description": "Testcontainers ships typed builders for common images — PostgreSqlBuilder, RedisBuilder, RabbitMqBuilder, MsSqlBuilder — with sensible defaults and a fluent API for image, port, and environment configuration."
+      },
+      {
+        "title": "Dynamic connection strings",
+        "description": "Each container exposes its mapped host port after start; the connection string is built from those values and injected into the application under test, preventing port conflicts between parallel runs."
+      },
+      {
+        "title": "WebApplicationFactory integration",
+        "description": "A custom WebApplicationFactory overrides the database connection string with the container's value, runs EF Core migrations on startup, and resets data between tests using transactions or respawn."
+      }
+    ],
+    "architecture": {
+      "description": "Test code starts named Docker containers, builds a WebApplicationFactory pointing at them, sends real HTTP requests, and asserts on responses backed by actual infrastructure.",
+      "nodes": ["xUnit test", "Docker containers", "WebApplicationFactory", "Real HTTP + database"],
+      "colors": ["#6e5bd7", "#1d6fa5", "#2678c8", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrdersIntegrationTests.cs",
+      "introduction": "A shared fixture starts a real PostgreSQL container once per test class, builds a WebApplicationFactory that runs EF Core migrations against it, and resets the database between tests.",
+      "code": "using Testcontainers.PostgreSql;\nusing Microsoft.AspNetCore.Mvc.Testing;\nusing Microsoft.EntityFrameworkCore;\n\npublic sealed class OrdersApiFixture : IAsyncLifetime\n{\n    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()\n        .WithImage(\"postgres:16-alpine\")\n        .WithDatabase(\"orders_test\")\n        .WithUsername(\"test\")\n        .WithPassword(\"test\")\n        .Build();\n\n    public HttpClient Client { get; private set; } = default!;\n    private WebApplicationFactory<Program> _factory = default!;\n\n    public async Task InitializeAsync()\n    {\n        await _postgres.StartAsync();\n\n        _factory = new WebApplicationFactory<Program>()\n            .WithWebHostBuilder(host =>\n                host.ConfigureServices(services =>\n                {\n                    services.RemoveAll<DbContextOptions<AppDbContext>>();\n                    services.AddDbContext<AppDbContext>(opts =>\n                        opts.UseNpgsql(_postgres.GetConnectionString()));\n                }));\n\n        // Run migrations against the real container\n        using var scope = _factory.Services.CreateScope();\n        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();\n        await db.Database.MigrateAsync();\n\n        Client = _factory.CreateClient();\n    }\n\n    public async Task DisposeAsync()\n    {\n        await _factory.DisposeAsync();\n        await _postgres.DisposeAsync();\n    }\n}\n\npublic sealed class PlaceOrderTests(OrdersApiFixture fixture)\n    : IClassFixture<OrdersApiFixture>\n{\n    [Fact]\n    public async Task PlaceOrder_returns_201_and_persists_to_database()\n    {\n        var response = await fixture.Client.PostAsJsonAsync(\"/api/orders\",\n            new { CustomerId = Guid.NewGuid(), Lines = new[] { new { ProductId = Guid.NewGuid(), Quantity = 2 } } });\n\n        Assert.Equal(HttpStatusCode.Created, response.StatusCode);\n\n        var body = await response.Content.ReadFromJsonAsync<JsonElement>();\n        var orderId = body.GetProperty(\"id\").GetGuid();\n        Assert.NotEqual(Guid.Empty, orderId);\n    }\n}"
+    },
+    "bestPractices": [
+      "Share one container per test class using IClassFixture to avoid the startup cost on every test, and use database transactions or Respawn to reset state between individual test methods.",
+      "Pin the Docker image tag explicitly — postgres:16-alpine rather than postgres:latest — so tests do not break silently when a new major version is pulled.",
+      "Run EF Core migrations inside InitializeAsync against the live container so the schema is always in sync with the current migration history, not a static seed script.",
+      "Use parallel test collections with separate container instances where full isolation is needed, and sequential collections where a single shared container is sufficient to control resource usage."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "Why use Testcontainers instead of an in-memory database provider for integration tests?",
+        "answer": "In-memory providers do not execute the same SQL translation, enforce the same constraints, or respect the same transaction semantics as the real database engine. Testcontainers runs the actual provider, so bugs from EF Core query translation, missing indexes, unique constraints, or migration scripts are caught in the test suite rather than in production."
+      },
+      {
+        "question": "How do you prevent Testcontainers tests from conflicting when run in parallel?",
+        "answer": "Each container gets a randomly assigned host port when it starts, so two tests running at the same time receive different connection strings and never share the same database port. Parallel collections can each start their own container without coordination."
+      },
+      {
+        "question": "How would you reset database state between tests without restarting the container?",
+        "answer": "Two common approaches: wrap each test in a transaction that rolls back after the assertion, or use the Respawn library which introspects the database schema and issues DELETE statements in dependency order, resetting to a known baseline faster than dropping and recreating the schema."
+      }
+    ],
+    "note": "Testcontainers tests are slower than unit tests by design — they start real infrastructure. Keep them in a separate test project, run them in CI on every pull request, and treat them as a confidence layer above unit tests rather than a replacement.",
+    "tip": "Combine Testcontainers with WebApplicationFactory and a custom IAlternateSeed fixture to cover full HTTP request-to-database round trips — this single test type catches the most integration bugs for the least test maintenance.",
+    "warning": "Testcontainers requires Docker to be running on the build agent; ensure CI runners have Docker available and check that your organisation's container registry policy allows pulling the required images.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on real-infrastructure integration tests with Docker containers and WebApplicationFactory"
   },
   {
     "slug": "semantic-kernel",
@@ -1630,6 +1765,74 @@
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on AWS SDK clients, compute, IAM, observability, and delivery"
   },
   {
+    "slug": "azure-container-apps",
+    "name": "Azure Container Apps",
+    "symbol": "ACA",
+    "category": "Cloud Platforms",
+    "color": "#0078d4",
+    "shortDescription": "Run containerised .NET workloads on serverless infrastructure with built-in scaling, service discovery, Dapr, and .NET Aspire integration.",
+    "keywords": ["Azure Container Apps", "ACA", "KEDA", "Dapr", "serverless containers", "scale to zero", "revision", "ingress", "Container Apps Environment", ".NET Aspire"],
+    "overview": "Azure Container Apps runs containers on fully managed infrastructure, handling scaling, service discovery, ingress, certificates, and revision traffic-splitting without exposing Kubernetes cluster management.",
+    "detail": "Container Apps sit between Azure Functions and AKS in the control spectrum. The platform abstracts Kubernetes and KEDA, letting teams focus on container configuration, scaling rules, traffic policies, secrets, managed identity, and observability. Each app runs as one or more replicas inside a shared Container Apps Environment, scales to zero when idle, and routes traffic across revisions for safe deployments. Dapr integration adds distributed application runtime capabilities — state, pub/sub, service invocation, and bindings — as a sidecar. .NET Aspire can target Container Apps for cloud deployment directly from the AppHost manifest.",
+    "concepts": [
+      {
+        "title": "Container Apps Environment",
+        "description": "A shared boundary for a group of container apps that provides a virtual network, internal DNS, log sink, Dapr configuration, and workload profile selection."
+      },
+      {
+        "title": "Revisions and traffic splitting",
+        "description": "Each deployment creates a new immutable revision; traffic can be split across revisions by percentage for canary releases, A/B tests, or safe rollouts."
+      },
+      {
+        "title": "Scaling rules",
+        "description": "Apps scale on HTTP concurrency, CPU, memory, Azure Service Bus queue depth, or custom KEDA scalers — including scale-to-zero for cost efficiency."
+      },
+      {
+        "title": "Dapr integration",
+        "description": "Enabling Dapr adds a sidecar that provides state management, pub/sub messaging, service invocation, secret access, and output bindings without SDK coupling."
+      }
+    ],
+    "architecture": {
+      "description": "External traffic enters through managed ingress, routes to the active revision of a container app inside the environment, which scales with demand and calls dependencies via internal DNS or Dapr.",
+      "nodes": ["Managed ingress", "Container Apps Environment", "Scaled container app", "Dapr + dependencies"],
+      "colors": ["#0078d4", "#5b5fc7", "#168c78", "#e07036"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "AppHost.cs",
+      "introduction": "A .NET Aspire AppHost publishes the Orders API to Azure Container Apps using the Azure Developer CLI publisher — the same local orchestration model extends to the cloud.",
+      "code": "using Aspire.Hosting.Azure;\n\nvar builder = DistributedApplication.CreateBuilder(args);\n\nvar postgres = builder.AddAzurePostgresFlexibleServer(\"postgres\")\n    .AddDatabase(\"orders\");\n\nvar serviceBus = builder.AddAzureServiceBus(\"messaging\")\n    .AddTopic(\"order-events\", [\"inventory-subscription\"]);\n\nvar api = builder.AddProject<Projects.Orders_Api>(\"orders-api\")\n    .WithReference(postgres)\n    .WithReference(serviceBus)\n    .WithExternalHttpEndpoints();\n\nbuilder.AddProject<Projects.Orders_Worker>(\"orders-worker\")\n    .WithReference(postgres)\n    .WithReference(serviceBus);\n\nbuilder.Build().Run();\n\n// Deploy to Azure Container Apps:\n// azd init && azd up\n// Aspire generates the Container Apps manifest from the AppHost graph."
+    },
+    "bestPractices": [
+      "Use a dedicated Container Apps Environment per workload group or environment tier; share an environment only for apps that genuinely need internal DNS resolution between them.",
+      "Set minimum replicas to zero for background workers and event-driven apps, but keep at least one replica for APIs where cold-start latency affects user experience.",
+      "Prefer managed identity and Azure RBAC for all resource access; store secrets as Container Apps secrets or Key Vault references, never in image layers or environment literals.",
+      "Define scaling rules from measured load rather than defaults — HTTP concurrency, queue depth, or CPU rules should match real traffic patterns observed in staging."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "When would you choose Azure Container Apps over AKS?",
+        "answer": "Container Apps suits teams that need container-based deployment, scale-to-zero, HTTP ingress, and event-driven scaling without managing Kubernetes cluster infrastructure, upgrades, node pools, or networking. AKS is the right choice when workloads need Kubernetes APIs, custom operators, specialised node types, cluster-level networking policy, or capabilities that Container Apps does not expose."
+      },
+      {
+        "question": "What is the difference between a Container App revision and a deployment in Kubernetes?",
+        "answer": "A revision is an immutable snapshot of an app's container image, environment, and scale configuration. Revisions are retained and traffic can be split across them by percentage, enabling canary releases without a separate ingress controller or rollout strategy resource."
+      },
+      {
+        "question": "What does Dapr add when enabled on a Container App?",
+        "answer": "Dapr injects a sidecar that provides state management, pub/sub messaging, service-to-service invocation, secret access, and output bindings through a consistent local HTTP or gRPC API. Application code calls the sidecar rather than cloud-specific SDKs, reducing coupling to a particular broker or state store."
+      }
+    ],
+    "note": "Container Apps abstracts Kubernetes but still runs on it — understanding replica behaviour, cold starts, revision limits, environment quotas, and networking boundaries matters for production design even though the cluster is not directly managed.",
+    "tip": "Start with the .NET Aspire Azure Container Apps publisher so the same AppHost that describes your local topology generates the cloud deployment manifest — this keeps local and cloud parity without a separate infrastructure definition.",
+    "warning": "Scale-to-zero means a first request after idle hits a cold start; measure startup time under real configuration and dependencies before committing to zero minimum replicas for latency-sensitive paths.",
+    "sampleId": "solution-architecture-portfolio",
+    "readingMinutes": 12,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on revisions, scaling, Dapr, and Aspire deployment to Container Apps"
+  },
+  {
     "slug": "azure-well-architected",
     "name": "Azure Well-Architected Framework",
     "symbol": "WAF",
@@ -1815,33 +2018,139 @@
   },
   {
     "slug": "graphql",
-    "name": "GraphQL",
+    "name": "GraphQL in .NET",
     "symbol": "GQL",
     "category": "Web & Data",
-    "color": "#d6336c",
-    "shortDescription": "Let clients query exactly the fields they need through a single strongly typed schema instead of many fixed REST endpoints.",
-    "keywords": ["GraphQL", "schema", "resolvers", "HotChocolate", "subscriptions", "N+1"],
-    "overview": "GraphQL exposes one endpoint backed by a schema of types and fields; clients send a query describing exactly the shape of data they want, and the server resolves only that shape.",
-    "detail": "A schema-first or code-first definition declares types, queries, mutations, and subscriptions; resolvers fetch the data behind each field, often from different sources. This flexibility trades away HTTP-level caching and can hide expensive resolver chains behind an innocent-looking query, so tooling for query cost analysis and batched data loading matters as much as the schema itself.",
+    "color": "#e535ab",
+    "shortDescription": "Build flexible, schema-first APIs in .NET using Hot Chocolate — letting clients query exactly the data they need with strong typing, resolvers, and subscriptions.",
+    "keywords": ["GraphQL", "Hot Chocolate", "schema", "resolvers", "mutations", "subscriptions", "DataLoader", "query depth", "persisted queries", "BFF"],
+    "overview": "GraphQL is a query language for APIs that lets clients specify exactly which fields they need, eliminating over-fetching and under-fetching in a single typed contract.",
+    "detail": "Hot Chocolate is the leading .NET GraphQL server library. It generates a strongly typed schema from C# types using code-first or annotation-based approaches, handles query parsing, validation, and execution, and integrates with ASP.NET Core middleware, dependency injection, Entity Framework Core, and OpenTelemetry. Clients send a POST request with a query document and receive exactly the shape they asked for — no more, no less. Mutations change state; subscriptions stream real-time updates over WebSockets. The DataLoader pattern batches and deduplicates database calls within a single request to avoid the N+1 query problem.",
     "concepts": [
-      {"title": "Schema and types", "description": "A single schema declares every type, query, mutation, and subscription a client can request, acting as a strongly typed contract."},
-      {"title": "Resolvers", "description": "Each field has a resolver function that fetches its value, potentially from a different data source than its sibling fields."},
-      {"title": "The N+1 problem", "description": "Resolving a list and then a related field per item can trigger one query per item unless requests are batched, typically with a data loader."},
-      {"title": "Query cost and depth limits", "description": "Because clients shape their own queries, servers need explicit complexity, depth, or cost limits to prevent one query from being disproportionately expensive."}
+      {
+        "title": "Schema, types, and resolvers",
+        "description": "The schema defines every type, field, query, mutation, and subscription the API exposes. A resolver is the function that fetches or computes the value for one field — analogous to a controller action but composable and field-scoped."
+      },
+      {
+        "title": "Queries, mutations, and subscriptions",
+        "description": "Queries read data; mutations write data and return the updated state; subscriptions open a WebSocket connection and push updates when server-side state changes — all described in the same schema."
+      },
+      {
+        "title": "DataLoader and the N+1 problem",
+        "description": "A DataLoader batches individual field-level resolver calls into a single bulk database query per request cycle, preventing the N+1 problem that occurs when each item in a list triggers a separate query."
+      },
+      {
+        "title": "Persisted queries",
+        "description": "Clients register query documents at build time and send only a hash at runtime. The server executes only pre-approved queries, reducing payload size, preventing arbitrary query attacks, and enabling query-level caching."
+      }
     ],
-    "architecture": {"description": "A client sends one query to a single endpoint; the schema routes each requested field to its resolver, which may call different underlying data sources.", "nodes": ["Client query", "GraphQL schema", "Resolvers", "Data sources"], "colors": ["#d6336c", "#ae3ec9", "#4c6ef5", "#168c78"]},
-    "code": {"language": "csharp", "label": "OrderType.cs", "introduction": "A resolver stays focused on fetching one field's data; a data loader batches related lookups to avoid N+1 queries.", "code": "public class OrderType : ObjectType<Order>\n{\n    protected override void Configure(IObjectTypeDescriptor<Order> descriptor)\n    {\n        descriptor.Field(o => o.Id);\n        descriptor.Field(o => o.Total);\n        descriptor.Field(\"customer\")\n            .ResolveWith<Resolvers>(r => r.GetCustomerAsync(default!, default!, default!))\n            .UseDataLoader<CustomerByIdDataLoader>();\n    }\n\n    private sealed class Resolvers\n    {\n        public Task<Customer> GetCustomerAsync(\n            [Parent] Order order, CustomerByIdDataLoader loader, CancellationToken ct) =>\n            loader.LoadAsync(order.CustomerId, ct);\n    }\n}"},
-    "bestPractices": ["Batch related lookups with a data loader so a list of N items never triggers N separate queries.", "Set explicit query depth and complexity limits so a client can't request an unbounded, expensive query.", "Version fields by deprecating and adding, not by breaking existing clients—GraphQL schemas evolve additively.", "Log and monitor resolver-level timing, not just total request time, since one slow field can hide inside a fast-looking response."],
+    "architecture": {
+      "description": "The client sends a typed query document; Hot Chocolate validates it against the schema, resolves each field using injected services or DataLoaders, and returns a single JSON response shaped to the query.",
+      "nodes": ["GraphQL client", "Hot Chocolate middleware", "Resolvers + DataLoaders", "Database / services"],
+      "colors": ["#e535ab", "#6e5bd7", "#2678c8", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderQuery.cs",
+      "introduction": "A code-first query type exposes orders with a DataLoader to batch product lookups — the client gets exactly the fields it asks for and the server makes one product query regardless of how many order lines are returned.",
+      "code": "// Schema registration\nbuilder.Services\n    .AddGraphQLServer()\n    .AddQueryType<OrderQuery>()\n    .AddMutationType<OrderMutation>()\n    .AddSubscriptionType<OrderSubscription>()\n    .AddProjections()\n    .AddFiltering()\n    .AddSorting()\n    .RegisterDbContext<AppDbContext>();\n\napp.MapGraphQL();\n\n// Query type\npublic sealed class OrderQuery\n{\n    [UseProjection]\n    [UseFiltering]\n    [UseSorting]\n    public IQueryable<Order> GetOrders(\n        AppDbContext db) => db.Orders.AsNoTracking();\n\n    public async Task<Order?> GetOrderAsync(\n        Guid id, AppDbContext db,\n        CancellationToken ct) =>\n        await db.Orders.FindAsync([id], ct);\n}\n\n// DataLoader: batch product loads across all order lines in one request\npublic sealed class ProductByIdDataLoader(\n    IProductRepository repo,\n    IBatchScheduler scheduler,\n    DataLoaderOptions options)\n    : BatchDataLoader<Guid, ProductDto>(scheduler, options)\n{\n    protected override async Task<IReadOnlyDictionary<Guid, ProductDto>>\n        LoadBatchAsync(IReadOnlyList<Guid> keys, CancellationToken ct)\n    {\n        var products = await repo.GetByIdsAsync(keys, ct);\n        return products.ToDictionary(p => p.Id);\n    }\n}\n\n// Resolver using DataLoader on OrderLine type\npublic sealed class OrderLineType : ObjectType<OrderLine>\n{\n    protected override void Configure(\n        IObjectTypeDescriptor<OrderLine> descriptor)\n    {\n        descriptor\n            .Field(\"product\")\n            .ResolveWith<OrderLineResolvers>(r =>\n                r.GetProductAsync(default!, default!, default!));\n    }\n}\n\npublic sealed class OrderLineResolvers\n{\n    public async Task<ProductDto?> GetProductAsync(\n        [Parent] OrderLine line,\n        ProductByIdDataLoader loader,\n        CancellationToken ct) =>\n        await loader.LoadAsync(line.ProductId, ct);\n}"
+    },
+    "bestPractices": [
+      "Always set query depth and complexity limits — an unbounded GraphQL query can trigger exponential resolver execution and take down a server. Hot Chocolate provides MaxExecutionDepth and cost analysis middleware.",
+      "Use DataLoaders for any resolver that loads a related entity by ID — without them, a list of 50 orders with product details triggers 50 separate database calls in a single request.",
+      "Use persisted queries in production to prevent arbitrary query execution, reduce payload size, and enable query-level response caching at the CDN or gateway layer.",
+      "Expose GraphQL alongside REST rather than as a replacement — REST suits simple CRUD and public third-party APIs; GraphQL suits complex client-driven queries, BFF aggregation, and mobile clients with bandwidth constraints."
+    ],
     "interviewQuestions": [
-      {"question": "What is the N+1 problem in GraphQL and how is it usually solved?", "answer": "It happens when resolving a list and then a related field per item triggers one query per item instead of one batched query; a data loader collects those individual requests within a single tick and issues one batched query instead."},
-      {"question": "Why is REST-style HTTP caching harder with GraphQL?", "answer": "Most GraphQL requests are POSTs to a single endpoint with a query in the body, so intermediary and browser caches that key on URL and method have nothing distinct to cache against, unlike REST's per-resource URLs."},
-      {"question": "Why do GraphQL servers need query cost or depth limits that REST APIs typically don't?", "answer": "Because the client—not the server—shapes each query, an unbounded or deeply nested query can force the server to do disproportionate work; REST endpoints have a fixed, server-defined cost per call, so this risk doesn't arise the same way."}
+      {
+        "question": "What problem does GraphQL solve that REST does not handle well?",
+        "answer": "REST endpoints return fixed shapes — clients either get too much data for their needs or must call multiple endpoints and assemble the result. GraphQL lets the client declare exactly which fields it needs in a single request, eliminating over-fetching, under-fetching, and the waterfall of requests common in REST-based mobile applications."
+      },
+      {
+        "question": "What is the N+1 problem in GraphQL and how does DataLoader solve it?",
+        "answer": "When resolving a list of items, each item's child fields are resolved individually — a list of 100 orders each triggering a separate product query results in 101 database calls. DataLoader collects all product ID requests made during one execution cycle, issues a single bulk query for all of them, and distributes the results back to each resolver — reducing 101 calls to 2."
+      },
+      {
+        "question": "When would you choose GraphQL over REST for a .NET API?",
+        "answer": "GraphQL is a strong fit when multiple clients need different shapes of the same data — a web app, a mobile app, and a BFF — when query flexibility matters more than cache simplicity, or when aggregating data from several services in a single request. REST remains better for simple CRUD resources, public APIs with broad tooling expectations, HTTP caching requirements, and teams less familiar with GraphQL's operational complexity."
+      }
     ],
-    "note": "GraphQL moves query shape control to the client, which is powerful but shifts real responsibility for cost control onto the server.",
-    "tip": "Start with a small, deliberate schema mirroring your most-requested client shapes rather than exposing your entire domain model as a first pass.",
-    "warning": "An unbounded, deeply nested query is functionally similar to an unthrottled expensive database query—treat query complexity limits as a required guardrail, not an optional add-on.",
-    "resources": [{"label": "GraphQL specification", "url": "https://spec.graphql.org/"}, {"label": "HotChocolate documentation", "url": "https://chillicream.com/docs/hotchocolate"}],
-    "sampleId": "ai-gatekeeper", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on schemas, resolvers, and the N+1 problem"
+    "note": "GraphQL shifts query complexity from the server to the schema design — a poorly designed schema with overly connected types becomes hard to secure, version, and optimise; treat schema design with the same care as REST API design.",
+    "tip": "Start with Hot Chocolate's annotation-based approach and UseProjection, UseFiltering, and UseSorting attributes on EF Core queryable resolvers — this gives clients flexible querying with database-level filtering before writing a single custom resolver.",
+    "warning": "GraphQL introspection exposes the full schema to any client — disable or restrict it in production environments to avoid leaking internal type names, field names, and relationships to external callers.",
+    "sampleId": "ai-orchestrator",
+    "readingMinutes": 13,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on schema-first design, resolvers, DataLoader, and persisted queries with Hot Chocolate"
+  },
+  {
+    "slug": "webhook-patterns",
+    "name": "Webhook Patterns",
+    "symbol": "WHK",
+    "category": "Web & Data",
+    "color": "#2e7d9e",
+    "shortDescription": "Receive, validate, process, and reliably handle inbound HTTP callbacks from third-party platforms with signature verification and idempotent consumers.",
+    "keywords": ["webhooks", "HMAC", "signature verification", "idempotent", "retry", "outbox", "event ingestion", "Stripe", "GitHub", "payload validation"],
+    "overview": "Webhooks are HTTP callbacks a third-party platform sends to your endpoint when something happens on their side. Receiving them reliably requires signature verification, fast acknowledgement, idempotent processing, and a durable handoff to background work.",
+    "detail": "Payment providers, source control platforms, and SaaS products push events to a URL you register rather than waiting for you to poll. The receiving endpoint must verify the request is genuine using an HMAC signature, return a 200 immediately to prevent the sender retrying, and hand the payload to a background processor that handles business logic durably. Because senders retry on failure or timeout, every handler must be idempotent. The same webhook event may arrive multiple times, out of order, or after a significant delay.",
+    "concepts": [
+      {
+        "title": "Signature verification",
+        "description": "The sender includes an HMAC signature computed from the raw request body and a shared secret. The receiver recomputes the signature and rejects the request if it does not match, preventing spoofed events."
+      },
+      {
+        "title": "Immediate acknowledgement",
+        "description": "Return HTTP 200 within seconds of receiving the webhook — most platforms retry if they do not get a quick response. Business logic runs asynchronously after the acknowledgement, not inside the receiving request."
+      },
+      {
+        "title": "Idempotent processing",
+        "description": "The same webhook event may be delivered more than once. The processor records processed event identifiers and skips re-execution when a duplicate arrives, preventing double charges, double emails, or duplicate records."
+      },
+      {
+        "title": "Durable handoff",
+        "description": "The receiving endpoint writes the raw payload to a durable store — a database outbox or a queue — before responding. A background worker processes it, decoupling reception from business logic and surviving restarts."
+      }
+    ],
+    "architecture": {
+      "description": "The inbound webhook endpoint verifies the signature, writes the raw payload to an outbox, returns 200, and a background worker processes the event idempotently from the outbox.",
+      "nodes": ["Third-party platform", "Webhook endpoint", "Durable outbox / queue", "Idempotent processor"],
+      "colors": ["#e07036", "#2e7d9e", "#2678c8", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "WebhookEndpoint.cs",
+      "introduction": "The endpoint reads the raw body before model binding, verifies the HMAC signature using the shared secret, stores the payload durably, and returns 200 — all before any business logic runs.",
+      "code": "app.MapPost(\"/webhooks/payments\", async (\n    HttpRequest request,\n    AppDbContext db,\n    IConfiguration config,\n    CancellationToken ct) =>\n{\n    // Read raw body before any model binding\n    using var reader = new StreamReader(request.Body);\n    var rawBody = await reader.ReadToEndAsync(ct);\n\n    // Verify HMAC-SHA256 signature\n    var signature = request.Headers[\"X-Signature-256\"].ToString();\n    var secret = config[\"Webhooks:PaymentSecret\"]!;\n\n    if (!IsValidSignature(rawBody, signature, secret))\n        return Results.Unauthorized();\n\n    // Idempotency: reject already-processed events\n    var eventId = request.Headers[\"X-Event-Id\"].ToString();\n    if (await db.ProcessedWebhooks.AnyAsync(w => w.EventId == eventId, ct))\n        return Results.Ok(); // Already handled\n\n    // Durable handoff — write to outbox before responding\n    db.WebhookInbox.Add(new WebhookInboxEntry(\n        EventId: eventId,\n        Source: \"payments\",\n        Payload: rawBody,\n        ReceivedAt: DateTime.UtcNow));\n\n    await db.SaveChangesAsync(ct);\n    return Results.Ok();\n});\n\nstatic bool IsValidSignature(string body, string signature, string secret)\n{\n    var key = Encoding.UTF8.GetBytes(secret);\n    var hash = HMACSHA256.HashData(key, Encoding.UTF8.GetBytes(body));\n    var expected = $\"sha256={Convert.ToHexString(hash).ToLowerInvariant()}\";\n    return CryptographicOperations.FixedTimeEquals(\n        Encoding.UTF8.GetBytes(expected),\n        Encoding.UTF8.GetBytes(signature));\n}\n\npublic sealed record WebhookInboxEntry(\n    string EventId, string Source,\n    string Payload, DateTime ReceivedAt);"
+    },
+    "bestPractices": [
+      "Always use a constant-time comparison such as CryptographicOperations.FixedTimeEquals when comparing HMAC signatures — standard string equality is vulnerable to timing attacks.",
+      "Read and verify the raw request body before any model binding or middleware transforms it; some frameworks buffer or modify the body stream, which invalidates the signature.",
+      "Persist the raw payload to an inbox or outbox table before returning 200, so a crash between acknowledgement and processing does not silently drop the event.",
+      "Design webhook processors as idempotent consumers and record the platform's event identifier in the same transaction as the business effect, so duplicate delivery is safe to retry."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "Why should business logic not run inside the webhook receiving endpoint?",
+        "answer": "Most platforms have a short response timeout — often five to thirty seconds — after which they mark the delivery as failed and retry. Business logic involving database writes, external calls, or message publishing can easily exceed that window. Acknowledging immediately and handing off to a background processor decouples reception from processing and prevents unnecessary retries."
+      },
+      {
+        "question": "What is a timing attack and why does it matter for HMAC verification?",
+        "answer": "A timing attack measures how long a comparison takes to infer whether the guess is partially correct. Standard string equality returns early on the first mismatch, leaking information through response time variance. CryptographicOperations.FixedTimeEquals always takes the same time regardless of where strings differ, making the comparison safe."
+      },
+      {
+        "question": "How do you handle webhook events that arrive out of order?",
+        "answer": "Most webhook events carry a timestamp and event type. The processor should check whether the event represents a state that the current aggregate state can transition to. If an older event arrives after a newer one has already been applied, the processor can detect and skip it using the recorded event sequence or a status field on the aggregate."
+      }
+    ],
+    "note": "Webhook reliability depends on the sender's retry policy, not yours — design the receiver to be tolerant of duplicates, delays, and reordering from day one rather than treating these as edge cases.",
+    "tip": "Register a dedicated webhook endpoint per platform rather than a single generic one — it simplifies routing, secret management, signature scheme differences, and per-provider monitoring and alerting.",
+    "warning": "Never trust the event payload alone to authorise a business action — a verified signature proves the request came from the platform, but the payload content should still be validated against your own database state before processing.",
+    "sampleId": "ai-gatekeeper",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on signature verification, immediate acknowledgement, idempotent processing, and durable handoff"
   },
   {
     "slug": "backend-for-frontend",
@@ -1934,6 +2243,142 @@
     "sampleId": "ai-gatekeeper", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on rotation, workload identity, and least privilege"
   },
   {
+    "slug": "infrastructure-as-code-bicep",
+    "name": "Infrastructure as Code (Bicep)",
+    "symbol": "IaC",
+    "category": "Delivery & Operations",
+    "color": "#5a3f9e",
+    "shortDescription": "Define, version, and deploy Azure infrastructure declaratively using Bicep modules, parameter files, deployment stacks, and CI/CD pipelines.",
+    "keywords": ["Bicep", "infrastructure as code", "IaC", "ARM templates", "modules", "parameter files", "deployment stacks", "Azure Developer CLI", "azd", "CI/CD"],
+    "overview": "Bicep is Microsoft's domain-specific language for declaring Azure infrastructure as code — compiled to ARM templates, reviewed like application code, and deployed repeatably across environments.",
+    "detail": "Bicep replaces raw ARM JSON with a clean declarative syntax, strong typing, native module support, and first-class IDE tooling. Infrastructure defined in Bicep is committed to source control, reviewed in pull requests, promoted through environments with parameter files, and deployed by CI/CD pipelines using the Azure CLI or Azure Developer CLI. Deployment stacks extend this model by tracking which resources a deployment owns and cleaning up orphaned resources when the stack is updated or deleted. For .NET teams, Bicep pairs naturally with the azd CLI that Aspire uses for cloud deployments.",
+    "concepts": [
+      {
+        "title": "Declarative resource definitions",
+        "description": "A Bicep file describes the desired state of Azure resources — their type, SKU, location, properties, and dependencies. The platform reconciles current state to match the declaration on each deployment."
+      },
+      {
+        "title": "Modules",
+        "description": "A module is a reusable Bicep file that accepts parameters and encapsulates one cohesive set of resources — a module for a Container App, a module for a Key Vault, a module for a SQL server — composable into larger deployments."
+      },
+      {
+        "title": "Parameter files and environments",
+        "description": "Bicepparam files supply environment-specific values — SKUs, capacities, feature flags, connection strings — keeping the template logic environment-neutral and the differences version-controlled and reviewable."
+      },
+      {
+        "title": "Deployment stacks",
+        "description": "A deployment stack tracks all resources deployed as a unit and applies a deny-assignment to prevent out-of-band changes. Updating or deleting the stack reconciles or removes managed resources automatically."
+      }
+    ],
+    "architecture": {
+      "description": "Bicep source is compiled and deployed through a CI/CD pipeline, promoting one validated template with environment-specific parameters from dev through staging to production.",
+      "nodes": ["Bicep source + modules", "CI/CD pipeline", "Parameter files per env", "Azure resource groups"],
+      "colors": ["#5a3f9e", "#2678c8", "#e07036", "#168c78"]
+    },
+    "code": {
+      "language": "bicep",
+      "label": "container-app.bicep",
+      "introduction": "A focused Bicep module deploys a Container App with managed identity, Key Vault secret reference, and environment-linked configuration — accepting only the values that change per environment.",
+      "code": "// modules/container-app.bicep\n\n@description('Name of the Container App')\nparam appName string\n\n@description('Container Apps Environment resource ID')\nparam environmentId string\n\n@description('Container image including tag')\nparam image string\n\n@description('Key Vault URI for secret references')\nparam keyVaultUri string\n\n@allowed(['dev', 'test', 'prod'])\nparam environment string\n\nresource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {\n  name: '${appName}-identity'\n  location: resourceGroup().location\n}\n\nresource app 'Microsoft.App/containerApps@2024-03-01' = {\n  name: appName\n  location: resourceGroup().location\n  identity: {\n    type: 'UserAssigned'\n    userAssignedIdentities: { '${identity.id}': {} }\n  }\n  properties: {\n    environmentId: environmentId\n    configuration: {\n      ingress: { external: true, targetPort: 8080 }\n      secrets: [\n        {\n          name: 'db-connection'\n          keyVaultUrl: '${keyVaultUri}secrets/db-connection'\n          identity: identity.id\n        }\n      ]\n    }\n    template: {\n      containers: [\n        {\n          name: appName\n          image: image\n          env: [\n            { name: 'ASPNETCORE_ENVIRONMENT', value: environment }\n            { name: 'ConnectionStrings__Database', secretRef: 'db-connection' }\n          ]\n          resources: { cpu: json('0.5'), memory: '1Gi' }\n        }\n      ]\n      scale: {\n        minReplicas: environment == 'prod' ? 1 : 0\n        maxReplicas: 10\n      }\n    }\n  }\n}\n\noutput appUrl string = 'https://${app.properties.configuration.ingress.fqdn}'"
+    },
+    "bestPractices": [
+      "Treat Bicep files as production code — review them in pull requests, lint with the Bicep linter, and enforce no-hardcoded-secrets and explicit API versions as CI checks.",
+      "Use modules to encapsulate cohesive resource groups — a Container App module, a networking module — and compose them in a main.bicep rather than putting everything in one large file.",
+      "Separate environment-specific values into Bicepparam files and keep template logic environment-neutral so the same compiled template is promoted from dev to prod without modification.",
+      "Run what-if deployments in CI before applying to staging or production so reviewers can see exactly which resource properties will change before approving the pipeline run."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the difference between an ARM template and a Bicep file?",
+        "answer": "A Bicep file is a higher-level declarative language that compiles to an ARM JSON template. Bicep provides cleaner syntax, type safety, native modules, string interpolation, conditional expressions, and IDE tooling, while ARM JSON is verbose and error-prone to write by hand. The compiled output is identical — Bicep is a transparent abstraction over ARM."
+      },
+      {
+        "question": "What is a Bicep deployment stack and when would you use it?",
+        "answer": "A deployment stack tracks all resources deployed as a unit and can apply deny-assignments to prevent out-of-band changes to managed resources. When the stack is updated, resources removed from the template can be detached, deleted, or left in place according to the configured cleanup policy. It is useful when you want the infrastructure definition to be the authoritative source and prevent drift from manual portal changes."
+      },
+      {
+        "question": "How do you pass secrets into a Bicep deployment without hardcoding them?",
+        "answer": "Reference secrets from Azure Key Vault using a Bicepparam file with a getSecret() call — this injects the secret value at deployment time from Key Vault without it appearing in source control, pipeline logs, or the compiled template. The deployment identity needs Key Vault Secrets User access on the vault."
+      }
+    ],
+    "note": "Bicep defines desired infrastructure state — it does not replace application configuration, secrets management, identity assignment, or monitoring setup, all of which need their own deliberate design.",
+    "tip": "Start with the Azure Developer CLI and let azd init scaffold the initial Bicep structure for your project — it produces working modules for common patterns like Container Apps with managed identity and Key Vault that you can extend rather than writing from scratch.",
+    "warning": "A what-if result showing no changes does not guarantee the deployment will succeed — resource provider API changes, quota limits, policy denials, and dependency ordering can still cause failures at apply time.",
+    "sampleId": "solution-architecture-portfolio",
+    "readingMinutes": 12,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on Bicep modules, parameter files, deployment stacks, and CI/CD promotion"
+  },
+  {
+    "slug": "health-checks",
+    "name": "Health Checks",
+    "symbol": "HC",
+    "category": "Delivery & Operations",
+    "color": "#1a7a4a",
+    "shortDescription": "Expose meaningful liveness, readiness, and startup signals from .NET applications so orchestrators, load balancers, and dashboards can act on real dependency health.",
+    "keywords": ["health checks", "IHealthCheck", "readiness", "liveness", "startup probe", "AspNetCore.Diagnostics.HealthChecks", "health check UI", "Kubernetes probes", "dependency health"],
+    "overview": "Health checks expose signals that tell orchestrators, load balancers, and monitoring systems whether an application is alive, ready to serve traffic, and has access to its dependencies.",
+    "detail": "ASP.NET Core's built-in health check infrastructure lets teams register custom IHealthCheck implementations, group them by tag, filter them per endpoint, and expose results as JSON. Three distinct signals serve different consumers: liveness tells Kubernetes whether to restart the container, readiness tells the load balancer whether to route traffic, and startup tells the orchestrator to wait before applying either probe. Community libraries extend this with pre-built checks for SQL Server, PostgreSQL, Redis, RabbitMQ, Azure Service Bus, URLs, and disk space. The HealthChecks UI library adds a visual dashboard that polls configured endpoints and displays history.",
+    "concepts": [
+      {
+        "title": "Liveness vs readiness vs startup",
+        "description": "Liveness answers 'is the process still functioning?' — failure triggers a container restart. Readiness answers 'is the app ready to serve traffic?' — failure removes the pod from load-balancer rotation. Startup answers 'has initialisation completed?' — used to give slow-starting apps time before liveness kicks in."
+      },
+      {
+        "title": "Custom IHealthCheck",
+        "description": "Any dependency or business invariant can be checked by implementing IHealthCheck and returning Healthy, Degraded, or Unhealthy with a description and optional data dictionary for diagnostic detail."
+      },
+      {
+        "title": "Tagging and filtering",
+        "description": "Health checks are tagged at registration and endpoints use a predicate to select which checks to run — database checks on the readiness endpoint, a trivial always-healthy check on the liveness endpoint."
+      },
+      {
+        "title": "Health check UI",
+        "description": "The AspNetCore.HealthChecks.UI package polls one or more health endpoints on a schedule and renders a dashboard showing current status, history, and failure details — useful for internal operations teams without a full APM tool."
+      }
+    ],
+    "architecture": {
+      "description": "Kubernetes probes call dedicated health endpoints filtered by tag; the readiness endpoint checks real dependencies while the liveness endpoint stays lightweight, and the UI dashboard polls all endpoints for operator visibility.",
+      "nodes": ["Kubernetes probes", "Liveness endpoint", "Readiness endpoint", "Health check UI"],
+      "colors": ["#2678c8", "#1a7a4a", "#e07036", "#6e5bd7"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "Program.cs",
+      "introduction": "Checks are registered with tags, exposed on separate endpoints filtered by tag, and a custom database check demonstrates how to surface a real dependency result with diagnostic data.",
+      "code": "using Microsoft.Extensions.Diagnostics.HealthChecks;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services\n    .AddHealthChecks()\n    // Liveness: trivial — if this fails the process is hung\n    .AddCheck(\"self\", () => HealthCheckResult.Healthy(), tags: [\"live\"])\n    // Readiness: real dependencies\n    .AddNpgSql(\n        builder.Configuration.GetConnectionString(\"Database\")!,\n        name: \"database\",\n        failureStatus: HealthStatus.Unhealthy,\n        tags: [\"ready\"])\n    .AddRedis(\n        builder.Configuration.GetConnectionString(\"Redis\")!,\n        name: \"cache\",\n        failureStatus: HealthStatus.Degraded,\n        tags: [\"ready\"])\n    .AddCheck<MessageBusHealthCheck>(\"messaging\", tags: [\"ready\"]);\n\nvar app = builder.Build();\n\n// Liveness: lightweight, no dependency checks\napp.MapHealthChecks(\"/health/live\", new()\n{\n    Predicate = check => check.Tags.Contains(\"live\"),\n    ResponseWriter = WriteJsonResponse\n});\n\n// Readiness: all dependency checks\napp.MapHealthChecks(\"/health/ready\", new()\n{\n    Predicate = check => check.Tags.Contains(\"ready\"),\n    ResponseWriter = WriteJsonResponse\n});\n\napp.Run();\n\n// Custom check: verifies a business-critical queue is reachable\npublic sealed class MessageBusHealthCheck(\n    IServiceBusClientFactory factory) : IHealthCheck\n{\n    public async Task<HealthCheckResult> CheckHealthAsync(\n        HealthCheckContext context, CancellationToken ct)\n    {\n        try\n        {\n            var client = factory.CreateAdminClient();\n            var props = await client.GetQueueRuntimePropertiesAsync(\n                \"order-events\", ct);\n\n            var data = new Dictionary<string, object>\n            {\n                [\"activeMessages\"] = props.Value.ActiveMessageCount,\n                [\"deadLetterMessages\"] = props.Value.DeadLetterMessageCount\n            };\n\n            return props.Value.DeadLetterMessageCount > 1000\n                ? HealthCheckResult.Degraded(\"High dead-letter count\", data: data)\n                : HealthCheckResult.Healthy(data: data);\n        }\n        catch (Exception ex)\n        {\n            return HealthCheckResult.Unhealthy(\n                \"Service Bus unreachable\", ex);\n        }\n    }\n}\n\nstatic Task WriteJsonResponse(HttpContext ctx, HealthReport report) =>\n    ctx.Response.WriteAsJsonAsync(new\n    {\n        status = report.Status.ToString(),\n        checks = report.Entries.Select(e => new\n        {\n            name = e.Key,\n            status = e.Value.Status.ToString(),\n            description = e.Value.Description,\n            data = e.Value.Data\n        })\n    });"
+    },
+    "bestPractices": [
+      "Never put real dependency checks on the liveness endpoint — a database outage would restart every healthy pod simultaneously, compounding the incident instead of reducing traffic to the affected node.",
+      "Return Degraded rather than Unhealthy for non-critical dependencies such as a cache or secondary queue so the pod stays in rotation but the degraded state is visible to operators and alerts.",
+      "Include diagnostic data — active message count, last successful query time, connection pool state — in the health check result so on-call engineers can triage from the health endpoint without needing a separate dashboard.",
+      "Set Kubernetes startup probes with a generous failure threshold for apps that run migrations or warm caches on startup; this prevents liveness from restarting a healthy but slow-starting container."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "Why is it dangerous to check database connectivity on the liveness probe?",
+        "answer": "Liveness failure causes Kubernetes to restart the container. If the database goes down, every pod fails liveness simultaneously and Kubernetes restarts them all in a loop — making the outage worse and losing in-flight requests. Liveness should only verify the process itself is alive and not deadlocked. Dependency health belongs on the readiness probe, which removes the pod from traffic rotation without restarting it."
+      },
+      {
+        "question": "What is the difference between Unhealthy and Degraded?",
+        "answer": "Unhealthy means the check has failed and the dependency is not usable — Kubernetes treats it as a readiness failure and stops routing traffic. Degraded means the dependency is reachable but operating below normal — it signals a warning state to monitoring tools while keeping the pod in rotation, allowing operations to investigate without triggering a traffic disruption."
+      },
+      {
+        "question": "How would you expose health checks in a microservices system so a central dashboard can monitor all services?",
+        "answer": "Each service exposes a standard JSON health endpoint. A Health Checks UI instance is configured with the URLs of all service endpoints and polls them on a schedule, aggregating status and history in a single dashboard. Alternatively, a monitoring platform such as Azure Monitor or Prometheus scrapes the endpoints and feeds a centralised alerting and visualisation layer."
+      }
+    ],
+    "note": "A health check that always returns Healthy is worse than no health check — it builds false confidence. Check the actual dependency, return meaningful status, and include data that helps an on-call engineer act without additional investigation.",
+    "tip": "Add a dead-letter message count check to your Service Bus or RabbitMQ health check — a rising dead-letter count is one of the earliest signals of a processing problem and is nearly free to surface from the broker's management API.",
+    "warning": "Health check endpoints should never require authentication from the orchestrator — Kubernetes and load balancers call them without credentials — but restrict them from the public internet using network policy or path-based ingress rules.",
+    "sampleId": "solution-architecture-portfolio",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on liveness, readiness, startup probes, custom checks, and Health Checks UI"
+  },
+  {
     "slug": "orleans",
     "name": "Orleans",
     "symbol": "ORL",
@@ -1962,5 +2407,209 @@
     "warning": "A grain is not a substitute for a database; treat its persisted state as what that one entity needs to recover, not as your system's queryable source of truth.",
     "resources": [{"label": "Microsoft Orleans documentation", "url": "https://learn.microsoft.com/en-us/dotnet/orleans/overview"}],
     "sampleId": "ai-orchestrator", "readingMinutes": 10, "level": "Advanced", "updated": "2026-08-07", "latestNote": "New guide on grains, silos, and virtual actor placement"
+  },
+  {
+    "slug": "event-sourcing",
+    "name": "Event Sourcing",
+    "symbol": "ES",
+    "category": "Cloud & Architecture",
+    "color": "#2e6da8",
+    "shortDescription": "Store state as an immutable sequence of domain events and derive current state by replaying them.",
+    "keywords": ["event sourcing", "event store", "projections", "aggregates", "snapshots", "append-only", "CQRS", "Marten", "EventStoreDB"],
+    "overview": "Event Sourcing persists the history of what happened to a domain object rather than just its current state, making every change first-class and queryable.",
+    "detail": "Instead of storing the current row in a database table, an event-sourced system appends a new immutable event every time something meaningful happens to an aggregate. Current state is derived by replaying those events in order. This gives a complete audit trail for free, enables temporal queries, supports event replay into new projections, and makes debugging production incidents far easier. The trade-offs are query complexity, event versioning discipline, and the need for snapshot strategies when event streams grow long.",
+    "concepts": [
+      {
+        "title": "Event store",
+        "description": "An append-only log that persists domain events for each aggregate stream. Events are never updated or deleted — only new events are written."
+      },
+      {
+        "title": "Aggregate reconstitution",
+        "description": "An aggregate is loaded by reading its event stream and applying each event in order, rebuilding current state from history rather than from a snapshot column."
+      },
+      {
+        "title": "Projections and read models",
+        "description": "Read models are built by subscribing to the event stream and projecting events into query-optimised shapes — separate from the write model and rebuildable at any time."
+      },
+      {
+        "title": "Snapshots",
+        "description": "When an aggregate stream grows long, a snapshot captures state at a checkpoint so reconstitution loads the snapshot plus only the events after it."
+      }
+    ],
+    "architecture": {
+      "description": "Commands produce domain events appended to an event store; projections subscribe to the store and populate read models that queries use.",
+      "nodes": ["Command handler", "Event store (append-only)", "Projection subscribers", "Read models"],
+      "colors": ["#6e5bd7", "#2e6da8", "#168c78", "#e07036"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "Order.cs",
+      "introduction": "The aggregate applies events to change its own state; the command handler appends those events to the store rather than saving a mutated entity.",
+      "code": "public sealed class Order\n{\n    public Guid Id { get; private set; }\n    public OrderStatus Status { get; private set; }\n    public decimal Total { get; private set; }\n\n    public static (Order, IReadOnlyList<object>) Place(\n        Guid id, CustomerId customerId, IEnumerable<OrderLine> lines)\n    {\n        var order = new Order();\n        var events = new List<object>\n        {\n            new OrderPlaced(id, customerId, lines.ToList(), DateTime.UtcNow)\n        };\n        foreach (var e in events) order.Apply(e);\n        return (order, events);\n    }\n\n    public (IReadOnlyList<object> Events) Cancel(string reason)\n    {\n        if (Status != OrderStatus.Pending)\n            throw new DomainException(\"Only pending orders can be cancelled.\");\n\n        var events = new List<object> { new OrderCancelled(Id, reason, DateTime.UtcNow) };\n        foreach (var e in events) Apply(e);\n        return (events);\n    }\n\n    private void Apply(object @event)\n    {\n        switch (@event)\n        {\n            case OrderPlaced e:\n                Id = e.OrderId;\n                Status = OrderStatus.Pending;\n                Total = e.Lines.Sum(l => l.Subtotal);\n                break;\n            case OrderCancelled:\n                Status = OrderStatus.Cancelled;\n                break;\n        }\n    }\n\n    // Reconstitution: load from event stream\n    public static Order Rehydrate(IEnumerable<object> events)\n    {\n        var order = new Order();\n        foreach (var e in events) order.Apply(e);\n        return order;\n    }\n}\n\npublic sealed record OrderPlaced(\n    Guid OrderId, CustomerId CustomerId,\n    IReadOnlyList<OrderLine> Lines, DateTime OccurredAt);\n\npublic sealed record OrderCancelled(\n    Guid OrderId, string Reason, DateTime OccurredAt);"
+    },
+    "bestPractices": [
+      "Name events in past tense after meaningful business facts — OrderPlaced, PaymentFailed — not technical operations like OrderUpdated.",
+      "Treat event schemas as public contracts; use upcasting or versioned event types to handle schema evolution without rewriting history.",
+      "Introduce snapshots only when reconstitution is measurably slow — start without them and add them at a measured stream length threshold.",
+      "Keep projections idempotent and rebuildable so a new read model can be populated by replaying the full event history at any time."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the key difference between event sourcing and storing domain events alongside a state record?",
+        "answer": "Event sourcing makes the event stream the source of truth — there is no separate state column to keep in sync. Current state is always derived by replaying events. Storing events alongside a state record is an audit log, not event sourcing, because the state record can diverge from the events."
+      },
+      {
+        "question": "How does event sourcing relate to CQRS?",
+        "answer": "They are complementary but independent. CQRS separates read and write models; event sourcing is a write-side persistence strategy. Together, the event store is the authoritative write side and projections populate the read side, but you can use either pattern without the other."
+      },
+      {
+        "question": "What is the main challenge of event versioning and how do you handle it?",
+        "answer": "Events are immutable, so when a schema needs to change, old events in the store still use the old shape. Upcasting transforms old events to the current schema during loading so the aggregate always sees a consistent version, without rewriting the store."
+      }
+    ],
+    "note": "Event sourcing solves the audit and temporal query problem well, but adds complexity around versioning, projection rebuilds, and eventually consistent reads — apply it where that trade-off is genuinely worth making.",
+    "tip": "Use Marten with PostgreSQL as an event store for a pragmatic .NET start — it gives you append-only streams, snapshots, projections, and async subscriptions without running a separate event store infrastructure.",
+    "warning": "Do not use event sourcing as a default persistence strategy for every aggregate; apply it where auditability, temporal queries, or event replay provide concrete business value that justifies the operational cost.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 14,
+    "level": "Advanced",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on immutable event streams, projections, snapshots, and versioning"
+  },
+  {
+    "slug": "redis-distributed-caching",
+    "name": "Redis & Distributed Caching",
+    "symbol": "RDS",
+    "category": "Cloud & Architecture",
+    "color": "#c0392b",
+    "shortDescription": "Speed up .NET applications and reduce database load with Redis for distributed caching, pub/sub, rate limiting, and distributed locks.",
+    "keywords": ["Redis", "IDistributedCache", "Azure Cache for Redis", "cache-aside", "pub/sub", "distributed lock", "rate limiting", "StackExchange.Redis", "output cache", "session"],
+    "overview": "Redis is an in-memory data structure store used in .NET applications for distributed caching, session storage, pub/sub messaging, rate limiting, and distributed coordination.",
+    "detail": "A single-node in-memory cache does not survive restarts and is invisible to other application instances behind a load balancer. Redis solves both problems with a shared, persistent, replicated store. StackExchange.Redis is the standard .NET client; ASP.NET Core integrates Redis through IDistributedCache and output caching middleware. Azure Cache for Redis is the managed option with built-in geo-replication, clustering, and Microsoft Entra authentication. The same Redis instance can serve as a cache, a SignalR backplane, a rate-limit counter store, and a distributed lock provider.",
+    "concepts": [
+      {
+        "title": "Cache-aside pattern",
+        "description": "The application checks the cache first; on a miss it reads from the source of truth, populates the cache with a TTL, and returns the value. Eviction and expiry keep the cache from growing unbounded."
+      },
+      {
+        "title": "IDistributedCache and output caching",
+        "description": "IDistributedCache is the ASP.NET Core abstraction for distributed string or byte caches. Output caching middleware caches full HTTP responses at the framework level with Redis as the backing store."
+      },
+      {
+        "title": "Pub/sub and streams",
+        "description": "Redis pub/sub broadcasts messages to all subscribers on a channel, powering SignalR backplanes and lightweight event fan-out. Redis Streams provide a durable, consumer-group-aware alternative."
+      },
+      {
+        "title": "Distributed locks and rate limiting",
+        "description": "The Redlock algorithm uses atomic SET NX EX commands to acquire time-bounded locks across processes. Sliding window and token bucket counters built on INCR and EXPIRE enable per-key rate limiting without a dedicated service."
+      }
+    ],
+    "architecture": {
+      "description": "Application instances share one Redis cluster; cache hits return data without touching the database, while pub/sub channels and lock keys coordinate distributed behaviour across all nodes.",
+      "nodes": ["App instances", "Azure Cache for Redis", "Pub/sub channels", "Primary database"],
+      "colors": ["#6e5bd7", "#c0392b", "#e07036", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "ProductCache.cs",
+      "introduction": "A typed cache service wraps IDistributedCache with JSON serialisation, a configurable TTL, and safe cache-aside logic — the database is only called on a miss.",
+      "code": "using Microsoft.Extensions.Caching.Distributed;\nusing System.Text.Json;\n\npublic sealed class ProductCache(\n    IDistributedCache cache,\n    IProductRepository repository)\n{\n    private static readonly DistributedCacheEntryOptions DefaultOptions = new()\n    {\n        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),\n        SlidingExpiration = TimeSpan.FromMinutes(2)\n    };\n\n    public async Task<ProductDto?> GetAsync(\n        Guid productId, CancellationToken ct)\n    {\n        var key = $\"product:{productId}\";\n\n        var cached = await cache.GetStringAsync(key, ct);\n        if (cached is not null)\n            return JsonSerializer.Deserialize<ProductDto>(cached);\n\n        var product = await repository.FindAsync(productId, ct);\n        if (product is null) return null;\n\n        await cache.SetStringAsync(\n            key,\n            JsonSerializer.Serialize(product),\n            DefaultOptions,\n            ct);\n\n        return product;\n    }\n\n    public Task InvalidateAsync(Guid productId, CancellationToken ct) =>\n        cache.RemoveAsync($\"product:{productId}\", ct);\n}\n\n// Registration\nbuilder.Services.AddStackExchangeRedisCache(options =>\n    options.Configuration =\n        builder.Configuration.GetConnectionString(\"Redis\"));\n\nbuilder.Services.AddScoped<ProductCache>();"
+    },
+    "bestPractices": [
+      "Always set an absolute TTL on cached entries; an entry without expiry is a memory leak and a staleness risk as the source of truth evolves.",
+      "Use structured, collision-safe key names — prefix by domain and identifier such as product:{id} or session:{userId} — and document the naming convention alongside the cache registration.",
+      "Invalidate or update the cache entry in the same operation that mutates the source of truth; invalidating after a separate call risks serving stale data if the second step fails.",
+      "Design application code to degrade gracefully when Redis is unavailable — catch connection exceptions, log them, and fall through to the database rather than surfacing a cache infrastructure failure to users."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the cache stampede problem and how do you prevent it?",
+        "answer": "A stampede happens when many requests simultaneously find a cache miss for the same key and all race to load from the database at once, multiplying load. Prevention strategies include probabilistic early expiry, a short-lived Redis lock so only one request rebuilds the entry while others wait or serve the slightly stale value, or background refresh before expiry."
+      },
+      {
+        "question": "When should you use Redis pub/sub versus Service Bus or Event Grid?",
+        "answer": "Redis pub/sub is fire-and-forget with no durability — if a subscriber is offline it misses messages. It suits low-latency fan-out within a trusted environment, such as a SignalR backplane or cache invalidation broadcast. Service Bus and Event Grid provide delivery guarantees, dead-lettering, and durable storage, which are essential for business-critical events."
+      },
+      {
+        "question": "What is the difference between IDistributedCache and IMemoryCache in ASP.NET Core?",
+        "answer": "IMemoryCache is in-process, fast, and invisible to other application instances — suitable for single-server or read-heavy non-critical data. IDistributedCache abstracts a shared external store such as Redis, so all instances behind a load balancer share the same data and eviction, at the cost of network latency per cache operation."
+      }
+    ],
+    "note": "Redis improves read performance and reduces database load, but it introduces a distributed dependency, consistency trade-offs, memory limits, and connection overhead that must be designed for explicitly.",
+    "tip": "Use .NET Aspire's AddRedis resource in the AppHost for local development so every developer gets a consistent Redis container without manual setup, and switch to Azure Cache for Redis in production through the same Aspire integration.",
+    "warning": "Never cache sensitive personal data or security tokens without encryption, short TTLs, and careful key scoping — a cache key collision or overly broad invalidation can expose one user's data to another.",
+    "sampleId": "ai-orchestrator",
+    "readingMinutes": 12,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on cache-aside, IDistributedCache, pub/sub, and distributed locks with Redis"
+  },
+  {
+    "slug": "yarp-reverse-proxy",
+    "name": "YARP — Reverse Proxy",
+    "symbol": "YRP",
+    "category": "Cloud & Architecture",
+    "color": "#7b4f9e",
+    "shortDescription": "Build a programmable .NET reverse proxy and API gateway using YARP with route-based forwarding, transforms, load balancing, and middleware integration.",
+    "keywords": ["YARP", "reverse proxy", "API gateway", "load balancing", "route config", "transforms", "rate limiting", "authentication", "BFF", "backend for frontend"],
+    "overview": "YARP (Yet Another Reverse Proxy) is a Microsoft library for building high-performance, programmable reverse proxies and API gateways directly in .NET using ASP.NET Core middleware.",
+    "detail": "Unlike infrastructure proxies such as NGINX or managed services such as Azure API Management, YARP runs inside a .NET application and integrates with the full ASP.NET Core pipeline — dependency injection, authentication, rate limiting, OpenTelemetry, and custom middleware all apply. Routes and clusters are configured in appsettings.json or loaded dynamically from a database or service registry. Request and response transforms allow header manipulation, path rewriting, query modifications, and claim forwarding. YARP is an excellent fit for the Backend for Frontend pattern, internal API gateways in Modular Monolith decomposition, and migration facades in Legacy Modernisation.",
+    "concepts": [
+      {
+        "title": "Routes and clusters",
+        "description": "A route matches an incoming request by path, host, or header and maps it to a cluster — a named group of destination backends with load balancing, health checks, and session affinity settings."
+      },
+      {
+        "title": "Transforms",
+        "description": "Request and response transforms modify headers, paths, query strings, and the request body before forwarding or after receiving the upstream response — configurable in JSON or code."
+      },
+      {
+        "title": "Load balancing and health checks",
+        "description": "YARP distributes traffic across cluster destinations using round-robin, least-requests, power-of-two, or random strategies and actively or passively monitors destination availability."
+      },
+      {
+        "title": "Dynamic configuration",
+        "description": "Routes and clusters can be reloaded at runtime from any IProxyConfigProvider implementation — a database, Consul, or a custom control plane — without restarting the proxy process."
+      }
+    ],
+    "architecture": {
+      "description": "Inbound traffic hits the YARP middleware pipeline, which matches a route, applies transforms, forwards to the selected cluster destination, and returns the upstream response through the response transform chain.",
+      "nodes": ["Client", "YARP middleware pipeline", "Route + transforms", "Upstream cluster destinations"],
+      "colors": ["#2678c8", "#7b4f9e", "#e07036", "#168c78"]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "Program.cs",
+      "introduction": "YARP is registered as middleware, routes are declared in configuration, and a custom transform forwards the authenticated user's claims to the upstream service as a trusted header.",
+      "code": "using Yarp.ReverseProxy.Transforms;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services\n    .AddReverseProxy()\n    .LoadFromConfig(builder.Configuration.GetSection(\"ReverseProxy\"))\n    .AddTransforms(ctx =>\n    {\n        ctx.AddRequestTransform(async transform =>\n        {\n            var userId = transform.HttpContext.User\n                .FindFirst(\"sub\")?.Value;\n\n            if (userId is not null)\n                transform.ProxyRequest.Headers\n                    .TryAddWithoutValidation(\"X-User-Id\", userId);\n\n            await Task.CompletedTask;\n        });\n    });\n\nbuilder.Services.AddAuthentication(\"Bearer\").AddJwtBearer();\nbuilder.Services.AddAuthorization();\n\nvar app = builder.Build();\n\napp.UseAuthentication();\napp.UseAuthorization();\napp.MapReverseProxy();\napp.Run();"
+    },
+    "bestPractices": [
+      "Centralise cross-cutting concerns — authentication, rate limiting, correlation ID injection, and request logging — in the YARP middleware pipeline rather than duplicating them in every upstream service.",
+      "Use the dynamic configuration provider pattern to reload routes and clusters from a database or service registry at runtime, enabling zero-downtime topology changes without a proxy restart.",
+      "Apply path-strip transforms at the proxy rather than requiring upstream services to understand gateway-prefixed paths — each service should be independently addressable without the proxy prefix.",
+      "Monitor YARP's built-in metrics for request rate, error rate, and destination health alongside upstream service telemetry so the proxy itself is not a blind spot in the observability picture."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "When would you choose YARP over Azure API Management?",
+        "answer": "YARP is a good fit when the gateway logic is complex enough to need code, when deep ASP.NET Core middleware integration is required — custom auth, claim transforms, feature flags — or when a managed gateway's cost, latency, or networking constraints are not acceptable. APIM is better when a managed service, a developer portal, a built-in policy engine, and multi-region capabilities are needed without writing and operating gateway code."
+      },
+      {
+        "question": "What is the Backend for Frontend pattern and how does YARP support it?",
+        "answer": "Backend for Frontend creates a dedicated gateway per client type — web, mobile, third-party — each exposing the exact API shape that client needs, aggregating and transforming upstream responses. YARP supports this by letting each BFF be a .NET application with its own route configuration, transforms, and authentication policy, all sharing common middleware through the ASP.NET Core pipeline."
+      },
+      {
+        "question": "How does YARP handle upstream service discovery in a dynamic environment?",
+        "answer": "A custom IProxyConfigProvider implementation reads destination addresses from any source — a database, Consul, Kubernetes endpoints, or an Azure App Configuration store — and returns a new configuration on each poll. YARP watches for configuration changes and reloads routes and clusters without restarting, enabling dynamic registration and deregistration of upstream services."
+      }
+    ],
+    "note": "YARP is a programmable proxy library, not a fully managed API gateway product — teams own its deployment, scaling, observability, and upgrades alongside the rest of the application.",
+    "tip": "Use YARP as the strangler facade in a Legacy Modernisation — route new paths to modern services and old paths to the legacy system, then gradually shift routes as capabilities are migrated with no client-visible change.",
+    "warning": "Placing authentication and authorisation exclusively in the YARP layer creates a single trust boundary — upstream services must still validate the forwarded identity header rather than treating an internal network call as implicitly trusted.",
+    "sampleId": "ai-gatekeeper",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on routes, clusters, transforms, load balancing, and BFF with YARP"
   }
 ]

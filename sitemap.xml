@@ -28,6 +28,8 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/signalr.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/resilience-rate-limiting.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/structured-logging.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/architecture-testing.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/testcontainers.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/semantic-kernel.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/domain-driven-design.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/vertical-slice-architecture.html</loc></url>
@@ -54,6 +56,7 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-data-factory-etl.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/cloud-adoption-framework.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/aws-for-dotnet.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-container-apps.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-well-architected.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-waf-reliability.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-waf-security.html</loc></url>
@@ -61,8 +64,14 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-waf-operational-excellence.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-waf-performance-efficiency.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/graphql.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/webhook-patterns.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/backend-for-frontend.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/terraform.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/secrets-management.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/infrastructure-as-code-bicep.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/health-checks.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/orleans.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/event-sourcing.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/redis-distributed-caching.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/yarp-reverse-proxy.html</loc></url>
 </urlset>

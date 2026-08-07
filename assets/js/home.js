@@ -20,6 +20,7 @@ async function start() {
     renderNavbar(base, technologies);
     renderSidebar(base, technologies);
     renderFooter(base);
+    document.getElementById('technology-guide-count').textContent = technologies.length;
     renderBlobs(technologies);
     renderFeatured(technologies, samples);
     renderRoadmap(technologies);
