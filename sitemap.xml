@@ -24,6 +24,8 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/dotnet-aspire.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/cqrs-mediatr.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/event-driven-messaging.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/apache-kafka.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/rabbitmq.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/grpc.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/signalr.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/resilience-rate-limiting.html</loc></url>
@@ -51,8 +53,11 @@
   <url><loc>https://adhakshinamoorthy.github.io/technologies/multi-tenancy-patterns.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/saga-pattern.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/legacy-modernization.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-resource-manager.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-api-management.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-functions-serverless.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-logic-apps.html</loc></url>
+  <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-event-hubs.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/azure-data-factory-etl.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/cloud-adoption-framework.html</loc></url>
   <url><loc>https://adhakshinamoorthy.github.io/technologies/aws-for-dotnet.html</loc></url>

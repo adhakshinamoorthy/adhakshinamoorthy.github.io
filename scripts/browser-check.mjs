@@ -147,11 +147,14 @@ try {
   );
 
   const cloudPlatforms = page.locator('.sidebar-group[aria-label="Cloud Platforms"] .sidebar-link');
-  check(await cloudPlatforms.count() === 6, 'Cloud Platforms category does not contain six guides');
+  check(await cloudPlatforms.count() === 9, 'Cloud Platforms category does not contain nine guides');
   check(
     JSON.stringify((await cloudPlatforms.allTextContents()).map(text => text.trim())) === JSON.stringify([
+      'Azure Resource Manager',
       'Azure API Management',
       'Azure Functions & Serverless',
+      'Azure Logic Apps',
+      'Azure Event Hubs',
       'Azure Data Factory & ETL',
       'Cloud Adoption Framework',
       'AWS for .NET',
@@ -170,13 +173,40 @@ try {
     'Infrastructure as Code (Bicep)',
     'Health Checks',
     'YARP — Reverse Proxy',
-    'GraphQL in .NET'
+    'GraphQL in .NET',
+    'Azure Resource Manager',
+    'Apache Kafka',
+    'Azure Logic Apps',
+    'Azure Event Hubs',
+    'RabbitMQ'
   ];
   const sidebarLabels = (await page.locator('.sidebar-link').allTextContents()).map(text => text.trim());
   check(
     expectedBatchTopics.every(topic => sidebarLabels.includes(topic)),
     'One or more supplied batch topics are missing from the sidebar'
   );
+
+  const reviewedBatch = [
+    ['azure-resource-manager', 'Azure Resource Manager', 2],
+    ['apache-kafka', 'Apache Kafka', 2],
+    ['azure-logic-apps', 'Azure Logic Apps', 2],
+    ['azure-event-hubs', 'Azure Event Hubs', 3],
+    ['rabbitmq', 'RabbitMQ', 3]
+  ];
+  for (const [topicSlug, expectedHeading, expectedResources] of reviewedBatch) {
+    await page.goto(`${baseUrl}/technologies/${topicSlug}.html`, { waitUntil: 'networkidle' });
+    check((await page.locator('h1').innerText()) === expectedHeading, `${topicSlug} rendered the wrong heading`);
+    check(
+      await page.locator('.official-resource-links a').count() === expectedResources,
+      `${topicSlug} does not show all reviewed official resources`
+    );
+    check(
+      await page.locator('.official-resource-links a').evaluateAll(links =>
+        links.every(link => link.href.startsWith('https://') && link.target === '_blank' && link.rel.includes('noreferrer'))
+      ),
+      `${topicSlug} official resources are not safe external links`
+    );
+  }
 
   await page.goto(`${baseUrl}/technologies/azure-well-architected.html`, { waitUntil: 'networkidle' });
   check(await page.locator('.official-resource-links a').count() === 3, 'WAF overview does not show all official resources');

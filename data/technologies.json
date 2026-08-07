@@ -667,6 +667,210 @@
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on outbox delivery and idempotent consumers"
   },
   {
+    "slug": "apache-kafka",
+    "name": "Apache Kafka",
+    "symbol": "KFK",
+    "category": "Cloud & Architecture",
+    "color": "#2d4a6b",
+    "shortDescription": "Build high-throughput, fault-tolerant event streaming pipelines in .NET using Apache Kafka with producers, consumers, consumer groups, and MassTransit.",
+    "keywords": [
+      "Kafka",
+      "Apache Kafka",
+      "event streaming",
+      "topics",
+      "partitions",
+      "consumer groups",
+      "Confluent.Kafka",
+      "MassTransit",
+      "offset",
+      "compaction",
+      "Azure Event Hubs Kafka"
+    ],
+    "overview": "Apache Kafka is a distributed event streaming platform designed for high-throughput, durable, ordered message delivery — used for real-time data pipelines, event sourcing at scale, and decoupling services in large systems.",
+    "detail": "Kafka stores messages as immutable, ordered logs partitioned across a cluster of brokers. Producers append events to topics; consumers read from specific offsets and commit their progress independently, enabling multiple consumer groups to process the same stream at their own pace. Unlike traditional message queues, messages are retained for a configurable period regardless of consumption — allowing replay, late subscribers, and event sourcing. In .NET, Confluent.Kafka provides the low-level client; MassTransit wraps it with familiar consumer and saga patterns. Azure Event Hubs is a fully managed Kafka-compatible service requiring no infrastructure management.",
+    "concepts": [
+      {
+        "title": "Topics, partitions, and offsets",
+        "description": "A topic is a named stream of events divided into partitions for parallelism. Each message has an offset — its position in a partition. Consumers commit offsets to track progress independently, enabling replay from any point."
+      },
+      {
+        "title": "Consumer groups",
+        "description": "A consumer group is a set of consumers that collectively process a topic — each partition is assigned to exactly one consumer in the group, balancing load. Multiple groups read the same topic independently at their own pace."
+      },
+      {
+        "title": "Log compaction and retention",
+        "description": "Time-based retention deletes old messages after a configured period. Compaction retains only the latest message per key, enabling Kafka to serve as a durable key-value store or materialised view source."
+      },
+      {
+        "title": "Exactly-once semantics",
+        "description": "Kafka's idempotent producer and transactional API guarantee that a message is written exactly once even on retries, and that a produce-consume-produce cycle is atomic across topics."
+      }
+    ],
+    "architecture": {
+      "description": "Producers append events to partitioned topics on the Kafka cluster; each consumer group reads independently at its own offset, enabling multiple downstream services to process the same stream without coordination.",
+      "nodes": [
+        "Producers (.NET services)",
+        "Kafka broker cluster",
+        "Topics + partitions",
+        "Consumer groups (.NET workers)"
+      ],
+      "colors": [
+        "#6e5bd7",
+        "#2d4a6b",
+        "#e07036",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderEventConsumer.cs",
+      "introduction": "MassTransit wraps Confluent.Kafka so Kafka consumers use the same IConsumer interface as Service Bus and RabbitMQ consumers — the infrastructure concern is in registration, not in the handler.",
+      "code": "using Confluent.Kafka;\nusing MassTransit;\n\nbuilder.Services.AddMassTransit(x =>\n{\n    // Kafka is configured as a rider alongside a primary bus.\n    x.UsingInMemory();\n\n    x.AddRider(rider =>\n    {\n        rider.AddConsumer<OrderPlacedConsumer>();\n\n        rider.UsingKafka((context, kafka) =>\n        {\n            kafka.Host(\"kafka:9092\");\n\n            kafka.TopicEndpoint<OrderPlaced>(\n                \"order-events\",\n                \"orders-consumer-group\",\n                endpoint =>\n                {\n                    endpoint.AutoOffsetReset = AutoOffsetReset.Earliest;\n                    endpoint.CheckpointMessageCount = 100;\n                    endpoint.CheckpointInterval = TimeSpan.FromSeconds(30);\n                    endpoint.EnableErrorTopic();\n                    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);\n                });\n        });\n    });\n});\n\npublic sealed class OrderPlacedConsumer(\n    ILogger<OrderPlacedConsumer> logger,\n    IOrderRepository repository)\n    : IConsumer<OrderPlaced>\n{\n    public async Task Consume(ConsumeContext<OrderPlaced> context)\n    {\n        logger.LogInformation(\"Processing order {OrderId}\", context.Message.OrderId);\n        await repository.MarkAsProcessingAsync(\n            context.Message.OrderId,\n            context.CancellationToken);\n    }\n}\n\npublic sealed record OrderPlaced(\n    Guid OrderId,\n    Guid CustomerId,\n    DateTime OccurredAt);"
+    },
+    "bestPractices": [
+      "Choose partition count carefully at topic creation — increasing partitions later is possible but rebalances consumer groups; a common starting point is one partition per expected peak consumer instance.",
+      "Always commit offsets only after processing succeeds, not before — committing first and then failing means the message is skipped; committing after means it is retried on failure.",
+      "Use consumer group IDs that are unique per logical service and environment so dev, staging, and production consumers never share progress state on the same cluster.",
+      "Use MassTransit’s Kafka rider when its consumer model fits, but configure delayed redelivery and an error topic explicitly; use Confluent.Kafka directly when the application needs lower-level protocol control."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How does Kafka differ from a traditional message queue like RabbitMQ or Service Bus?",
+        "answer": "A traditional queue removes a message after it is consumed — one consumer processes each message. Kafka retains messages in an immutable log for a configurable period regardless of consumption, so multiple consumer groups each read the same events independently and consumers can replay from any offset. Kafka is optimised for throughput and stream processing; queues are optimised for task distribution and point-to-point delivery."
+      },
+      {
+        "question": "What determines the maximum parallelism of a Kafka consumer group?",
+        "answer": "The number of partitions in the topic. Each partition is assigned to exactly one consumer in a group at a time, so adding more consumers than partitions leaves the extras idle. To increase parallelism, increase the partition count — ideally at topic creation since repartitioning triggers a consumer group rebalance."
+      },
+      {
+        "question": "What is the difference between at-least-once and exactly-once delivery in Kafka?",
+        "answer": "At-least-once processing commits the offset after work succeeds, so a crash between the side effect and the commit can cause a replay. Kafka exactly-once semantics use transactions to atomically publish Kafka output records and commit consumed offsets for a read-process-write pipeline; external database or API side effects still require idempotency or an outbox-style design."
+      }
+    ],
+    "note": "Kafka is operationally complex — broker sizing, partition leadership, consumer group rebalancing, and schema evolution all require deliberate design. Azure Event Hubs offers Kafka protocol compatibility without the operational overhead for teams that do not need a self-managed cluster.",
+    "tip": "Use Azure Event Hubs with Kafka protocol compatibility in Azure-hosted workloads — change only the bootstrap server URL and the Confluent.Kafka or MassTransit client connects without code changes, while Azure manages the cluster.",
+    "warning": "Messages in Kafka are ordered within a partition but not across partitions — if your business logic requires strict global ordering, all related messages must use the same partition key to land in the same partition.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 13,
+    "level": "Advanced",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on topics, partitions, consumer groups, offset management, and MassTransit Kafka transport",
+    "resources": [
+      {
+        "label": "Apache Kafka documentation",
+        "url": "https://kafka.apache.org/documentation/"
+      },
+      {
+        "label": "MassTransit Kafka rider",
+        "url": "https://masstransit.io/documentation/configuration/transports/kafka"
+      }
+    ]
+  },
+  {
+    "slug": "rabbitmq",
+    "name": "RabbitMQ",
+    "symbol": "RMQ",
+    "category": "Cloud & Architecture",
+    "color": "#ff6600",
+    "shortDescription": "Route messages reliably between .NET services using RabbitMQ exchanges, queues, bindings, dead-letter handling, and MassTransit for a clean consumer abstraction.",
+    "keywords": [
+      "RabbitMQ",
+      "AMQP",
+      "exchanges",
+      "queues",
+      "bindings",
+      "routing key",
+      "dead-letter exchange",
+      "publisher confirms",
+      "MassTransit",
+      "fanout",
+      "topic exchange"
+    ],
+    "overview": "RabbitMQ is a mature, widely deployed open-source message broker that routes messages through exchanges to queues using flexible binding patterns — making it a reliable backbone for microservices communication.",
+    "detail": "RabbitMQ implements AMQP 0-9-1 and uses a producer-exchange-queue-consumer model. Producers publish to named exchanges rather than directly to queues; exchanges apply routing rules to deliver messages to the correct queues based on binding keys and exchange type — direct, fanout, topic, or headers. Consumer acknowledgements ensure messages are not lost if a consumer crashes before processing. Dead-letter exchanges capture failed or expired messages for inspection. In .NET, MassTransit abstracts RabbitMQ's exchange and queue topology, exposing familiar consumer and saga interfaces so the broker can be swapped with minimal code change.",
+    "concepts": [
+      {
+        "title": "Exchanges and exchange types",
+        "description": "Direct exchanges route by exact routing key match. Fanout exchanges broadcast to all bound queues. Topic exchanges route by wildcard pattern. Headers exchanges route by message header values. Choosing the right exchange type determines the flexibility and complexity of the routing topology."
+      },
+      {
+        "title": "Queues, bindings, and routing keys",
+        "description": "A queue holds messages until a consumer retrieves them. A binding connects an exchange to a queue with an optional routing key pattern. The routing key on the published message is matched against bindings to determine which queues receive a copy."
+      },
+      {
+        "title": "Acknowledgements and publisher confirms",
+        "description": "Consumer acknowledgements tell RabbitMQ the message was processed and can be discarded. Negative acknowledgements requeue or discard failed messages. Publisher confirms tell the producer that RabbitMQ has persisted the message to disk, preventing loss on broker restart."
+      },
+      {
+        "title": "Dead-letter exchanges",
+        "description": "A dead-letter exchange receives messages that are rejected, nacked without requeue, or expired. Dead-lettered messages can be inspected, retried manually, or routed to an error queue for monitoring and alerting."
+      }
+    ],
+    "architecture": {
+      "description": "A producer publishes to a named exchange with a routing key; the exchange delivers matching copies to bound queues; consumers acknowledge messages after processing; dead-lettered messages are routed to an error exchange for inspection.",
+      "nodes": [
+        "Producer (.NET service)",
+        "Exchange + bindings",
+        "Consumer queues",
+        "Dead-letter exchange"
+      ],
+      "colors": [
+        "#6e5bd7",
+        "#ff6600",
+        "#2678c8",
+        "#c0392b"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderConsumer.cs",
+      "introduction": "MassTransit configures the RabbitMQ topology — exchange, queue, and dead-letter binding — from the consumer type automatically. The consumer itself only handles business logic.",
+      "code": "using MassTransit;\n\n// Registration\nbuilder.Services.AddMassTransit(x =>\n{\n    x.AddConsumer<OrderPlacedConsumer>(cfg =>\n    {\n        cfg.UseMessageRetry(r => r.Exponential(\n            retryLimit: 5,\n            minInterval: TimeSpan.FromSeconds(1),\n            maxInterval: TimeSpan.FromSeconds(30),\n            intervalDelta: TimeSpan.FromSeconds(5)));\n    });\n\n    x.UsingRabbitMq((ctx, cfg) =>\n    {\n        cfg.Host(\"rabbitmq\", \"/\", h =>\n        {\n            h.Username(config[\"RabbitMQ:User\"]);\n            h.Password(config[\"RabbitMQ:Password\"]);\n        });\n\n        cfg.ConfigureEndpoints(ctx);\n    });\n});\n\n// Consumer\npublic sealed class OrderPlacedConsumer(\n    IInventoryService inventory,\n    ILogger<OrderPlacedConsumer> logger)\n    : IConsumer<OrderPlaced>\n{\n    public async Task Consume(ConsumeContext<OrderPlaced> context)\n    {\n        logger.LogInformation(\n            \"Reserving stock for order {OrderId}\",\n            context.Message.OrderId);\n\n        await inventory.ReserveAsync(\n            context.Message.OrderId,\n            context.Message.Lines,\n            context.CancellationToken);\n    }\n}\n\n// Publishing\npublic sealed class OrderService(IPublishEndpoint publisher)\n{\n    public async Task PlaceOrderAsync(PlaceOrderCommand cmd, CancellationToken ct)\n    {\n        // ... business logic ...\n        await publisher.Publish(\n            new OrderPlaced(cmd.OrderId, cmd.CustomerId, cmd.Lines),\n            ct);\n    }\n}"
+    },
+    "bestPractices": [
+      "Always acknowledge messages only after processing succeeds — auto-acknowledgement on receipt risks losing messages if the consumer crashes between receipt and processing.",
+      "Configure a dead-letter exchange on every queue from the start so failed messages are captured and inspectable rather than silently discarded.",
+      "Use MassTransit's retry and redelivery middleware rather than implementing retry loops in consumer code — this keeps retry policy configuration in one place and works consistently across broker types.",
+      "Enable publisher confirms for critical message publishing so producers know RabbitMQ has persisted the message before considering the operation complete."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the difference between a topic exchange and a fanout exchange in RabbitMQ?",
+        "answer": "A fanout exchange ignores the routing key entirely and delivers every published message to all bound queues — useful for broadcast scenarios. A topic exchange matches the routing key against binding patterns using dot-separated words and wildcard characters (* for one word, # for zero or more), enabling flexible selective routing to multiple queues based on message category."
+      },
+      {
+        "question": "What happens to a message when a consumer throws an exception in MassTransit with RabbitMQ?",
+        "answer": "MassTransit applies any configured in-memory retry policy while the delivery remains locked. If retries are exhausted, the message faults and is moved to the endpoint’s _error queue. Delayed or scheduled redelivery happens only when that middleware is configured separately, so retry and redelivery should not be treated as the same operation."
+      },
+      {
+        "question": "When would you choose RabbitMQ over Azure Service Bus?",
+        "answer": "RabbitMQ is a strong choice for flexible routing topologies — topic and headers exchanges have no direct equivalent in Service Bus — and for workloads that need to run on-premises, in a private cloud, or in any cloud without vendor lock-in. Azure Service Bus is better when deep Azure integration, managed infrastructure, geo-redundancy, and native Azure RBAC are more important than routing flexibility or cross-cloud portability."
+      }
+    ],
+    "note": "RabbitMQ's flexibility comes from its exchange-binding model, which can represent almost any routing topology — but that flexibility requires deliberate design of the topology before writing producer and consumer code.",
+    "tip": "Use the RabbitMQ Management UI at /api/queues to monitor queue depth, unacknowledged message counts, and dead-letter queue growth during development and load testing — catching queue depth growth early prevents memory exhaustion on the broker.",
+    "warning": "Prefetch controls how many unacknowledged deliveries can be in flight. There is no universal ideal value: too high can increase memory pressure and uneven distribution, while too low limits throughput. Start conservatively and tune with production-like load tests.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 12,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on exchanges, queues, bindings, dead-letter handling, and MassTransit RabbitMQ transport",
+    "resources": [
+      {
+        "label": "RabbitMQ documentation",
+        "url": "https://www.rabbitmq.com/docs"
+      },
+      {
+        "label": "RabbitMQ acknowledgements and publisher confirms",
+        "url": "https://www.rabbitmq.com/docs/confirms"
+      },
+      {
+        "label": "MassTransit RabbitMQ transport",
+        "url": "https://masstransit.io/documentation/configuration/transports/rabbitmq"
+      }
+    ]
+  },
+  {
     "slug": "grpc",
     "name": "gRPC",
     "symbol": "gRPC",
@@ -1615,6 +1819,105 @@
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 16, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on assessment, 6 Rs, strangler delivery, and safe cutover"
   },
   {
+    "slug": "azure-resource-manager",
+    "name": "Azure Resource Manager",
+    "symbol": "ARM",
+    "category": "Cloud Platforms",
+    "color": "#0072c6",
+    "shortDescription": "Govern Azure infrastructure through a unified management layer — resource groups, subscriptions, RBAC, policies, locks, and deployment modes.",
+    "keywords": [
+      "ARM",
+      "Azure Resource Manager",
+      "resource groups",
+      "management groups",
+      "RBAC",
+      "Azure Policy",
+      "resource locks",
+      "tags",
+      "deployment modes",
+      "management plane"
+    ],
+    "overview": "Azure Resource Manager is the control plane for all Azure resources — every portal click, CLI command, Bicep deployment, and SDK call goes through ARM, which enforces identity, policy, and governance before any resource is touched.",
+    "detail": "ARM provides a consistent management layer across all Azure services. It organises resources into a hierarchy — management groups, subscriptions, resource groups, and individual resources — and applies access control, policy, tags, and locks at any level of that hierarchy. Understanding ARM is fundamental to architect-level Azure work because governance decisions made at the ARM layer affect every team and every workload in a tenant. Deployment modes, resource providers, the management plane versus data plane distinction, and the ARM REST API underpin every IaC tool including Bicep, Terraform, and Pulumi.",
+    "concepts": [
+      {
+        "title": "Resource hierarchy",
+        "description": "Resources live in resource groups, resource groups live in subscriptions, and subscriptions live in management groups. Policies and RBAC assignments at a higher scope inherit down, enabling consistent governance across all workloads."
+      },
+      {
+        "title": "RBAC and role assignments",
+        "description": "Azure RBAC controls who can perform which actions on which resources using built-in and custom role definitions assigned to users, groups, service principals, or managed identities at any scope in the hierarchy."
+      },
+      {
+        "title": "Azure Policy",
+        "description": "Policies define rules that ARM evaluates on every resource write — preventing non-compliant resources from being created, auditing existing ones, or automatically remediating drift from the desired configuration baseline."
+      },
+      {
+        "title": "Deployment modes and resource locks",
+        "description": "Incremental mode adds or updates resources without touching others in the group; complete mode deletes any resource not in the template. Resource locks — CanNotDelete and ReadOnly — prevent accidental or unauthorised changes outside the deployment pipeline."
+      }
+    ],
+    "architecture": {
+      "description": "Every Azure operation — portal, CLI, SDK, or IaC — passes through the ARM API, which authenticates via Entra ID, evaluates RBAC and Policy, and routes to the target resource provider.",
+      "nodes": [
+        "Caller (portal / CLI / IaC)",
+        "ARM API + Entra ID auth",
+        "RBAC + Azure Policy",
+        "Resource provider"
+      ],
+      "colors": [
+        "#6e5bd7",
+        "#0072c6",
+        "#e07036",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "ArmGovernance.cs",
+      "introduction": "The Azure SDK for .NET manages ARM-level resources — creating resource groups, assigning roles, and applying locks — directly in code for automation pipelines or custom governance tooling.",
+      "code": "using Azure.Identity;\nusing Azure.ResourceManager;\nusing Azure.ResourceManager.Resources;\n\nvar credential = new DefaultAzureCredential();\nvar armClient = new ArmClient(credential);\n\nvar subscription = await armClient\n    .GetDefaultSubscriptionAsync();\n\n// Create a resource group with required tags\nvar rgData = new ResourceGroupData(AzureLocation.UKSouth)\n{\n    Tags =\n    {\n        [\"environment\"] = \"production\",\n        [\"team\"]        = \"platform\",\n        [\"costCentre\"]  = \"CC-1042\"\n    }\n};\n\nvar rg = await subscription.GetResourceGroups()\n    .CreateOrUpdateAsync(\n        WaitUntil.Completed,\n        \"rg-orders-prod\",\n        rgData);\n\nConsole.WriteLine($\"Resource group ready: {rg.Value.Data.Name}\");\n\n// Apply a CanNotDelete lock to protect production resources\nvar lockData = new ManagementLockData(ManagementLockLevel.CanNotDelete)\n{\n    Notes = \"Production resource group — deletion requires CAB approval\"\n};\n\nawait rg.Value.GetManagementLocks()\n    .CreateOrUpdateAsync(\n        WaitUntil.Completed,\n        \"lock-orders-prod\",\n        lockData);\n\nConsole.WriteLine(\"Resource lock applied.\");"
+    },
+    "bestPractices": [
+      "Design the management group and subscription hierarchy before deploying workloads — retrofitting governance scope after resources exist is significantly more complex and disruptive.",
+      "Assign Azure roles at the narrowest practical scope—usually a subscription or resource group—and reserve management-group assignments for genuinely shared platform responsibilities.",
+      "Use Azure Policy deny effects for non-negotiable standards — allowed locations, required tags, SKU restrictions — and audit effects for visibility before escalating to deny.",
+      "Apply CanNotDelete locks to production resource groups containing stateful resources so accidental complete-mode deployments or manual deletions require an explicit lock removal step."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the difference between the management plane and the data plane in Azure?",
+        "answer": "The management plane is the ARM API used to create, update, delete, and configure resources — all RBAC and Policy enforcement happens here. The data plane is the resource's own API for working with its content — reading blobs from Storage, sending messages to Service Bus, or querying a database. A user can have ARM RBAC rights to manage a resource without having data plane access to its content, and vice versa."
+      },
+      {
+        "question": "What is the difference between incremental and complete deployment mode?",
+        "answer": "Incremental mode, the recommended default, adds or updates resources in the template while leaving unspecified resources in place. Complete mode deletes resources that are absent from the template, but Microsoft is gradually deprecating it for deletion scenarios; use deployment stacks when a declarative deployment must also remove resources."
+      },
+      {
+        "question": "How would you enforce a tagging standard across all resources in an Azure tenant?",
+        "answer": "Assign an Azure Policy at the management group scope with a deny effect that requires specified tag keys on all resource writes. For existing untagged resources, use a modify policy with a remediation task to apply default tag values. This ensures compliance for new resources immediately and provides a path to remediate existing ones."
+      }
+    ],
+    "note": "ARM governance decisions — hierarchy design, policy scope, RBAC model — are very difficult to change after workloads are deployed. Treat the ARM layer as foundational architecture that deserves the same design rigour as application architecture.",
+    "tip": "Use the Azure Resource Graph to query the live state of all resources across subscriptions using KQL — it is far faster than iterating through the ARM SDK and essential for compliance reporting and cost visibility at scale.",
+    "warning": "Complete deployment mode deletes resources that are absent from the template and is not recommended for new deletion workflows. Prefer deployment stacks, and always review a what-if result before any potentially destructive deployment.",
+    "sampleId": "solution-architecture-portfolio",
+    "readingMinutes": 12,
+    "level": "Advanced",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on ARM hierarchy, RBAC, Azure Policy, deployment modes, and resource locks",
+    "resources": [
+      {
+        "label": "Azure Resource Manager overview",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview"
+      },
+      {
+        "label": "ARM deployment modes",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-modes"
+      }
+    ]
+  },
+  {
     "slug": "azure-api-management",
     "name": "Azure API Management",
     "symbol": "APIM",
@@ -1673,6 +1976,209 @@
     "warning": "Do not assume exactly-once event delivery; build handlers and downstream effects to tolerate duplicates and partial failure.",
     "resources": [{"label": "Azure Functions documentation", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/"}, {"label": ".NET isolated worker guide", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide"}],
     "sampleId": "ai-orchestrator", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on isolated workers, event delivery, hosting, and scale"
+  },
+  {
+    "slug": "azure-logic-apps",
+    "name": "Azure Logic Apps",
+    "symbol": "ALA",
+    "category": "Cloud Platforms",
+    "color": "#5c2d91",
+    "shortDescription": "Automate enterprise workflows and system integrations using Azure Logic Apps — connecting hundreds of services with triggers, actions, and conditional logic without writing infrastructure code.",
+    "keywords": [
+      "Azure Logic Apps",
+      "workflow automation",
+      "connectors",
+      "triggers",
+      "actions",
+      "Standard",
+      "Consumption",
+      "integration account",
+      "EDI",
+      "B2B",
+      "enterprise integration"
+    ],
+    "overview": "Azure Logic Apps is a cloud platform for building and running automated workflows that integrate applications, data, services, and systems across an enterprise with minimal code.",
+    "detail": "Logic Apps uses a visual designer backed by a JSON workflow definition to connect triggers—such as a Service Bus message, HTTP request, schedule, or arriving file—to actions from a large catalog of built-in and managed connectors. A Standard logic app runs in the single-tenant Azure Logic Apps runtime, can host multiple stateful or stateless workflows, and supports local development, private networking, and dedicated plan-based billing. Consumption is multitenant, hosts one stateful workflow per app, and bills per execution. A separate hybrid option can host the Standard runtime on your infrastructure through an Azure Container Apps extension. Logic Apps fits scenarios where integration workflow and connector orchestration outweigh custom computation.",
+    "concepts": [
+      {
+        "title": "Triggers and connectors",
+        "description": "A trigger starts a workflow — on a schedule, on a message arrival, on an HTTP call, or on a change in an external system. Connectors provide pre-built authenticated integrations to hundreds of services without managing credentials or SDKs."
+      },
+      {
+        "title": "Stateful vs stateless workflows",
+        "description": "Stateful workflows persist run history and intermediate state to storage, enabling long-running orchestrations, human approvals, and retry inspection. Stateless workflows keep state in memory only, offering lower latency for short-lived, high-frequency integrations."
+      },
+      {
+        "title": "Standard vs Consumption tier",
+        "description": "Consumption Logic Apps run in the multitenant service and bill per trigger and action execution. Standard Logic Apps use the single-tenant runtime and a plan-based model, supporting private networking, local development, and multiple stateful or stateless workflows in one app."
+      },
+      {
+        "title": "Integration accounts and B2B",
+        "description": "An Integration Account stores EDI schemas, maps, trading partner agreements, and certificates, enabling Logic Apps to process AS2, EDIFACT, and X12 messages for B2B integrations — a capability that would require significant custom code to replicate."
+      }
+    ],
+    "architecture": {
+      "description": "A trigger fires the workflow; each action calls a connector or runs inline code; the workflow state is persisted between steps for long-running orchestrations and surfaced in the run history for monitoring.",
+      "nodes": [
+        "Trigger (event / schedule / HTTP)",
+        "Logic Apps workflow engine",
+        "Connector actions",
+        "Target systems"
+      ],
+      "colors": [
+        "#5c2d91",
+        "#e07036",
+        "#2678c8",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderWorkflowClient.cs",
+      "introduction": "Logic Apps workflows are JSON definitions — this excerpt shows an HTTP trigger, a Service Bus send action, and a conditional branch, the same structure visible in the visual designer.",
+      "code": "// Calling a Logic Apps workflow from .NET using HTTP trigger\nusing System.Net.Http.Json;\n\npublic sealed class OrderWorkflowClient(HttpClient http)\n{\n    public async Task TriggerOrderApprovalAsync(\n        Guid orderId, decimal total, CancellationToken ct)\n    {\n        // Logic Apps exposes an HTTP trigger URL with a SAS key\n        var response = await http.PostAsJsonAsync(\n            string.Empty, // Base URL set in HttpClient config\n            new\n            {\n                orderId = orderId.ToString(),\n                total,\n                requestedAt = DateTime.UtcNow\n            },\n            ct);\n\n        response.EnsureSuccessStatusCode();\n    }\n}\n\n// Registration with typed client\nbuilder.Services.AddHttpClient<OrderWorkflowClient>(client =>\n{\n    client.BaseAddress = new Uri(\n        builder.Configuration[\"LogicApps:OrderApprovalUrl\"]!);\n});\n\n// Equivalent workflow definition (abridged JSON)\n// {\n//   \"definition\": {\n//     \"triggers\": {\n//       \"manual\": { \"type\": \"Request\", \"kind\": \"Http\" }\n//     },\n//     \"actions\": {\n//       \"Send_approval_email\": {\n//         \"type\": \"ApiConnection\",\n//         \"inputs\": { \"host\": { \"connection\": { \"name\": \"office365\" } } }\n//       },\n//       \"Check_approval\": {\n//         \"type\": \"If\",\n//         \"expression\": { \"equals\": [\"@body('Send_approval_email')\", \"Approve\"] },\n//         \"actions\": { \"Notify_orders_service\": { \"type\": \"Http\" } }\n//       }\n//     }\n//   }\n// }"
+    },
+    "bestPractices": [
+      "Use Logic Apps for integration orchestration and connector-heavy workflows; use Azure Functions or .NET Workers for compute-heavy, latency-sensitive, or complex business logic that needs unit testing and version control.",
+      "Store sensitive workflow inputs and connector credentials as Logic Apps parameters backed by Key Vault references — never hardcode connection strings or API keys in the workflow definition.",
+      "Design long-running approval workflows as stateful workflows with explicit timeout and cancellation branches so workflows do not run indefinitely when an approver is unavailable.",
+      "Version workflow definitions in source control and deploy via CI/CD using the Azure CLI or Bicep — treat the JSON definition as infrastructure code rather than a designer-only artefact."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "When would you choose Logic Apps over Azure Functions for an integration scenario?",
+        "answer": "Logic Apps is the right choice when the integration is connector-heavy — Office 365, Salesforce, SAP, EDI — and the orchestration logic is conditional branching, looping, and sequencing rather than complex computation. Functions are better when the logic requires unit testing, custom algorithms, precise latency control, or dependencies not available as connectors."
+      },
+      {
+        "question": "What is the difference between Standard and Consumption Logic Apps?",
+        "answer": "Consumption Logic Apps are multitenant, pay-per-execution resources that host one stateful workflow per app. Standard Logic Apps use the single-tenant runtime and a plan-based model, host multiple stateful or stateless workflows, support local development and private networking, and can also use a separate hybrid hosting option backed by an Azure Container Apps extension."
+      },
+      {
+        "question": "How do you handle errors and retries in a Logic Apps workflow?",
+        "answer": "Each action in a Logic Apps workflow can be configured with a retry policy — fixed or exponential backoff with a configurable count and interval. Run-after conditions on subsequent actions determine whether they execute on success, failure, timeout, or skipped status of the preceding action, enabling branching error-handling logic without custom exception handling code."
+      }
+    ],
+    "note": "Logic Apps excels at enterprise integration patterns — it is not a general application platform. Workflows with significant business logic, custom data transformations, or testing requirements are better served by .NET code.",
+    "tip": "Use the Standard tier with local development tooling for any workflow that will be maintained long-term — it enables debugging in VS Code, source-controlled workflow definitions, and deployment through standard Azure pipelines.",
+    "warning": "Consumption Logic Apps can accumulate significant costs under high-volume scenarios where thousands of actions execute per minute — model expected execution counts before choosing the consumption tier for frequent event-driven workflows.",
+    "sampleId": "solution-architecture-portfolio",
+    "readingMinutes": 11,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on triggers, connectors, stateful workflows, Standard vs Consumption, and B2B integration",
+    "resources": [
+      {
+        "label": "Azure Logic Apps overview",
+        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview"
+      },
+      {
+        "label": "Logic Apps workflow designer",
+        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/designer-overview"
+      }
+    ]
+  },
+  {
+    "slug": "azure-event-hubs",
+    "name": "Azure Event Hubs",
+    "symbol": "AEH",
+    "category": "Cloud Platforms",
+    "color": "#00a4ef",
+    "shortDescription": "Ingest millions of events per second into Azure using Event Hubs — a fully managed, Kafka-compatible streaming platform with partitioned consumers, capture, and schema registry.",
+    "keywords": [
+      "Azure Event Hubs",
+      "event streaming",
+      "EventProcessorClient",
+      "partitions",
+      "consumer groups",
+      "checkpointing",
+      "Kafka compatibility",
+      "Event Hubs Capture",
+      "schema registry",
+      "AMQP"
+    ],
+    "overview": "Azure Event Hubs is a fully managed big-data streaming platform that can receive and process millions of events per second with low latency, offering Kafka protocol compatibility and deep Azure ecosystem integration.",
+    "detail": "Event Hubs acts as the front door for event pipelines — telemetry ingestion, clickstream data, IoT device events, and application logs flow in through producers and are processed by consumers reading partitioned streams at their own pace. The EventProcessorClient in the Azure SDK for .NET handles partition ownership, checkpointing to Azure Blob Storage, and load-balanced consumption across multiple instances. Event Hubs is Kafka protocol-compatible, so existing Confluent.Kafka clients work by changing only the bootstrap server. Event Hubs Capture writes the stream to Azure Data Lake or Blob Storage in Avro format for batch analytics without additional pipeline code.",
+    "concepts": [
+      {
+        "title": "Partitions and throughput units",
+        "description": "Events are distributed across partitions for parallel processing. Throughput units — or processing units in Premium — control ingress and egress capacity. Partition count is fixed at creation and determines maximum consumer parallelism."
+      },
+      {
+        "title": "EventProcessorClient and checkpointing",
+        "description": "EventProcessorClient distributes partition ownership across multiple instances, processes events in batches, and persists checkpoints to Azure Blob Storage so processing resumes from the last committed offset after a restart."
+      },
+      {
+        "title": "Kafka compatibility",
+        "description": "Event Hubs exposes a Kafka endpoint on port 9093. Confluent.Kafka and MassTransit Kafka transport clients connect by replacing the bootstrap server with the Event Hubs namespace FQDN and using a connection string as the SASL password."
+      },
+      {
+        "title": "Event Hubs Capture",
+        "description": "Capture automatically writes the event stream to Azure Blob Storage or Data Lake in Avro format on a time or size interval — enabling batch analytics, archiving, and event replay without any pipeline code."
+      }
+    ],
+    "architecture": {
+      "description": "Producers send events to Event Hubs partitions; EventProcessorClient instances compete for partition ownership and checkpoint progress to Blob Storage; Capture writes the stream to Data Lake for batch consumers.",
+      "nodes": [
+        "Event producers",
+        "Event Hubs partitions",
+        "EventProcessorClient cluster",
+        "Azure Blob / Data Lake"
+      ],
+      "colors": [
+        "#6e5bd7",
+        "#00a4ef",
+        "#2678c8",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderEventProcessor.cs",
+      "introduction": "EventProcessorClient handles partition ownership and checkpoint coordination. This simple handler processes one event at a time and checkpoints only after success; high-throughput applications should checkpoint at a deliberate interval rather than writing a checkpoint for every event.",
+      "code": "using Azure.Messaging.EventHubs;\nusing Azure.Messaging.EventHubs.Processor;\nusing Azure.Storage.Blobs;\n\nvar storageClient = new BlobContainerClient(\n    config[\"Storage:ConnectionString\"],\n    \"event-checkpoints\");\n\nvar processor = new EventProcessorClient(\n    storageClient,\n    \"orders-consumer-group\",\n    config[\"EventHubs:ConnectionString\"],\n    \"order-events\");\n\nprocessor.ProcessEventAsync += async args =>\n{\n    try\n    {\n        var body = args.Data.Body.ToArray();\n        var orderEvent = JsonSerializer.Deserialize<OrderPlaced>(body);\n\n        if (orderEvent is not null)\n        {\n            logger.LogInformation(\n                \"Processing order {OrderId} from partition {Partition}\",\n                orderEvent.OrderId,\n                args.Partition.PartitionId);\n\n            await orderService.ProcessAsync(orderEvent, args.CancellationToken);\n        }\n\n        // Simple example: checkpoint after success. At scale, checkpoint less often.\n        await args.UpdateCheckpointAsync(args.CancellationToken);\n    }\n    catch (Exception ex)\n    {\n        logger.LogError(ex,\n            \"Failed to process event from partition {Partition}\",\n            args.Partition.PartitionId);\n        // Do NOT checkpoint on failure — event will be reprocessed\n    }\n};\n\nprocessor.ProcessErrorAsync += args =>\n{\n    logger.LogError(args.Exception,\n        \"Event Hubs processor error on partition {Partition}\",\n        args.PartitionId);\n    return Task.CompletedTask;\n};\n\nawait processor.StartProcessingAsync();\nawait Task.Delay(Timeout.Infinite); // Keep alive\nawait processor.StopProcessingAsync();"
+    },
+    "bestPractices": [
+      "Checkpoint only after successful processing, and choose a bounded checkpoint cadence—checkpointing every event increases storage operations, while checkpointing too rarely increases replay after failure.",
+      "Size partition count to match expected peak consumer instances — you cannot increase parallelism beyond the partition count regardless of how many processor instances you run.",
+      "Enable Event Hubs Capture from the start for production streams — it provides a zero-code archiving and replay capability that is very difficult to add retroactively once the retention window has passed.",
+      "Use managed identity for both producers and the EventProcessorClient in production — connection strings in configuration are a rotation burden and a security risk; managed identity eliminates both."
+    ],
+    "interviewQuestions": [
+      {
+        "question": "What is the role of checkpointing in Event Hubs processing?",
+        "answer": "Checkpointing persists the offset of the last successfully processed event for each partition to Azure Blob Storage. When a processor instance restarts or another instance takes over a partition, it reads the checkpoint and resumes from where processing left off rather than from the beginning of the stream or the latest event."
+      },
+      {
+        "question": "When would you choose Event Hubs over Azure Service Bus?",
+        "answer": "Event Hubs is designed for high-throughput event streaming — telemetry, logs, IoT, clickstreams — where multiple consumers read the same stream independently and ordering within a partition matters. Service Bus is designed for reliable message queuing and task distribution with dead-lettering, sessions, deferral, and transactional sends. Use Event Hubs for streaming analytics pipelines; use Service Bus for business process messaging and command distribution."
+      },
+      {
+        "question": "How does Event Hubs Kafka compatibility work and what are its limits?",
+        "answer": "Event Hubs exposes the Kafka protocol over TLS on port 9093, using SASL_SSL with Microsoft Entra OAuth or SAS authentication. Kafka topics map to event hubs, while partitions and offsets map directly. Event Hubs remains a managed service that scales through throughput or processing units; some Kafka capabilities, including transactions and Kafka Streams, are tier-dependent previews in Premium and Dedicated."
+      }
+    ],
+    "note": "Event Hubs retention is time-based, not consumption-based — events are deleted after the configured retention period regardless of whether they were consumed. Design consumer catch-up strategies and use Capture for long-term archiving.",
+    "tip": "Use the Kafka-compatible endpoint when migrating existing Kafka producers from a self-managed cluster to Event Hubs — change only the bootstrap server and credential configuration, validate, then decommission the cluster.",
+    "warning": "Event Hubs provides at-least-once delivery. A failure after a side effect but before the next checkpoint can replay events, so handlers and downstream writes must be idempotent even though partition ownership is coordinated between processor instances.",
+    "sampleId": "ride-sharing-cqrs",
+    "readingMinutes": 12,
+    "level": "Intermediate",
+    "updated": "2026-08-07",
+    "latestNote": "New guide on partitions, EventProcessorClient, checkpointing, Kafka compatibility, and Capture",
+    "resources": [
+      {
+        "label": "Azure Event Hubs overview",
+        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about"
+      },
+      {
+        "label": "EventProcessorClient load balancing and checkpoints",
+        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/event-processor-balance-partition-load"
+      },
+      {
+        "label": "Event Hubs for Apache Kafka",
+        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/azure-event-hubs-apache-kafka-overview"
+      }
+    ]
   },
   {
     "slug": "azure-data-factory-etl",
