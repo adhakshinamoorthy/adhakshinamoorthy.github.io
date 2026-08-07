@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $technologyPath = Join-Path $projectRoot "data\technologies.json"
 $outputDirectory = Join-Path $projectRoot "technologies"
-$technologies = Get-Content -Raw -LiteralPath $technologyPath | ConvertFrom-Json
+$technologies = Get-Content -Raw -Encoding UTF8 -LiteralPath $technologyPath | ConvertFrom-Json
 $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
 
 New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null

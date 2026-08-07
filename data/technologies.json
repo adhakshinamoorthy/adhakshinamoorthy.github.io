@@ -1812,5 +1812,155 @@
     "warning": "Autoscaling cannot compensate for a hard database bottleneck, hot partition, serialized critical section, or dependency quota.",
     "resources": [{"label": "Performance Efficiency guidance", "url": "https://learn.microsoft.com/en-us/azure/well-architected/performance-efficiency/"}],
     "sampleId": "solution-architecture-portfolio", "readingMinutes": 15, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New pillar guide on targets, scaling, caching, partitioning, and load testing"
+  },
+  {
+    "slug": "graphql",
+    "name": "GraphQL",
+    "symbol": "GQL",
+    "category": "Web & Data",
+    "color": "#d6336c",
+    "shortDescription": "Let clients query exactly the fields they need through a single strongly typed schema instead of many fixed REST endpoints.",
+    "keywords": ["GraphQL", "schema", "resolvers", "HotChocolate", "subscriptions", "N+1"],
+    "overview": "GraphQL exposes one endpoint backed by a schema of types and fields; clients send a query describing exactly the shape of data they want, and the server resolves only that shape.",
+    "detail": "A schema-first or code-first definition declares types, queries, mutations, and subscriptions; resolvers fetch the data behind each field, often from different sources. This flexibility trades away HTTP-level caching and can hide expensive resolver chains behind an innocent-looking query, so tooling for query cost analysis and batched data loading matters as much as the schema itself.",
+    "concepts": [
+      {"title": "Schema and types", "description": "A single schema declares every type, query, mutation, and subscription a client can request, acting as a strongly typed contract."},
+      {"title": "Resolvers", "description": "Each field has a resolver function that fetches its value, potentially from a different data source than its sibling fields."},
+      {"title": "The N+1 problem", "description": "Resolving a list and then a related field per item can trigger one query per item unless requests are batched, typically with a data loader."},
+      {"title": "Query cost and depth limits", "description": "Because clients shape their own queries, servers need explicit complexity, depth, or cost limits to prevent one query from being disproportionately expensive."}
+    ],
+    "architecture": {"description": "A client sends one query to a single endpoint; the schema routes each requested field to its resolver, which may call different underlying data sources.", "nodes": ["Client query", "GraphQL schema", "Resolvers", "Data sources"], "colors": ["#d6336c", "#ae3ec9", "#4c6ef5", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderType.cs", "introduction": "A resolver stays focused on fetching one field's data; a data loader batches related lookups to avoid N+1 queries.", "code": "public class OrderType : ObjectType<Order>\n{\n    protected override void Configure(IObjectTypeDescriptor<Order> descriptor)\n    {\n        descriptor.Field(o => o.Id);\n        descriptor.Field(o => o.Total);\n        descriptor.Field(\"customer\")\n            .ResolveWith<Resolvers>(r => r.GetCustomerAsync(default!, default!, default!))\n            .UseDataLoader<CustomerByIdDataLoader>();\n    }\n\n    private sealed class Resolvers\n    {\n        public Task<Customer> GetCustomerAsync(\n            [Parent] Order order, CustomerByIdDataLoader loader, CancellationToken ct) =>\n            loader.LoadAsync(order.CustomerId, ct);\n    }\n}"},
+    "bestPractices": ["Batch related lookups with a data loader so a list of N items never triggers N separate queries.", "Set explicit query depth and complexity limits so a client can't request an unbounded, expensive query.", "Version fields by deprecating and adding, not by breaking existing clients—GraphQL schemas evolve additively.", "Log and monitor resolver-level timing, not just total request time, since one slow field can hide inside a fast-looking response."],
+    "interviewQuestions": [
+      {"question": "What is the N+1 problem in GraphQL and how is it usually solved?", "answer": "It happens when resolving a list and then a related field per item triggers one query per item instead of one batched query; a data loader collects those individual requests within a single tick and issues one batched query instead."},
+      {"question": "Why is REST-style HTTP caching harder with GraphQL?", "answer": "Most GraphQL requests are POSTs to a single endpoint with a query in the body, so intermediary and browser caches that key on URL and method have nothing distinct to cache against, unlike REST's per-resource URLs."},
+      {"question": "Why do GraphQL servers need query cost or depth limits that REST APIs typically don't?", "answer": "Because the client—not the server—shapes each query, an unbounded or deeply nested query can force the server to do disproportionate work; REST endpoints have a fixed, server-defined cost per call, so this risk doesn't arise the same way."}
+    ],
+    "note": "GraphQL moves query shape control to the client, which is powerful but shifts real responsibility for cost control onto the server.",
+    "tip": "Start with a small, deliberate schema mirroring your most-requested client shapes rather than exposing your entire domain model as a first pass.",
+    "warning": "An unbounded, deeply nested query is functionally similar to an unthrottled expensive database query—treat query complexity limits as a required guardrail, not an optional add-on.",
+    "resources": [{"label": "GraphQL specification", "url": "https://spec.graphql.org/"}, {"label": "HotChocolate documentation", "url": "https://chillicream.com/docs/hotchocolate"}],
+    "sampleId": "ai-gatekeeper", "readingMinutes": 11, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on schemas, resolvers, and the N+1 problem"
+  },
+  {
+    "slug": "backend-for-frontend",
+    "name": "Backend for Frontend",
+    "symbol": "BFF",
+    "category": "Architecture Practice",
+    "color": "#4c6ef5",
+    "shortDescription": "Give each frontend its own tailored API layer instead of forcing every client through one general-purpose API.",
+    "keywords": ["BFF", "API aggregation", "client-specific APIs", "edge composition", "gateway"],
+    "overview": "A Backend for Frontend is a thin API layer built and owned for one specific client—web, mobile, or a partner integration—that aggregates and reshapes calls to backend services into exactly what that client needs.",
+    "detail": "Instead of one general-purpose API serving every client's differing needs with optional fields and version branches, each frontend gets its own BFF: composing multiple backend calls into one response, hiding backend topology, and evolving independently of other clients' needs. The tradeoff is more services to own and keep consistent, so BFFs work best when client needs have genuinely diverged, not as a default for every project.",
+    "concepts": [
+      {"title": "Client-owned aggregation", "description": "A BFF composes calls to multiple backend services into the single shaped response its one client actually needs."},
+      {"title": "Reduced client-side complexity", "description": "Moving aggregation, retries, and field shaping into the BFF keeps client code focused on presentation instead of backend orchestration."},
+      {"title": "Independent evolution", "description": "Each BFF can change its contract and pace of release without coordinating with unrelated frontends sharing the same backend."},
+      {"title": "Backend topology hiding", "description": "Clients depend on their BFF's contract, not on the internal service boundaries behind it, so backend services can be refactored without breaking clients."}
+    ],
+    "architecture": {"description": "A frontend calls its own BFF, which aggregates and reshapes calls to shared backend services into that client's specific response shape.", "nodes": ["Frontend client", "BFF layer", "Aggregated calls", "Backend services"], "colors": ["#4c6ef5", "#7c4dff", "#ae3ec9", "#168c78"]},
+    "code": {"language": "csharp", "label": "WebBffEndpoints.cs", "introduction": "A BFF endpoint composes two backend calls into the single shape the web client actually renders.", "code": "app.MapGet(\"/bff/order-summary/{orderId:guid}\", async (\n    Guid orderId, IOrdersClient orders, ICustomersClient customers, CancellationToken ct) =>\n{\n    var order = await orders.GetAsync(orderId, ct);\n    var customer = await customers.GetAsync(order.CustomerId, ct);\n\n    return Results.Ok(new OrderSummaryResponse(\n        order.Id, order.Total, order.Status, customer.DisplayName));\n});"},
+    "bestPractices": ["Create a new BFF only once a client's needs have genuinely diverged from others, not preemptively for every frontend.", "Keep a BFF thin—composition and shaping, not business logic that belongs in the backend services it calls.", "Own each BFF with the team that owns its frontend, so contract changes don't require cross-team coordination.", "Apply the same resilience patterns—timeouts, retries, circuit breakers—to a BFF's outbound calls as any other service-to-service call."],
+    "interviewQuestions": [
+      {"question": "How is a BFF different from an API gateway?", "answer": "A gateway is typically one shared entry point applying cross-cutting concerns like routing, auth, and rate limiting for many clients; a BFF is dedicated to one client, aggregating and shaping backend calls into that client's specific needs—the two are often used together, gateway in front of multiple BFFs."},
+      {"question": "What problem does a BFF solve that a single shared API doesn't?", "answer": "A shared API serving very different clients accumulates optional fields, version branches, and client-specific logic to satisfy everyone; a BFF lets each client's API evolve and be shaped independently, avoiding that shared complexity."},
+      {"question": "What's the main cost of adopting the BFF pattern?", "answer": "More services to build, deploy, and keep consistent—logic like authorization or validation can end up duplicated across BFFs unless it's deliberately kept in shared backend services instead."}
+    ],
+    "note": "A BFF is scoped to one client's needs, not a second general-purpose API sitting in front of your services.",
+    "tip": "Let the frontend team that owns the client also own its BFF; the pattern's main value is removing cross-team coordination from client-specific changes.",
+    "warning": "Duplicating business rules—not just response shaping—across multiple BFFs recreates the consistency problems the pattern was meant to avoid.",
+    "resources": [{"label": "Backends for Frontends pattern", "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on client-owned API aggregation"
+  },
+  {
+    "slug": "terraform",
+    "name": "Terraform",
+    "symbol": "TF",
+    "category": "Delivery & Operations",
+    "color": "#7c4dff",
+    "shortDescription": "Declare cloud infrastructure as versioned, reviewable code that can be planned before it's applied, across any provider.",
+    "keywords": ["Terraform", "infrastructure as code", "HCL", "state", "providers", "modules"],
+    "overview": "Terraform describes infrastructure—networks, databases, compute, permissions—as declarative configuration, then plans and applies the changes needed to make real infrastructure match that configuration.",
+    "detail": "A provider maps Terraform's HCL configuration to a specific cloud's APIs, so the same workflow applies whether you're targeting Azure, AWS, or another platform. Terraform tracks real infrastructure in a state file, computes a plan showing exactly what will be created, changed, or destroyed before anything happens, and lets teams share reusable modules for common infrastructure shapes.",
+    "concepts": [
+      {"title": "Providers", "description": "A provider translates Terraform configuration into calls against a specific platform's API, letting one tool and workflow target multiple clouds."},
+      {"title": "State", "description": "Terraform records the real infrastructure it manages in a state file, using it to compute the difference between desired and actual on every run."},
+      {"title": "Plan and apply", "description": "Plan shows exactly what will be created, changed, or destroyed before anything happens; apply executes only that reviewed plan."},
+      {"title": "Modules", "description": "Reusable, parameterized configuration packages let teams share a tested infrastructure shape—like a standard app environment—instead of duplicating raw resources."}
+    ],
+    "architecture": {"description": "Configuration is planned against current state to compute a diff, then applied through the provider to create the real infrastructure.", "nodes": ["HCL configuration", "State file", "Plan (diff)", "Provider API"], "colors": ["#7c4dff", "#4c6ef5", "#ae3ec9", "#168c78"]},
+    "code": {"language": "hcl", "label": "main.tf", "introduction": "A module call provisions a standard app environment with parameters instead of duplicating the underlying resources per project.", "code": "module \"orders_api\" {\n  source              = \"./modules/app-service\"\n  name                = \"orders-api\"\n  resource_group_name = azurerm_resource_group.main.name\n  sku_name            = \"P1v3\"\n  app_settings = {\n    ASPNETCORE_ENVIRONMENT = \"Production\"\n  }\n}\n\noutput \"orders_api_url\" {\n  value = module.orders_api.default_hostname\n}"},
+    "bestPractices": ["Store state remotely with locking so two runs can't apply conflicting changes to the same infrastructure at once.", "Always review a plan's output before applying it, especially destroy actions—treat plan as a required gate, not a formality.", "Package repeated infrastructure shapes as modules with clear inputs and outputs instead of copy-pasting resource blocks.", "Keep secrets out of state and configuration; reference them from a secrets manager instead of hardcoding values."],
+    "interviewQuestions": [
+      {"question": "What is Terraform state, and why does losing it matter?", "answer": "State is Terraform's record of the real infrastructure it manages, used to compute what's changed on every run; without it, Terraform has no way to know what already exists and can plan to recreate or orphan real resources."},
+      {"question": "Why review a Terraform plan before applying it?", "answer": "The plan shows exactly what will be created, changed, or destroyed as a result of a configuration change, catching unintended consequences—like a destroy triggered by a renamed resource—before they happen against real infrastructure."},
+      {"question": "What problem do Terraform modules solve?", "answer": "They let a team package a tested, parameterized shape of infrastructure—like a standard app environment—and reuse it across projects, instead of every project hand-writing and maintaining its own copy of similar resource blocks."}
+    ],
+    "note": "Terraform's plan/apply split exists specifically so infrastructure changes can be reviewed like code changes, before they touch anything real.",
+    "tip": "Run Terraform in CI with a required plan-review step on every pull request, the same way you'd require a code review.",
+    "warning": "Manually changing infrastructure that Terraform manages, outside of Terraform, causes state drift that can lead to a later apply silently reverting or fighting your manual change.",
+    "resources": [{"label": "Terraform documentation", "url": "https://developer.hashicorp.com/terraform/docs"}, {"label": "AzureRM provider", "url": "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs"}],
+    "sampleId": "solution-architecture-portfolio", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on providers, state, and plan/apply"
+  },
+  {
+    "slug": "secrets-management",
+    "name": "Secrets Management",
+    "symbol": "KEY",
+    "category": "Delivery & Operations",
+    "color": "#a1662f",
+    "shortDescription": "Keep credentials, keys, and connection strings out of source and configuration, with rotation and least-privilege access built in.",
+    "keywords": ["secrets", "rotation", "least privilege", "managed identity", "vault", "encryption at rest"],
+    "overview": "Secrets management is about where credentials live, who and what can read them, and how they get replaced—not just picking a vault product to store them in.",
+    "detail": "A secret checked into source control or left in a plain configuration file is a secret that's already leaked, because history, backups, and logs outlive any later attempt to remove it. A dedicated secrets store centralizes access control and auditing, workload identity removes the need for an application to hold its own long-lived credential to reach that store, and rotation limits how long a compromised secret stays useful.",
+    "concepts": [
+      {"title": "Centralized storage and access control", "description": "A dedicated secrets store lets access be granted, audited, and revoked per identity, instead of secrets being copied into every environment's configuration."},
+      {"title": "Workload identity", "description": "Letting a compute resource authenticate to the secrets store using its platform identity removes the need for a bootstrap credential to fetch other credentials."},
+      {"title": "Rotation", "description": "Regularly replacing secrets, ideally automatically, limits how long a leaked or compromised credential remains valid."},
+      {"title": "Least privilege scoping", "description": "An application or service should only be able to read the specific secrets it needs, not every secret in a shared vault."}
+    ],
+    "architecture": {"description": "A workload authenticates with its platform identity, requests only the secrets it needs from the vault, and the vault logs and can later rotate that access.", "nodes": ["Workload identity", "Secrets vault", "Scoped access policy", "Audit log + rotation"], "colors": ["#a1662f", "#d17a2d", "#4c6ef5", "#168c78"]},
+    "code": {"language": "csharp", "label": "SecretsSetup.cs", "introduction": "The application authenticates to the vault using its managed identity, with no credential stored in configuration to reach it.", "code": "var builder = WebApplication.CreateBuilder(args);\n\nbuilder.Configuration.AddAzureKeyVault(\n    new Uri(\"https://orders-vault.vault.azure.net/\"),\n    new DefaultAzureCredential());\n\nvar app = builder.Build();\nvar connectionString = app.Configuration[\"OrdersDb--ConnectionString\"];"},
+    "bestPractices": ["Never commit a secret to source control, even temporarily—rotate it immediately if it happens, since history retains it.", "Use a workload's platform identity to authenticate to the vault instead of storing a separate credential to reach the vault itself.", "Scope access policies per secret or per group of secrets, not one broad policy granting every workload read access to everything.", "Automate rotation for anything long-lived, and design applications to pick up a rotated secret without a manual restart."],
+    "interviewQuestions": [
+      {"question": "Why is committing a secret to source control dangerous even if you delete it in the next commit?", "answer": "Git history retains every prior version by default, and the secret may already be in forks, backups, CI logs, or cached clones, so deleting it from the latest commit doesn't remove it from anywhere it's already been."},
+      {"question": "What problem does workload identity solve for secrets management?", "answer": "Without it, an application needs some credential to authenticate to the secrets store in the first place, which just relocates the original problem; workload identity lets the platform vouch for the application's identity directly, removing that bootstrap credential entirely."},
+      {"question": "Why rotate secrets that haven't been confirmed as leaked?", "answer": "You can't always know a secret has leaked—rotation limits the value and window of a leak you don't yet know about, the same way changing a lock periodically doesn't require proof a key was copied."}
+    ],
+    "note": "Secrets management is as much about identity and access design as it is about which product stores the values.",
+    "tip": "Design for rotation from day one—retrofitting a rotation-tolerant application after every secret is hardcoded at startup is much harder than building it in from the start.",
+    "warning": "A single shared master credential granting broad access to a whole vault defeats much of the purpose of centralizing secrets in the first place.",
+    "resources": [{"label": "Secrets management best practices", "url": "https://learn.microsoft.com/en-us/azure/key-vault/general/best-practices"}, {"label": "OWASP secrets management cheat sheet", "url": "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}],
+    "sampleId": "ai-gatekeeper", "readingMinutes": 9, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on rotation, workload identity, and least privilege"
+  },
+  {
+    "slug": "orleans",
+    "name": "Orleans",
+    "symbol": "ORL",
+    "category": "Cloud & Architecture",
+    "color": "#4a5fc1",
+    "shortDescription": "Model distributed state and behavior as virtual actors that the runtime activates, places, and recovers automatically.",
+    "keywords": ["Orleans", "virtual actors", "grains", "distributed state", "silo"],
+    "overview": "Orleans lets you write distributed systems as single-threaded objects called grains, while the runtime handles where each grain runs, how it's activated on demand, and how it recovers after a failure.",
+    "detail": "A grain is addressed by a stable identity, not a physical location; Orleans activates it on some silo when a call arrives, deactivates it when idle, and reactivates it elsewhere if that silo fails—all transparent to the caller. Because each grain processes messages one at a time, application code inside it can be written without locks, while Orleans handles distribution, placement, and failure recovery underneath.",
+    "concepts": [
+      {"title": "Grains", "description": "A grain is a single-threaded, addressable unit of distributed state and behavior, identified by a stable key rather than a physical location."},
+      {"title": "Virtual actors", "description": "Grains always logically exist; the runtime activates them on demand and deactivates them when idle, so callers never manage a grain's lifecycle directly."},
+      {"title": "Silos and placement", "description": "A cluster of silos hosts grains; Orleans decides where to activate each grain and can reactivate it elsewhere automatically if a silo fails."},
+      {"title": "Single-threaded execution", "description": "Each grain processes one message at a time, so application code inside it avoids the locks and race conditions typical of shared-state concurrency."}
+    ],
+    "architecture": {"description": "A client calls a grain by its identity; the runtime activates it on an available silo, and that grain processes messages one at a time, persisting state as needed.", "nodes": ["Client call", "Grain identity", "Silo cluster", "Persisted state"], "colors": ["#4a5fc1", "#4c6ef5", "#7c4dff", "#168c78"]},
+    "code": {"language": "csharp", "label": "OrderGrain.cs", "introduction": "A grain interface and implementation define addressable, single-threaded state; Orleans handles activation and placement.", "code": "public interface IOrderGrain : IGrainWithGuidKey\n{\n    Task<OrderStatus> GetStatusAsync();\n    Task PlaceAsync(IReadOnlyList<OrderLine> lines);\n}\n\npublic sealed class OrderGrain(\n    [PersistentState(\"order\")] IPersistentState<OrderState> state)\n    : Grain, IOrderGrain\n{\n    public Task<OrderStatus> GetStatusAsync() => Task.FromResult(state.State.Status);\n\n    public async Task PlaceAsync(IReadOnlyList<OrderLine> lines)\n    {\n        state.State = state.State with { Lines = lines, Status = OrderStatus.Placed };\n        await state.WriteStateAsync();\n    }\n}"},
+    "bestPractices": ["Keep grain calls single-purpose and short-lived; a grain is a unit of state and behavior, not a place for long synchronous blocking work.", "Persist only the state a grain actually needs to recover, and choose a storage provider that matches your durability requirements.", "Design grain identities deliberately—they determine how work and state are partitioned across the cluster.", "Avoid grain-to-grain call chains that form cycles; they can deadlock since each grain processes one message at a time."],
+    "interviewQuestions": [
+      {"question": "What does 'virtual actor' mean in Orleans, and why does it matter?", "answer": "A grain logically always exists at its identity, whether or not it's currently activated in memory; callers never create or destroy it explicitly, and the runtime transparently activates, deactivates, and relocates it, which removes a whole class of lifecycle and placement code the application would otherwise have to write."},
+      {"question": "How does Orleans avoid the need for locks inside a grain?", "answer": "Each grain processes incoming calls one at a time, single-threaded, so there's never concurrent access to a grain's own state from within—concurrency exists between grains, not within one."},
+      {"question": "What happens to a grain's in-memory state if the silo hosting it fails?", "answer": "The in-memory activation is lost, but if the grain persists its state through a storage provider, Orleans can reactivate it—with that persisted state restored—on another silo when the next call arrives."}
+    ],
+    "note": "Orleans trades explicit distributed-systems plumbing for a programming model where distribution is mostly the runtime's problem, not the application's.",
+    "tip": "Start by modeling your domain's natural single-owner entities—one order, one device, one session—as grains; that mapping is usually where Orleans fits most naturally.",
+    "warning": "A grain is not a substitute for a database; treat its persisted state as what that one entity needs to recover, not as your system's queryable source of truth.",
+    "resources": [{"label": "Microsoft Orleans documentation", "url": "https://learn.microsoft.com/en-us/dotnet/orleans/overview"}],
+    "sampleId": "ai-orchestrator", "readingMinutes": 10, "level": "Advanced", "updated": "2026-08-07", "latestNote": "New guide on grains, silos, and virtual actor placement"
   }
 ]

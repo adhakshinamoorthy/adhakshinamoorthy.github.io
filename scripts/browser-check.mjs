@@ -128,7 +128,7 @@ try {
   );
 
   const architecturePractice = page.locator('.sidebar-group[aria-label="Architecture Practice"] .sidebar-link');
-  check(await architecturePractice.count() === 6, 'Architecture Practice category does not contain six guides');
+  check(await architecturePractice.count() === 7, 'Architecture Practice category does not contain seven guides');
   check(
     JSON.stringify((await architecturePractice.allTextContents()).map(text => text.trim())) === JSON.stringify([
       'Solution Architecture Fundamentals',
@@ -136,7 +136,8 @@ try {
       'API Design Best Practices',
       'Multi-Tenancy Patterns',
       'Saga Pattern',
-      'Legacy Modernization'
+      'Legacy Modernization',
+      'Backend for Frontend'
     ]),
     'Architecture Practice guides are not in the expected learning order'
   );
