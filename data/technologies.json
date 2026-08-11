@@ -93,27 +93,84 @@
     "category": "Web & Data",
     "color": "#2878c8",
     "shortDescription": "A high-performance, cross-platform framework for APIs, web apps, real-time systems, and services.",
-    "keywords": ["web", "middleware", "MVC", "API", "Kestrel", "SignalR"],
-    "overview": "ASP.NET Core is the web framework for building HTTP APIs, server-rendered applications, real-time endpoints, and cloud services on .NET.",
-    "detail": "Requests enter Kestrel, pass through an ordered middleware pipeline, and reach an endpoint selected by routing. Built-in facilities cover configuration, logging, dependency injection, authentication, authorization, health checks, caching, and graceful shutdown.",
-    "concepts": [
-      {"title": "Middleware pipeline", "description": "Ordered components inspect, short-circuit, or pass HTTP requests and responses through the application."},
-      {"title": "Routing and endpoints", "description": "Routes match requests to controllers, Razor pages, hubs, health checks, or minimal API handlers."},
-      {"title": "Hosting model", "description": "WebApplication coordinates configuration, services, logging, server startup, and application lifetime."},
-      {"title": "Cross-cutting services", "description": "Authentication, problem details, rate limits, output caching, and telemetry integrate at the platform level."}
+    "keywords": ["web", "middleware", "minimal APIs", "controllers", "Kestrel", "dependency injection", "problem details", "rate limiting", "health checks", "integration testing"],
+    "contentStatus": "complete",
+    "overview": "ASP.NET Core is the cross-platform .NET framework for HTTP APIs, server-rendered applications, real-time systems, background-enabled web services, and cloud-native workloads.",
+    "detail": "An ASP.NET Core application is a hosted process with configuration, logging, dependency injection, and an ordered HTTP middleware pipeline. Kestrel accepts a request, middleware applies cross-cutting behavior, routing selects an endpoint, and the endpoint coordinates application services before the response travels back through the pipeline. The framework supplies primitives for authentication, authorization, validation, problem details, rate limiting, caching, health checks, graceful shutdown, and telemetry, but teams must still choose clear boundaries and verify the complete runtime path.",
+    "learningObjectives": [
+      "Explain how Kestrel, middleware, routing, endpoints, dependency injection, and application services collaborate for one HTTP request.",
+      "Build a small API that returns consistent success and problem-detail responses.",
+      "Place exception handling, correlation, rate limiting, and endpoint execution in an intentional order.",
+      "Separate liveness from readiness and propagate request cancellation to downstream work.",
+      "Verify routing, serialization, validation, middleware, and headers through end-to-end tests."
     ],
-    "architecture": {"description": "The request pipeline applies cross-cutting policy before dispatching to an endpoint that coordinates application and infrastructure services.", "nodes": ["HTTP client", "Middleware pipeline", "Endpoint", "Application services"], "colors": ["#168dcc", "#2878c8", "#6556c8", "#168c78"]},
-    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A focused API configures platform services first, then composes middleware in an intentional order.", "code": "var builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddProblemDetails();\nbuilder.Services.AddOpenApi();\nbuilder.Services.AddHealthChecks();\n\nvar app = builder.Build();\napp.UseExceptionHandler();\napp.UseHttpsRedirection();\n\napp.MapGet(\"/api/orders/{id:guid}\", async (\n    Guid id, IOrderService orders, CancellationToken ct) =>\n    await orders.FindAsync(id, ct) is { } order\n        ? Results.Ok(order)\n        : Results.NotFound());\n\napp.MapHealthChecks(\"/health\");\napp.Run();"},
-    "bestPractices": ["Keep middleware order explicit and cover security-sensitive ordering with integration tests.", "Return consistent problem details for failures instead of ad hoc error shapes.", "Propagate request cancellation to database and outbound HTTP operations.", "Expose separate liveness and readiness checks when orchestration depends on them."],
+    "prerequisites": [
+      "Comfort with C# types, records, asynchronous methods, and cancellation tokens.",
+      "The .NET 10 SDK and an editor or terminal capable of sending HTTP requests.",
+      "Basic HTTP knowledge: methods, routes, headers, status codes, and JSON bodies."
+    ],
+    "decisionGuide": {
+      "use": [
+        "HTTP APIs, web applications, real-time hubs, backend-for-frontend services, and cloud-hosted .NET workloads.",
+        "Systems that benefit from built-in dependency injection, configuration, logging, security middleware, health checks, and test hosting.",
+        "Teams that want one programming model from a small minimal API to a structured controller-based application."
+      ],
+      "avoid": [
+        "A simple scheduled or queue-driven process with no HTTP surface; use a Worker Service instead.",
+        "Static content that can be served directly from object storage or a CDN without an application process.",
+        "A requirement to hide unclear domain boundaries inside controllers or endpoint handlers; design the application model first."
+      ]
+    },
+    "concepts": [
+      {"title": "Hosting and Kestrel", "description": "WebApplication composes configuration, logging, services, server startup, and lifetime while Kestrel accepts HTTP connections."},
+      {"title": "Middleware pipeline", "description": "Ordered components can inspect, enrich, reject, short-circuit, or pass requests to the next component and then observe the response."},
+      {"title": "Routing and endpoints", "description": "Endpoint routing matches method, path, constraints, and metadata to minimal API handlers, controllers, Razor pages, hubs, or health checks."},
+      {"title": "Dependency injection", "description": "The built-in container creates endpoint and service dependencies with singleton, scoped, or transient ownership."},
+      {"title": "HTTP contracts", "description": "Status codes, headers, JSON shapes, validation responses, and problem details form the observable contract clients depend on."},
+      {"title": "Operational middleware", "description": "Exception handling, authentication, authorization, rate limiting, caching, health checks, and telemetry belong in the runtime design, not as afterthoughts."}
+    ],
+    "architecture": {"description": "A request enters Kestrel, receives cross-cutting policy in middleware, is matched by routing, reaches a feature endpoint, and coordinates an application boundary before the response returns through the same pipeline.", "nodes": ["HTTP client", "Kestrel", "Middleware", "Endpoint routing", "Application service", "Response"], "colors": ["#168dcc", "#2878c8", "#6556c8", "#8a4db8", "#168c78", "#2678c8"]},
+    "implementationSteps": [
+      {"title": "Create the host", "description": "Use WebApplication.CreateBuilder to load configuration, logging, environment information, and the dependency-injection container."},
+      {"title": "Register capabilities", "description": "Add problem details, repositories, health checks, rate limiting, options, and other dependencies before building the application."},
+      {"title": "Compose middleware", "description": "Order exception handling, correlation, security, rate limiting, caching, and routing based on which requests and responses each component must observe."},
+      {"title": "Map feature endpoints", "description": "Group related routes, attach metadata and policies, validate boundary input, call application services, and translate outcomes into HTTP responses."},
+      {"title": "Propagate cancellation", "description": "Pass the request CancellationToken into database, messaging, and outbound HTTP work so disconnected requests do not waste resources."},
+      {"title": "Expose health signals", "description": "Keep liveness focused on the process and readiness focused on dependencies required to serve traffic."},
+      {"title": "Test through HTTP", "description": "Use WebApplicationFactory to exercise the real middleware, routing, serialization, validation, and response contract."
+      }
+    ],
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "The dedicated sample keeps startup readable while registering problem details, health checks, rate limiting, correlation, and a feature-oriented product endpoint group.", "code": "var builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddProblemDetails();\nbuilder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();\nbuilder.Services.AddHealthChecks();\nbuilder.Services.AddRateLimiter(options =>\n    options.AddFixedWindowLimiter(\"api\", limiter =>\n    {\n        limiter.PermitLimit = 20;\n        limiter.Window = TimeSpan.FromMinutes(1);\n    }));\n\nvar app = builder.Build();\n\napp.UseExceptionHandler();\napp.UseMiddleware<CorrelationIdMiddleware>();\napp.UseRateLimiter();\n\napp.MapProductEndpoints();\napp.MapHealthChecks(\"/health/live\");\napp.MapHealthChecks(\"/health/ready\");\n\napp.Run();"},
+    "testing": {"introduction": "Unit tests are useful for domain rules, but an HTTP application also needs integration tests that prove framework configuration works together.", "items": ["Create the application with WebApplicationFactory so tests use the real service registrations and middleware pipeline.", "Test successful and failed routes, JSON serialization, validation problem details, headers, and status codes.", "Avoid assertions that depend on test execution order or shared mutable state.", "Keep live external-service tests behind an explicit opt-in flag; normal tests should remain deterministic."]},
+    "security": {"introduction": "Security depends on middleware order, endpoint metadata, trusted proxy configuration, and safe boundary handling.", "items": ["Authenticate before authorization and require policies on route groups or endpoints instead of relying on UI visibility.", "Validate and normalize all boundary input; never bind persistence entities directly as public contracts.", "Configure forwarded headers only for known proxies and do not trust arbitrary client identity headers.", "Limit request sizes, protect secrets with environment-specific providers, and return safe problem details without stack traces."]},
+    "performance": {"introduction": "ASP.NET Core is efficient by default, but application throughput is usually constrained by blocking I/O, unbounded work, serialization, databases, or downstream services.", "items": ["Use asynchronous APIs for I/O and pass cancellation tokens throughout the call chain.", "Bound request bodies, query results, queues, concurrency, retries, and outbound timeouts.", "Measure with metrics and traces before optimizing allocations or switching serializers.", "Use output caching only for responses whose identity, authorization, and invalidation rules are explicit."]},
+    "deployment": {"introduction": "A deployable API needs more than a successful local build.", "items": ["Publish for the target OS and architecture, run containers as non-root, and scan dependencies and images in CI.", "Terminate TLS at a trusted boundary and configure reverse-proxy headers, host filtering, and HTTPS behavior consistently.", "Export structured logs, metrics, and traces with correlation across inbound and outbound calls.", "Handle graceful shutdown, readiness changes, configuration validation, and database migrations as deliberate operational workflows."]},
+    "troubleshooting": [
+      {"symptom": "An endpoint always returns 404.", "cause": "The route, HTTP method, constraint, base path, or endpoint registration does not match the request.", "fix": "Inspect the mapped endpoint pattern and test the exact URL and method through WebApplicationFactory or an HTTP file."},
+      {"symptom": "Requests return 401 or 403 unexpectedly.", "cause": "Authentication did not establish an identity, a policy requirement failed, or middleware is ordered incorrectly.", "fix": "Separate authentication from authorization, inspect claims, and integration-test the endpoint metadata and middleware order."},
+      {"symptom": "The application hangs under load.", "cause": "Blocking calls, missing timeouts, unbounded concurrency, thread-pool starvation, or a slow downstream dependency is consuming request capacity.", "fix": "Capture traces and runtime metrics, remove sync-over-async calls, add timeouts and bounds, and load-test the real dependency path."},
+      {"symptom": "The service is healthy but cannot serve traffic.", "cause": "A single health endpoint reports process health without checking required dependencies.", "fix": "Use separate liveness and readiness checks and make readiness fail when a required dependency is unavailable."}
+    ],
+    "bestPractices": ["Keep the composition root readable and registrations close to their feature boundaries.", "Keep middleware order explicit and cover security-sensitive ordering with integration tests.", "Return consistent problem details for failures instead of ad hoc error shapes.", "Propagate request cancellation to database and outbound HTTP operations.", "Expose separate liveness and readiness checks when orchestration depends on them.", "Keep business rules outside HttpContext-dependent code so they remain fast to test."],
+    "productionChecklist": ["Configuration is validated on startup and secrets are not stored in source control.", "Authentication, authorization, CORS, forwarded headers, and rate limits match the deployment boundary.", "Errors use safe problem details and logs contain correlation without sensitive payloads.", "Liveness and readiness have distinct meanings and are tested during dependency failure.", "Outbound calls have timeouts, resilience policies, cancellation, and telemetry.", "Integration tests cover critical routes and the published artifact is smoke-tested in CI."],
     "interviewQuestions": [
       {"question": "Why does middleware order matter?", "answer": "Each middleware wraps the next component. Ordering changes which requests it sees and whether authentication, authorization, exceptions, and endpoints behave correctly."},
       {"question": "What is Kestrel?", "answer": "Kestrel is ASP.NET Core's cross-platform web server. It can be internet-facing or run behind a reverse proxy depending on the deployment."},
-      {"question": "When would you choose controllers over minimal APIs?", "answer": "Controllers are useful when conventions, filters, model-binding customization, and a structured large API surface outweigh minimal APIs' compact vertical-slice style."}
+      {"question": "When would you choose controllers over minimal APIs?", "answer": "Controllers are useful when conventions, filters, model-binding customization, and a structured large API surface outweigh minimal APIs' compact vertical-slice style."},
+      {"question": "What is the difference between liveness and readiness?", "answer": "Liveness answers whether the process should be restarted. Readiness answers whether this instance currently has the dependencies and state required to receive traffic."},
+      {"question": "Why use WebApplicationFactory instead of testing handlers directly?", "answer": "Handler tests do not prove route matching, middleware order, dependency registration, serialization, filters, or headers. WebApplicationFactory exercises those behaviors through the in-memory HTTP server."}
     ],
     "note": "Treat the HTTP layer as an adapter. Business rules should remain testable without constructing HTTP contexts.",
     "tip": "Use WebApplicationFactory integration tests to verify routing, filters, serialization, authentication, and middleware together.",
     "warning": "A health endpoint that always returns success can cause an orchestrator to route traffic to an application that cannot serve real requests.",
-    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-04", "latestNote": "Request pipeline guidance refreshed"
+    "resources": [
+      {"label": "ASP.NET Core fundamentals", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/"},
+      {"label": "Middleware", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/middleware/"},
+      {"label": "Integration tests", "url": "https://learn.microsoft.com/aspnet/core/test/integration-tests"},
+      {"label": "Rate limiting", "url": "https://learn.microsoft.com/aspnet/core/performance/rate-limit"},
+      {"label": "Health checks", "url": "https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks"}
+    ],
+    "sampleId": "aspnet-core-api-gold-standard", "readingMinutes": 24, "level": "Foundation to production", "updated": "2026-08-11", "latestNote": "Gold-standard guide with a dedicated runnable sample"
   },
   {
     "slug": "entity-framework-core",

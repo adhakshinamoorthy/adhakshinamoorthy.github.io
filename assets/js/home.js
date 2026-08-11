@@ -21,6 +21,7 @@ async function start() {
     renderSidebar(base, technologies);
     renderFooter(base);
     document.getElementById('technology-guide-count').textContent = technologies.length;
+    document.getElementById('sample-count').textContent = samples.length;
     renderBlobs(technologies);
     renderFeatured(technologies, samples);
     renderRoadmap(technologies);
@@ -52,7 +53,10 @@ function renderFeatured(technologies, samples) {
   const featuredSlugs = ['dotnet', 'aspnet-core', 'entity-framework-core'];
   const featured = featuredSlugs.map(slug => technologies.find(item => item.slug === slug));
   document.getElementById('featured-technologies').replaceChildren(...featured.map(item => technologyCard(item, base)));
-  document.getElementById('featured-samples').replaceChildren(...samples.slice(0, 3).map(githubCard));
+  const featuredSamples = [...samples]
+    .sort((left, right) => Number(right.status === 'complete') - Number(left.status === 'complete'))
+    .slice(0, 3);
+  document.getElementById('featured-samples').replaceChildren(...featuredSamples.map(githubCard));
 }
 
 function renderRoadmap(technologies) {

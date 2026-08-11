@@ -35,23 +35,40 @@ async function start() {
 
 function renderArticle(topic, technologies, samples) {
   const article = document.getElementById('topic-article');
+  const sample = samples.find(item => item.id === topic.sampleId);
+  const status = topic.contentStatus || 'outline';
+  const statusLabel = status === 'complete' ? 'Complete guide' : status === 'in-progress' ? 'In progress' : 'Outline guide';
   document.documentElement.style.setProperty('--topic-color', topic.color);
   article.innerHTML = `
     <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-separator" aria-hidden="true">/</span><span>Technologies</span><span class="breadcrumb-separator" aria-hidden="true">/</span><span aria-current="page">${escapeHtml(topic.name)}</span></nav>
     <header class="article-header">
-      <span class="topic-badge">${escapeHtml(topic.category)}</span>
+      <div class="topic-labels"><span class="topic-badge">${escapeHtml(topic.category)}</span><span class="topic-status topic-status-${escapeHtml(status)}">${statusLabel}</span></div>
       <h1>${escapeHtml(topic.name)}</h1>
       <p class="article-lede">${escapeHtml(topic.overview)}</p>
       <div class="article-meta"><span>⏱ ${topic.readingMinutes} min read</span><span>Updated ${formatDate(topic.updated)}</span><span>Level: ${escapeHtml(topic.level)}</span></div>
     </header>
     <section id="overview" class="article-section"><h2>Overview</h2><p>${escapeHtml(topic.detail)}</p><div class="official-resources"></div></section>
+    ${topic.learningObjectives?.length ? '<section id="learning-objectives" class="article-section"><h2>What you will learn</h2><ul class="practice-list learning-objectives"></ul><h3>Prerequisites</h3><ul class="plain-list prerequisites"></ul></section>' : ''}
+    ${topic.decisionGuide ? '<section id="decision-guide" class="article-section"><h2>When to use ASP.NET Core</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul></ul></article></div></section>' : ''}
     <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"></div></section>
     <section id="architecture" class="article-section"><h2>Architecture</h2><p>${escapeHtml(topic.architecture.description)}</p><div class="architecture-placeholder"><div class="diagram-flow"></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
+    ${topic.implementationSteps?.length ? '<section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>Build the runtime path deliberately, then prove it through HTTP.</p><ol class="step-list"></ol></section>' : ''}
     <section id="code-example" class="article-section"><h2>Code example</h2><p>${escapeHtml(topic.code.introduction)}</p><div class="code-host"></div></section>
+    ${guidanceMarkup('testing', 'Testing strategy', topic.testing)}
+    ${guidanceMarkup('security', 'Security considerations', topic.security)}
+    ${guidanceMarkup('performance', 'Performance and scalability', topic.performance)}
+    ${guidanceMarkup('deployment', 'Deployment and operations', topic.deployment)}
+    ${topic.troubleshooting?.length ? '<section id="troubleshooting" class="article-section"><h2>Common problems and fixes</h2><div class="troubleshooting-list"></div></section>' : ''}
     <section id="best-practices" class="article-section"><h2>Best practices</h2><ul class="practice-list"></ul></section>
+    ${topic.productionChecklist?.length ? '<section id="production-checklist" class="article-section"><h2>Production checklist</h2><ul class="checklist"></ul></section>' : ''}
     <section id="interview-questions" class="article-section"><h2>Common interview questions</h2><div class="faq-list"></div></section>
-    <section id="github-sample" class="article-section article-sample"><h2>Related GitHub sample</h2><p>Move from concept to implementation with a repository selected for this topic.</p><div class="sample-host"></div></section>
+    <section id="github-sample" class="article-section article-sample"><h2>${sample?.topicSlug === topic.slug ? 'Dedicated GitHub sample' : 'Related GitHub sample'}</h2><p>${sample?.topicSlug === topic.slug ? 'Clone, run, test, and modify the focused implementation created for this guide.' : 'Move from concept to implementation with a repository selected for this topic.'}</p><div class="sample-host"></div></section>
     <nav class="article-nav" aria-label="Previous and next topics"></nav>`;
+
+  fillList(article.querySelector('.learning-objectives'), topic.learningObjectives);
+  fillList(article.querySelector('.prerequisites'), topic.prerequisites);
+  fillList(article.querySelector('.decision-use ul'), topic.decisionGuide?.use);
+  fillList(article.querySelector('.decision-avoid ul'), topic.decisionGuide?.avoid);
 
   article.querySelector('.concept-grid').replaceChildren(...topic.concepts.map(concept => {
     const card = document.createElement('article');
@@ -95,19 +112,78 @@ function renderArticle(topic, technologies, samples) {
     }
   });
 
+  renderSteps(article.querySelector('.step-list'), topic.implementationSteps);
+
   article.querySelector('.code-host').append(codeBlock(topic.code));
   article.querySelector('#code-example').append(callout('note', topic.note));
-  article.querySelector('.practice-list').replaceChildren(...topic.bestPractices.map(practice => {
+  renderGuidance(article, 'testing', topic.testing);
+  renderGuidance(article, 'security', topic.security);
+  renderGuidance(article, 'performance', topic.performance);
+  renderGuidance(article, 'deployment', topic.deployment);
+  renderTroubleshooting(article.querySelector('.troubleshooting-list'), topic.troubleshooting);
+  article.querySelector('#best-practices .practice-list').replaceChildren(...topic.bestPractices.map(practice => {
     const item = document.createElement('li'); item.textContent = practice; return item;
   }));
   article.querySelector('#best-practices').append(callout('tip', topic.tip));
   article.querySelector('#best-practices').append(callout('warning', topic.warning));
+  fillList(article.querySelector('.checklist'), topic.productionChecklist);
   article.querySelector('.faq-list').replaceChildren(...topic.interviewQuestions.map(faqItem));
 
-  const sample = samples.find(item => item.id === topic.sampleId) || samples[0];
-  article.querySelector('.sample-host').append(githubCard(sample));
+  if (sample) {
+    article.querySelector('.sample-host').append(githubCard(sample));
+  } else {
+    const missing = document.createElement('div');
+    missing.className = 'error-panel';
+    missing.innerHTML = '<h3>Dedicated sample pending</h3><p>This guide does not yet have a verified GitHub sample.</p>';
+    article.querySelector('.sample-host').append(missing);
+  }
   renderAdjacentNavigation(article.querySelector('.article-nav'), topic, technologies);
-  renderToc(topic);
+  renderToc();
+}
+
+function guidanceMarkup(id, title, guidance) {
+  if (!guidance?.items?.length) return '';
+  return `<section id="${id}" class="article-section"><h2>${title}</h2><p>${escapeHtml(guidance.introduction)}</p><ul class="practice-list guidance-list"></ul></section>`;
+}
+
+function fillList(host, items = []) {
+  if (!host || !items?.length) return;
+  host.replaceChildren(...items.map(text => {
+    const item = document.createElement('li');
+    item.textContent = text;
+    return item;
+  }));
+}
+
+function renderSteps(host, steps = []) {
+  if (!host || !steps?.length) return;
+  host.replaceChildren(...steps.map((step, index) => {
+    const item = document.createElement('li');
+    const number = document.createElement('span'); number.textContent = String(index + 1).padStart(2, '0');
+    const content = document.createElement('div');
+    const title = document.createElement('strong'); title.textContent = step.title;
+    const body = document.createElement('p'); body.textContent = step.description;
+    content.append(title, body);
+    item.append(number, content);
+    return item;
+  }));
+}
+
+function renderGuidance(article, id, guidance) {
+  fillList(article.querySelector(`#${id} .guidance-list`), guidance?.items);
+}
+
+function renderTroubleshooting(host, problems = []) {
+  if (!host || !problems?.length) return;
+  host.replaceChildren(...problems.map(problem => {
+    const card = document.createElement('article');
+    card.className = 'troubleshooting-card';
+    const title = document.createElement('h3'); title.textContent = problem.symptom;
+    const cause = document.createElement('p'); cause.innerHTML = `<strong>Likely cause:</strong> ${escapeHtml(problem.cause)}`;
+    const fix = document.createElement('p'); fix.innerHTML = `<strong>Fix:</strong> ${escapeHtml(problem.fix)}`;
+    card.append(title, cause, fix);
+    return card;
+  }));
 }
 
 function renderAdjacentNavigation(host, topic, technologies) {
@@ -128,11 +204,12 @@ function navLink(topic, label) {
   return link;
 }
 
-function renderToc(topic) {
-  const sections = [
-    ['overview','Overview'],['key-concepts','Key concepts'],['architecture','Architecture'],['code-example','Code example'],['best-practices','Best practices'],['interview-questions','Interview questions'],['github-sample','GitHub sample']
-  ];
-  document.getElementById('article-toc').innerHTML = `<p class="toc-title">On this page</p><ul class="toc-list">${sections.map(([id,label]) => `<li><a class="toc-link" href="#${id}">${label}</a></li>`).join('')}</ul>`;
+function renderToc() {
+  const sections = [...document.querySelectorAll('.article-section')].map(section => [
+    section.id,
+    section.querySelector('h2')?.textContent || section.id
+  ]);
+  document.getElementById('article-toc').innerHTML = `<p class="toc-title">On this page</p><ul class="toc-list">${sections.map(([id,label]) => `<li><a class="toc-link" href="#${id}">${escapeHtml(label)}</a></li>`).join('')}</ul>`;
 }
 
 function bindTableOfContents() {

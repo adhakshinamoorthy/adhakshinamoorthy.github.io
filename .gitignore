@@ -1,1 +1,4 @@
 artifacts/
+**/bin/
+**/obj/
+**/TestResults/

@@ -4,7 +4,9 @@ A modern, responsive static learning portal for the Microsoft .NET ecosystem. It
 
 ## What is included
 
-- 78 technology guides with overview, key concepts, architecture, code, practices, interview questions, and a related sample
+- 78 technology topics with honest `Outline`, `In progress`, or `Complete` status labels
+- One gold-standard complete ASP.NET Core guide covering decisions, implementation, testing, security, performance, deployment, troubleshooting, and production readiness
+- Seven GitHub samples, including a dedicated runnable ASP.NET Core API with tests and HTTP requests
 - Light and dark themes with system detection and persisted manual selection
 - Responsive sticky navigation, collapsible mobile sidebar, global search, and keyboard shortcuts
 - Animated, accessible technology blob cloud
@@ -55,6 +57,25 @@ Edit [`data/github-samples.json`](data/github-samples.json). Each card uses this
 ```
 
 Set `liveDemoUrl` to `null` to hide the demo button. Use a sample's `id` in a technology's `sampleId` field to connect it to an article.
+
+A topic marked `complete` must reference a unique sample with matching `topicSlug`, `status: "complete"`, a local README path, and documented run and test commands. Verification fails when this contract is broken. Related flagship repositories may still appear on outline guides, but they do not qualify a guide as complete.
+
+## Content completion contract
+
+Outline topics remain searchable while their full learning path is being built. A guide can be marked `complete` only when it includes:
+
+- Learning objectives and prerequisites
+- When-to-use and when-not-to-use guidance
+- At least six core concepts
+- Architecture and an implementation walkthrough
+- Runnable code connected to a dedicated sample
+- Testing, security, performance, and deployment guidance
+- Troubleshooting scenarios and a production checklist
+- At least six best practices and five interview questions
+- A realistic reading time of at least 20 minutes
+- A unique verified sample with run and test commands
+
+The contract is enforced by `scripts/verify.mjs`; completeness is not based on page count or word count alone.
 
 ## Add or edit technologies
 

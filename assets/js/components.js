@@ -35,7 +35,8 @@ export function technologyCard(technology, base = '') {
   const card = cloneTemplate('technology-card-template');
   card.style.setProperty('--topic-color', technology.color);
   card.querySelector('.technology-card-icon').textContent = technology.symbol;
-  card.querySelector('.card-kicker').textContent = technology.category;
+  const status = technology.contentStatus === 'complete' ? 'Complete' : technology.contentStatus === 'in-progress' ? 'In progress' : 'Outline';
+  card.querySelector('.card-kicker').textContent = `${technology.category} · ${status}`;
   card.querySelector('h3').textContent = technology.name;
   card.querySelector('p').textContent = technology.shortDescription;
   card.querySelector('a').href = `${base}technologies/${technology.slug}.html`;
@@ -44,15 +45,33 @@ export function technologyCard(technology, base = '') {
 
 export function githubCard(sample) {
   const card = cloneTemplate('github-card-template');
+  if (sample.status === 'complete') card.querySelector('.repo-visibility').textContent = 'Verified sample';
   card.querySelector('h3').textContent = sample.name;
   card.querySelector('.repo-description').textContent = sample.description;
   card.querySelector('.tech-pills').replaceChildren(...sample.technologies.map(label => pill(label)));
   card.querySelector('.tag-list').replaceChildren(...sample.tags.map(label => pill(label)));
   card.querySelector('.github-link').href = sample.githubUrl;
+  if (sample.runCommand || sample.testCommand) {
+    const commands = document.createElement('dl');
+    commands.className = 'sample-commands';
+    if (sample.runCommand) commands.append(commandRow('Run', sample.runCommand));
+    if (sample.testCommand) commands.append(commandRow('Test', sample.testCommand));
+    card.querySelector('.repo-actions').before(commands);
+  }
   const demo = card.querySelector('.demo-link');
   if (sample.liveDemoUrl) demo.href = sample.liveDemoUrl;
   else demo.remove();
   return card;
+}
+
+function commandRow(label, command) {
+  const wrapper = document.createElement('div');
+  const term = document.createElement('dt'); term.textContent = label;
+  const value = document.createElement('dd');
+  const code = document.createElement('code'); code.textContent = command;
+  value.append(code);
+  wrapper.append(term, value);
+  return wrapper;
 }
 
 function pill(text) {
