@@ -52,5 +52,19 @@
     "tags": ["gof", "solid", "learning"],
     "githubUrl": "https://github.com/adhakshinamoorthy/DesignPatterns",
     "liveDemoUrl": null
+  },
+  {
+    "id": "aspnet-core-api-gold-standard",
+    "topicSlug": "aspnet-core",
+    "status": "complete",
+    "name": "ASP.NET Core Product API",
+    "description": "A focused .NET 10 API demonstrating middleware ordering, dependency injection, validation problem details, rate limiting, health checks, correlation IDs, HTTP requests, Docker, and end-to-end tests.",
+    "technologies": ["ASP.NET Core", ".NET 10", "Minimal APIs", "xUnit"],
+    "tags": ["dedicated-sample", "problem-details", "health-checks", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/aspnet-core-api",
+    "localPath": "samples/aspnet-core-api/README.md",
+    "runCommand": "dotnet run --project src/AspNetCoreApi.Api",
+    "testCommand": "dotnet test AspNetCoreApi.slnx",
+    "liveDemoUrl": null
   }
 ]

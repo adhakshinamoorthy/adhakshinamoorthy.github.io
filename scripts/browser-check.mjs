@@ -92,11 +92,20 @@ try {
     await page.locator('.sidebar-disclosure[open] .sidebar-link[aria-current="page"]').count() === 1,
     'Expanded sidebar category does not contain the active topic'
   );
-  check(await page.locator('.article-section').count() === 7, 'Topic does not render all seven content sections');
-  check(await page.locator('.concept-card').count() === 4, 'Topic key concepts are incomplete');
+  check(await page.locator('.topic-status-complete').count() === 1, 'ASP.NET Core is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'Gold-standard topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'Gold-standard table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 6, 'Gold-standard topic key concepts are incomplete');
+  check(await page.locator('.decision-panel').count() === 2, 'When-to-use decision guidance is incomplete');
+  check(await page.locator('.step-list li').count() === 7, 'Implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 4, 'Troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 6, 'Production checklist is incomplete');
   check(await page.locator('.diagram-node').count() >= 3, 'Architecture diagram flow is incomplete');
   check(await page.locator('.callout').count() === 3, 'Topic callout panels are incomplete');
-  check(await page.locator('.faq-item').count() >= 3, 'Topic interview FAQ is incomplete');
+  check(await page.locator('.faq-item').count() >= 5, 'Topic interview FAQ is incomplete');
+  check((await page.locator('#github-sample h2').innerText()) === 'Dedicated GitHub sample', 'Topic does not identify its dedicated sample');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'Dedicated sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/aspnet-core-api'), 'Dedicated sample links to the wrong GitHub path');
   check(await page.locator('.article-nav a').count() === 2, 'Previous/next navigation is incomplete');
   check(await page.locator('.code-block .tok-keyword').count() > 0, 'C# syntax highlighting is missing');
 

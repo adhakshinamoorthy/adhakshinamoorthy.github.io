@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:5085
+
+### Discover the API
+GET {{baseUrl}}/
+
+### List seeded products
+GET {{baseUrl}}/api/products
+X-Correlation-ID: atlas-learning-run
+
+### Find the seeded product
+GET {{baseUrl}}/api/products/d85b1407-351d-4694-9392-03acc5870eb1
+
+### Create a product
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "name": "USB-C dock",
+  "price": 129.50
+}
+
+### Observe validation problem details
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "price": 0
+}
+
+### Liveness
+GET {{baseUrl}}/health/live
+
+### Readiness
+GET {{baseUrl}}/health/ready
