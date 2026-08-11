@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/EfCoreOrderManagement/EfCoreOrderManagement.csproj" />
+  <Project Path="tests/EfCoreOrderManagement.Tests/EfCoreOrderManagement.Tests.csproj" />
+</Solution>
