@@ -108,5 +108,19 @@
     "runCommand": "dotnet run --project src/DotnetPlatformBaseline",
     "testCommand": "dotnet test DotnetPlatformBaseline.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "csharp-language-workbench",
+    "topicSlug": "csharp",
+    "status": "complete",
+    "name": "C# Language Workbench",
+    "description": "A focused .NET 10 sample demonstrating C# 14, nullable contracts, records and value objects, extension members, pattern matching, LINQ, async streams, cancellation, validation, and deterministic tests.",
+    "technologies": ["C# 14", ".NET 10", "LINQ", "xUnit"],
+    "tags": ["dedicated-sample", "type-system", "pattern-matching", "async-streams", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/csharp-language-workbench",
+    "localPath": "samples/csharp-language-workbench/README.md",
+    "runCommand": "dotnet run --project src/CSharpLanguageWorkbench",
+    "testCommand": "dotnet test CSharpLanguageWorkbench.slnx",
+    "liveDemoUrl": null
   }
 ]

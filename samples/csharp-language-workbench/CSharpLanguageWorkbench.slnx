@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/CSharpLanguageWorkbench/CSharpLanguageWorkbench.csproj" />
+  <Project Path="tests/CSharpLanguageWorkbench.Tests/CSharpLanguageWorkbench.Tests.csproj" />
+</Solution>

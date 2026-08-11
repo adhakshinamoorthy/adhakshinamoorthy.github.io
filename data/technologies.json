@@ -103,28 +103,101 @@
     "symbol": "C#",
     "category": "Core Platform",
     "color": "#7f4fc7",
-    "shortDescription": "A strongly typed, expressive language for object-oriented, functional, and asynchronous programming.",
-    "keywords": ["language", "LINQ", "records", "async", "generics", "nullable"],
-    "overview": "C# is a modern, statically typed language designed for productive application development across the .NET platform.",
-    "detail": "C# combines a rich type system with approachable syntax. Its records, pattern matching, LINQ, generics, asynchronous programming model, and nullable analysis help teams express domain rules clearly while retaining strong compile-time checks.",
+    "shortDescription": "A strongly typed language for explicit domain models, safe composition, asynchronous workflows, and high-performance .NET software.",
+    "keywords": ["C# 14", "type system", "records", "generics", "nullable", "pattern matching", "LINQ", "async", "IAsyncEnumerable", "delegates", "exceptions", "Span"],
+    "contentStatus": "complete",
+    "overview": "C# is the primary general-purpose language of .NET. It combines static typing, managed memory, object-oriented and functional techniques, expressive data modeling, asynchronous control flow, and access to the full .NET library ecosystem.",
+    "detail": "Production C# is less about using every syntax feature and more about making contracts, ownership, state changes, failure modes, and concurrency visible. Types should prevent invalid states where practical; nullable annotations should match runtime truth; exceptions should represent exceptional failure; async code must propagate cancellation; LINQ must be understood as an execution pipeline; and newer language features should improve clarity without hiding cost. C# 14 on .NET 10 adds extension members, field-backed properties, null-conditional assignment, and improved Span conversions, while the durable fundamentals remain types, generics, patterns, delegates, resource ownership, and testable boundaries.",
+    "learningObjectives": [
+      "Distinguish value types, reference types, identity, value equality, boxing, copying, and nullable intent.",
+      "Design domain contracts with classes, records, record structs, interfaces, generics, and constrained type parameters.",
+      "Use pattern matching, expressions, delegates, lambdas, and LINQ while keeping control flow and execution cost visible.",
+      "Build asynchronous and streaming workflows with Task, ValueTask, IAsyncEnumerable, cancellation, and exception propagation.",
+      "Own managed and unmanaged resources with IDisposable, IAsyncDisposable, using, and clear lifetime boundaries.",
+      "Apply analyzers, tests, benchmarks, and API-compatibility discipline to evolve production C# safely."
+    ],
+    "prerequisites": [
+      "Basic programming concepts such as variables, conditions, loops, methods, collections, and exceptions.",
+      "The .NET 10 SDK and a terminal; the dedicated sample has no database or external-service dependency.",
+      "Familiarity with projects, namespaces, packages, build warnings, and automated tests is helpful."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Web, cloud, desktop, mobile, data, tooling, games, and services that run on .NET and benefit from strong tooling and static analysis.",
+        "Domains where expressive types, generics, records, pattern matching, and nullable contracts can make rules reviewable and testable.",
+        "Concurrent I/O-heavy systems that benefit from Task-based APIs, async streams, cancellation, and mature runtime diagnostics."
+      ],
+      "avoid": [
+        "A host where neither the .NET runtime nor an appropriate native AOT artifact can meet platform, startup, memory, or deployment constraints.",
+        "A team or ecosystem whose required libraries, operational tooling, or platform ownership strongly favors another supported language.",
+        "Using dynamic or reflection-heavy C# to imitate an untyped language when compile-time contracts would be clearer and safer."
+      ]
+    },
     "concepts": [
-      {"title": "Type system", "description": "Value and reference types, generics, nullability, and inference make contracts explicit without excessive syntax."},
-      {"title": "Async and tasks", "description": "async and await express non-blocking I/O as readable control flow while Task represents future completion."},
-      {"title": "LINQ", "description": "Composable query operators transform in-memory data and provider-backed query expressions."},
-      {"title": "Records and patterns", "description": "Records model value-like data while patterns make branching over shapes and values concise."}
+      {"title": "Types, identity, and equality", "description": "Value types contain their data and are copied by value; reference types carry object references. Equality semantics, mutability, allocation, and boxing should match the domain."},
+      {"title": "Nullable reference analysis", "description": "Annotations such as string and string? express intent while flow analysis warns when maybe-null values are assigned or dereferenced; runtime representation is unchanged."},
+      {"title": "Classes, records, and structs", "description": "Classes suit identity and behavior, records provide value-oriented equality and with expressions, and small readonly structs can model allocation-free values when copying is cheap."},
+      {"title": "Generics and constraints", "description": "Generic types and methods preserve compile-time information and avoid casts; constraints describe the members, construction, nullability, or value/reference behavior an algorithm requires."},
+      {"title": "Patterns and expressions", "description": "Type, property, relational, list, logical, and recursive patterns make branching over shape and state explicit; guards handle rules not expressible as patterns alone."},
+      {"title": "Delegates, lambdas, and LINQ", "description": "Delegates model executable behavior, lambdas create it concisely, and LINQ composes transformations whose deferred or provider-specific execution must remain understood."},
+      {"title": "Tasks, async streams, and cancellation", "description": "Task represents eventual completion, async and await preserve readable control flow, IAsyncEnumerable streams results, and CancellationToken carries cooperative cancellation."},
+      {"title": "Resource and failure ownership", "description": "Exceptions communicate exceptional failure, result types can model expected alternatives, and using or await using defines deterministic cleanup for scarce resources."
+      }
     ],
-    "architecture": {"description": "Language features help move data from boundary contracts through domain behavior to infrastructure without losing type information.", "nodes": ["Input records", "Domain types", "Application flow", "Output contracts"], "colors": ["#7f4fc7", "#6753c7", "#2678c8", "#168c78"]},
-    "code": {"language": "csharp", "label": "Order.cs", "introduction": "Records and property patterns create compact, immutable contracts and readable business decisions.", "code": "public sealed record Order(Guid Id, decimal Total, OrderStatus Status);\n\npublic static string GetNextAction(Order order) => order switch\n{\n    { Status: OrderStatus.Pending, Total: > 1000m } => \"Review\",\n    { Status: OrderStatus.Pending } => \"CapturePayment\",\n    { Status: OrderStatus.Paid } => \"Fulfil\",\n    _ => \"None\"\n};\n\npublic enum OrderStatus { Pending, Paid, Cancelled }"},
-    "bestPractices": ["Enable nullable reference types and fix warnings at boundaries.", "Prefer small immutable types for messages and values that should not change.", "Use async all the way for I/O-bound work and pass cancellation tokens.", "Keep LINQ queries readable; name intermediate results when intent becomes hidden."],
+    "architecture": {"description": "External data is parsed and validated into typed boundary contracts. Application workflows coordinate domain behavior through interfaces and explicit results. Infrastructure owns I/O and resources, while output contracts prevent internal mutable state from leaking.", "nodes": ["Untrusted input", "Validated contracts", "Domain types + rules", "Application workflow", "Infrastructure adapters", "Output contracts"], "colors": ["#7f4fc7", "#8751b8", "#6753c7", "#2678c8", "#168dcc", "#168c78"]},
+    "implementationIntroduction": "Start with the domain language and failure boundaries, then select C# features that make those decisions obvious to callers and verifiable in tests.",
+    "implementationSteps": [
+      {"title": "Enable compiler guardrails", "description": "Select the supported language version, enable nullable analysis and analyzers, treat reviewed warnings as errors, and centralize repository policy."},
+      {"title": "Model valid domain states", "description": "Choose classes for identity, records for value-oriented contracts, and small readonly structs for cheap values; validate construction and expose only required mutation."},
+      {"title": "Define boundaries and variance", "description": "Use interfaces and generics at real substitution points, apply the narrowest useful constraints, and avoid abstraction that only renames a concrete type."},
+      {"title": "Express decisions clearly", "description": "Use pattern matching, switch expressions, guard clauses, and named methods so business branches are exhaustive, ordered, and easy to review."},
+      {"title": "Compose data deliberately", "description": "Use LINQ for readable transformations, distinguish IEnumerable from IQueryable, know when execution is deferred, and materialize once at ownership boundaries."},
+      {"title": "Design asynchronous flow", "description": "Return Task or ValueTask deliberately, avoid blocking waits, propagate CancellationToken, stream large results with IAsyncEnumerable, and preserve exception context."},
+      {"title": "Test contracts and costs", "description": "Test equality, nullability assumptions, patterns, cancellation, disposal, enumeration, serialization, public API compatibility, and measured hot paths."
+      }
+    ],
+    "code": {"language": "csharp", "label": "OrderProcessor.cs", "introduction": "The dedicated sample combines records, a readonly value object, C# 14 extension members, property patterns, LINQ, async streams, and cancellation in one typed workflow.", "code": "public sealed class OrderProcessor(decimal reviewThreshold)\n{\n    public NextAction Decide(Order order) => order switch\n    {\n        { Status: OrderStatus.Pending, Total.Amount: var total }\n            when total >= reviewThreshold => NextAction.ManualReview,\n        { Status: OrderStatus.Pending } => NextAction.CapturePayment,\n        { Status: OrderStatus.Paid } => NextAction.Fulfil,\n        _ => NextAction.NoAction\n    };\n\n    public async Task<IReadOnlyList<OrderDecision>> ProcessAsync(\n        IAsyncEnumerable<Order> orders,\n        CancellationToken cancellationToken = default)\n    {\n        var decisions = new List<OrderDecision>();\n        await foreach (var order in orders.WithCancellation(cancellationToken))\n        {\n            decisions.Add(new(order.Id, order.Total, Decide(order)));\n        }\n\n        return decisions.OrderByDescending(x => x.Total.Amount).ToArray();\n    }\n}"},
+    "testing": {"introduction": "Test semantics that syntax can obscure: equality, copying, null-state assumptions, enumeration timing, cancellation, exceptions, resource cleanup, and concurrency.", "items": ["Write focused unit tests for domain construction, record equality, value-object operators, generic algorithms, pattern branches, and exhaustive fallbacks.", "Test async methods by awaiting them; use controllable fakes or TaskCompletionSource instead of sleeps, and assert cancellation separately from failure.", "Enumerate deferred LINQ queries intentionally and test for multiple enumeration, ordering, provider translation, and mutation of the underlying source.", "Exercise IDisposable and IAsyncDisposable ownership on success, failure, and cancellation; verify resources are not captured beyond their intended lifetime.", "Run analyzers and nullable warnings in CI, add integration tests at serialization and I/O boundaries, and benchmark only measured hot paths."]},
+    "security": {"introduction": "Language safety reduces classes of defects but does not validate untrusted data, authorize actions, erase secrets, or make unsafe/native boundaries harmless.", "items": ["Validate length, range, format, encoding, and allowed values at trust boundaries; do not treat a successful parse or non-null annotation as authorization.", "Avoid logging secrets and sensitive object graphs; remember strings are immutable and cannot be reliably cleared from memory.", "Use checked arithmetic where overflow changes security or money decisions, bound collection growth, and reject attacker-controlled recursion or allocation sizes.", "Treat reflection, dynamic loading, expression compilation, unsafe code, native interop, and deserialization as explicit reviewed trust boundaries.", "Preserve exception context internally but return safe external errors; do not expose stack traces, filesystem paths, connection details, or secret-bearing values."]},
+    "performance": {"introduction": "C# syntax maps to allocations, copies, dispatch, enumeration, state machines, and runtime calls. Measure the complete workload before trading clarity for lower-level constructs.", "items": ["Use BenchmarkDotNet or representative application telemetry to measure CPU, allocation, throughput, latency, and generated code in Release builds.", "Avoid accidental boxing, closure captures, repeated enumeration, intermediate collections, string concatenation in loops, and large mutable struct copies.", "Use arrays, spans, pooling, ref-like types, or stack allocation only when profiling identifies a hot path and lifetime rules stay clear.", "Choose Task by default; consider ValueTask only for measured frequently synchronous paths where callers obey its consumption constraints.", "Keep LINQ when it is clear and fast enough; replace a pipeline with loops only when measurements justify the maintenance cost."]},
+    "deployment": {"introduction": "C# source is compiled under a selected language version into .NET assemblies; runtime and publish choices can change reflection, trimming, serialization, and dynamic-code behavior.", "items": ["Record the SDK and language version, compile Release with the same nullable and analyzer policy in CI, and avoid relying on a developer IDE's implicit settings.", "Publish and smoke-test the actual artifact; source-level success does not prove content files, native assets, dynamic loading, or runtime compatibility.", "Enable trimming and native AOT analyzers early when those modes are targets; test reflection, serializers, dependency injection, and expression generation.", "Version public contracts deliberately, use API compatibility checks for libraries, and account for record constructor or required-member changes in consumers and serializers.", "Capture symbols and source metadata for diagnostics, keep secrets external, and ensure cancellation plus graceful shutdown reach asynchronous application boundaries."]},
+    "troubleshooting": [
+      {"symptom": "A nullable warning is silenced but a NullReferenceException still occurs.", "cause": "The null-forgiving operator changed compiler analysis, not runtime data, or an external boundary violated its annotation.", "fix": "Trace the actual source, correct annotations and validation, add appropriate nullable attributes, and reserve ! for invariants the code truly proves."},
+      {"symptom": "An async workflow hangs or loses throughput.", "cause": "Code blocks on Result or Wait, holds scarce resources across awaits, ignores cancellation, or starts unbounded concurrent work.", "fix": "Await end to end, propagate tokens, bound concurrency, shorten resource ownership, and inspect task, thread-pool, and dependency telemetry."},
+      {"symptom": "A LINQ query runs repeatedly or changes after it was created.", "cause": "Deferred execution re-enumerates a mutable source, or IQueryable delegates behavior to a provider.", "fix": "Identify the execution boundary, materialize once where ownership changes, inspect generated provider queries, and avoid hidden side effects."},
+      {"symptom": "Record equality or dictionary lookup behaves unexpectedly.", "cause": "Generated value equality includes different members than intended, mutable members changed a key, or reference equality was required.", "fix": "Choose identity versus value semantics explicitly, keep keys immutable, customize equality only with a complete contract, and test hash behavior."},
+      {"symptom": "Code works normally but fails after trimming or native AOT publishing.", "cause": "Reflection, dynamic code, serializers, or plugins depend on members the compiler cannot discover statically.", "fix": "Act on analyzer warnings, prefer source generation and explicit registrations, annotate unavoidable reflection, and test the published artifact."
+      }
+    ],
+    "productionChecklist": [
+      "The supported SDK and C# language version are recorded; nullable analysis, analyzers, formatting, and warning policy run in CI.",
+      "Public types make identity, equality, nullability, mutation, ownership, and failure behavior explicit.",
+      "Inputs are validated at trust boundaries and sensitive values are excluded from logs, exceptions, and serialized output.",
+      "Async APIs are awaited end to end, cancellation is propagated, concurrency is bounded, and async void is limited to event handlers.",
+      "LINQ execution, materialization, provider translation, ordering, and multiple enumeration are understood and tested.",
+      "Disposable and async-disposable resources have clear owners on success, exception, and cancellation paths.",
+      "Release tests cover public contracts and published artifacts; performance changes are measured and trimming or AOT warnings are resolved."
+    ],
+    "resources": [
+      {"label": "C# guide", "url": "https://learn.microsoft.com/dotnet/csharp/"},
+      {"label": "What's new in C# 14", "url": "https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-14"},
+      {"label": "C# language reference", "url": "https://learn.microsoft.com/dotnet/csharp/language-reference/"},
+      {"label": "Nullable reference types", "url": "https://learn.microsoft.com/dotnet/csharp/fundamentals/null-safety/nullable-reference-types"}
+    ],
+    "bestPractices": ["Enable nullable reference analysis and correct the contract instead of routinely suppressing warnings.", "Choose class, record, record struct, or readonly struct from identity, equality, mutation, copying, and allocation needs.", "Make invalid states difficult to construct and validate untrusted data at the boundary.", "Use generics and interfaces where they preserve meaningful type information or substitution, not as ceremony.", "Keep pattern matches exhaustive and ordered from specific to general; name complex guards.", "Understand deferred execution and materialize LINQ results once at clear ownership boundaries.", "Await asynchronous work end to end, propagate cancellation, and bound parallelism.", "Give scarce resources deterministic owners and preserve exception context when adding useful domain information.", "Measure before applying spans, pooling, ValueTask, unsafe code, or allocation-avoiding complexity."],
     "interviewQuestions": [
-      {"question": "What is the difference between a class and a record?", "answer": "Classes use reference identity by default. Records emphasize value equality and concise immutable-style construction, though both remain reference types unless record struct is used."},
-      {"question": "Why should async void usually be avoided?", "answer": "It cannot be awaited, composes poorly, and propagates exceptions differently. It is generally reserved for event handlers."},
-      {"question": "What does deferred execution mean in LINQ?", "answer": "Many LINQ operators describe a query that runs only when enumerated, so data and side effects may be evaluated later or more than once."}
+      {"question": "What is the difference between a class, record, and record struct?", "answer": "A class is a reference type with reference equality by default. A record class is still a reference type but synthesizes value-oriented equality and nondestructive mutation. A record struct is a value type, so assignments copy its data and size matters."},
+      {"question": "Do nullable reference types prevent null at runtime?", "answer": "No. They add annotations and flow-analysis warnings at compile time without changing runtime representation. External data and oblivious code still require validation."},
+      {"question": "What does deferred execution mean in LINQ?", "answer": "Many operators build a pipeline that executes only when enumerated. Re-enumeration can repeat work and observe changed source data; IQueryable may translate the expression for another provider."},
+      {"question": "Task or ValueTask?", "answer": "Use Task by default because it is simple and safely awaitable multiple times. Consider ValueTask only for measured, often-synchronous hot paths and document its stricter consumption rules."},
+      {"question": "Why should async void usually be avoided?", "answer": "It cannot be awaited or composed and its exceptions follow the synchronization context rather than a returned task. It is mainly appropriate for event handlers."},
+      {"question": "When would you use a generic constraint?", "answer": "Use a constraint when an algorithm genuinely requires capabilities such as an interface, base type, value/reference semantics, construction, unmanaged representation, or a static abstract member."},
+      {"question": "How do IEnumerable and IQueryable differ?", "answer": "IEnumerable composes delegates executed by .NET over objects. IQueryable builds expression trees that a provider translates, so supported operations, execution location, and performance depend on that provider."}
     ],
-    "note": "Concise syntax should expose intent. If a clever expression makes debugging or ownership harder, a named method is usually better.",
-    "tip": "Model domain values such as Money or Email as focused types instead of passing primitive strings and decimals everywhere.",
-    "warning": "Avoid blocking Task results with .Result or .Wait() in request paths; this can reduce throughput and create deadlock risks in some contexts.",
-    "sampleId": "design-patterns", "readingMinutes": 9, "level": "Foundation", "updated": "2026-08-01", "latestNote": "Pattern matching examples expanded"
+    "note": "The newest syntax is optional. A feature earns its place when it makes contracts or ownership clearer to the next reader and survives the project's supported toolchain.",
+    "tip": "Model domain values such as Money, EmailAddress, or OrderId as focused types when they carry validation, equality, formatting, or behavior beyond a primitive.",
+    "warning": "Do not hide uncertain nulls with !, block asynchronous work with Result or Wait, or assume a deferred LINQ pipeline has already executed; each removes evidence the compiler or runtime could give you.",
+    "sampleId": "csharp-language-workbench", "readingMinutes": 32, "level": "Foundation to production", "updated": "2026-08-11", "latestNote": "Gold-standard C# 14 guide with a dedicated language workbench"
   },
   {
     "slug": "dependency-injection",

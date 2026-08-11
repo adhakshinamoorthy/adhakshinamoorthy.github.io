@@ -99,6 +99,21 @@ try {
   check(await page.locator('#github-sample .sample-commands code').count() === 2, '.NET sample run and test commands are missing');
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/dotnet-platform-baseline'), '.NET sample links to the wrong GitHub path');
 
+  await page.goto(`${baseUrl}/technologies/csharp.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'C#', 'Direct topic link did not render C#');
+  check(await page.locator('.topic-status-complete').count() === 1, 'C# is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'C# topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'C# table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 8, 'C# key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use C#', 'C# decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, 'C# implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 5, 'C# troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 7, 'C# production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 7, 'C# interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'C# sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/csharp-language-workbench'), 'C# sample links to the wrong GitHub path');
+  await page.screenshot({ path: join(artifactDirectory, 'csharp-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
   check(await page.locator('.sidebar-disclosure[open]').count() === 1, 'Topic page does not expand exactly one sidebar category');
@@ -311,6 +326,11 @@ try {
   await mobilePage.waitForLoadState('networkidle');
   check(mobilePage.url().includes('/technologies/dotnet.html'), `Mobile sidebar route was unexpected: ${mobilePage.url()}`);
   check((await mobilePage.locator('h1').innerText()) === '.NET', 'Mobile topic page did not render');
+  await mobilePage.goto(`${baseUrl}/technologies/csharp.html`, { waitUntil: 'networkidle' });
+  check((await mobilePage.locator('h1').innerText()) === 'C#', 'Mobile C# topic page did not render');
+  const csharpMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+  check(csharpMobileMetrics.scrollWidth <= csharpMobileMetrics.width + 1, `Mobile C# horizontal overflow: ${csharpMobileMetrics.scrollWidth}px`);
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'csharp-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();
