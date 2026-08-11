@@ -179,27 +179,89 @@
     "category": "Web & Data",
     "color": "#4767c8",
     "shortDescription": "An object-relational mapper for expressive data access, change tracking, migrations, and transactions.",
-    "keywords": ["database", "ORM", "LINQ", "migrations", "DbContext", "SQL"],
-    "overview": "Entity Framework Core is a lightweight, extensible ORM that maps .NET models and LINQ queries to database operations.",
-    "detail": "A DbContext represents a unit of work over mapped entities. Providers translate expression trees into database queries, change tracking detects mutations, and migrations describe schema evolution. Good EF Core use still requires database literacy and query inspection.",
+    "keywords": ["database", "ORM", "LINQ", "migrations", "DbContext", "SQL", "change tracking", "transactions", "concurrency", "SQLite", "PostgreSQL"],
+    "contentStatus": "complete",
+    "overview": "Entity Framework Core is the modern .NET object-relational mapper for translating LINQ into database commands, mapping domain state to relational schemas, coordinating units of work, and evolving schemas through reviewed migrations.",
+    "detail": "Entity Framework Core sits between application code and a database provider, but it does not remove the need to understand relational design or SQL. A short-lived DbContext holds model metadata, a database connection strategy, query composition, change tracking, transactions, and SaveChanges behavior. Providers translate expression trees into database-specific SQL, so the same LINQ can behave differently across SQLite, PostgreSQL, SQL Server, or another provider. Production-ready use requires intentional mappings and constraints, bounded projections, query inspection, optimistic concurrency, migration discipline, provider-realistic tests, and operational ownership of schema deployment.",
+    "learningObjectives": [
+      "Explain the roles of DbContext, the model, providers, change tracking, SaveChanges, and the underlying database.",
+      "Map aggregates with keys, relationships, owned types, conversions, indexes, constraints, and concurrency tokens.",
+      "Shape efficient read models with projection, AsNoTracking, bounded pagination, query tags, and generated-SQL inspection.",
+      "Coordinate atomic writes with transactions while allowing database constraints to protect invariants.",
+      "Create, review, test, script, and deploy migrations as versioned production artifacts.",
+      "Test important behavior against SQLite and the real production provider without relying on EF Core's in-memory substitute."
+    ],
+    "prerequisites": [
+      "Comfort with C#, LINQ, asynchronous methods, cancellation tokens, and dependency injection.",
+      "Basic relational concepts including tables, primary and foreign keys, indexes, joins, constraints, and transactions.",
+      "The .NET 10 SDK; Docker Desktop is optional for the PostgreSQL/Testcontainers verification path."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Transactional .NET applications that benefit from strongly typed LINQ, unit-of-work change tracking, relationship mapping, and managed schema evolution.",
+        "Teams that want most CRUD and aggregate persistence expressed in C# while retaining access to SQL, transactions, interceptors, and provider-specific features.",
+        "Workloads where developers will inspect generated SQL, measure important queries, and treat migrations and database constraints as first-class engineering artifacts."
+      ],
+      "avoid": [
+        "A read-heavy path requiring tightly controlled hand-written SQL or specialized database features for nearly every query; Dapper or the provider API may be clearer.",
+        "Bulk ingestion, analytical processing, or set-based maintenance where database-native commands and bulk tooling are the primary abstraction.",
+        "A design that assumes one LINQ query is portable and equally efficient across all providers without provider-specific verification."
+      ]
+    },
     "concepts": [
-      {"title": "DbContext", "description": "A short-lived unit of work that coordinates queries, tracked changes, transactions, and persistence."},
-      {"title": "Query translation", "description": "LINQ expression trees are translated by a provider into database-specific commands."},
-      {"title": "Change tracking", "description": "Tracked entity state determines which inserts, updates, and deletes SaveChanges will issue."},
-      {"title": "Migrations", "description": "Versioned schema operations let teams review and deploy database changes deliberately."}
+      {"title": "DbContext lifetime", "description": "A DbContext is a short-lived unit of work that coordinates queries, tracked state, transactions, and persistence; it is not thread-safe."},
+      {"title": "Model and Fluent API", "description": "Entity configuration maps CLR types to keys, columns, conversions, relationships, owned values, indexes, constraints, and concurrency behavior."},
+      {"title": "Query translation", "description": "The provider translates a composable LINQ expression tree into database-specific commands; translation and performance must be verified."},
+      {"title": "Change tracking", "description": "Snapshots and entity states let SaveChanges calculate inserts, updates, and deletes, while no-tracking queries avoid that cost for read models."},
+      {"title": "Transactions and constraints", "description": "SaveChanges is transactional for one batch, explicit transactions span multiple operations, and database constraints remain the final consistency boundary."},
+      {"title": "Optimistic concurrency", "description": "A concurrency token participates in an update predicate so stale writers fail instead of silently overwriting newer state."},
+      {"title": "Migrations", "description": "Versioned schema operations capture model changes for review, testing, scripting, deployment, and rollback planning."},
+      {"title": "Provider behavior", "description": "SQLite, PostgreSQL, SQL Server, and other providers differ in types, SQL translation, locking, migrations, functions, and operational capabilities."}
     ],
-    "architecture": {"description": "Application queries pass through a DbContext and provider, which translates operations for the target relational database.", "nodes": ["Application query", "DbContext", "Database provider", "Relational database"], "colors": ["#6e5bd7", "#4767c8", "#2678c8", "#168c78"]},
-    "code": {"language": "csharp", "label": "OrderQueries.cs", "introduction": "Project read models at the database, disable tracking when updating is unnecessary, and make cancellation explicit.", "code": "public async Task<IReadOnlyList<OrderSummary>> GetOpenOrdersAsync(\n    CancellationToken cancellationToken)\n{\n    return await db.Orders\n        .AsNoTracking()\n        .Where(order => order.Status == OrderStatus.Open)\n        .OrderByDescending(order => order.CreatedAt)\n        .Select(order => new OrderSummary(\n            order.Id, order.Customer.Name, order.Total))\n        .Take(100)\n        .ToListAsync(cancellationToken);\n}"},
-    "bestPractices": ["Project only the columns required for read models.", "Use AsNoTracking for read-only queries and bounded result sets for lists.", "Inspect generated SQL and query plans for important paths.", "Review migrations as production code and separate migration execution from application startup when needed."],
+    "architecture": {"description": "Application commands and queries use a short-lived DbContext. EF Core applies model metadata and provider translation to execute parameterized SQL inside database transactions, then materializes results or reconciles tracked changes.", "nodes": ["Application use case", "DbContext", "Model + change tracker", "Database provider", "SQL + transaction", "Relational database"], "colors": ["#6e5bd7", "#4767c8", "#2678c8", "#168dcc", "#d18415", "#168c78"]},
+    "implementationSteps": [
+      {"title": "Choose the provider deliberately", "description": "Install the provider for the production database and keep provider versions compatible with the EF Core runtime."},
+      {"title": "Define aggregate boundaries", "description": "Model entities and value objects around business invariants before persistence configuration leaks into every domain type."},
+      {"title": "Configure the relational model", "description": "Use IEntityTypeConfiguration classes for keys, relationships, owned types, lengths, precision, conversions, indexes, constraints, and delete behavior."},
+      {"title": "Shape read queries", "description": "Filter, order, project, and bound results in the database; use AsNoTracking when the unit of work will not modify returned entities."},
+      {"title": "Protect write workflows", "description": "Use database constraints, explicit transactions when one SaveChanges is insufficient, and concurrency tokens for competing writers."},
+      {"title": "Create and review migrations", "description": "Generate a migration, inspect every operation, test it on representative data, and create an idempotent script or migration bundle for deployment."},
+      {"title": "Verify real providers", "description": "Use fast relational tests locally and container-backed tests for behaviors whose types, SQL, locking, or migrations depend on the production provider."}
+    ],
+    "code": {"language": "csharp", "label": "OrderQueries.cs", "introduction": "The dedicated sample projects a bounded read model in SQL, disables tracking, tags the query for diagnostics, and keeps cancellation explicit.", "code": "return await db.Orders\n    .TagWith(\"Open order summaries\")\n    .AsNoTracking()\n    .Where(order => order.Status == OrderStatus.Placed)\n    .OrderByDescending(order => order.CreatedAtUtc)\n    .ThenBy(order => order.Id)\n    .Select(order => new OrderSummary(\n        order.Id,\n        order.CreatedAtUtc,\n        order.Customer.Name,\n        order.Items.Count,\n        order.Items.Sum(item => item.UnitPrice * item.Quantity)))\n    .Skip(page * pageSize)\n    .Take(pageSize)\n    .ToListAsync(cancellationToken);"},
+    "testing": {"introduction": "EF Core tests should prove relational behavior, not just exercise LINQ against an in-memory collection.", "items": ["Use SQLite or another relational provider for fast tests that need migrations, foreign keys, unique constraints, transactions, and concurrency behavior.", "Avoid the EF Core in-memory provider when relational translation or constraints are part of the requirement.", "Run focused Testcontainers tests against the production provider for provider-specific SQL, types, locking, migrations, and functions.", "Assert observable outcomes and important SQL shape without coupling every test to incidental generated text.", "Keep external provider tests explicit and deterministic so a missing Docker engine is reported honestly rather than causing mysterious failures."]},
+    "security": {"introduction": "An ORM reduces repetitive SQL construction but does not make data access automatically safe.", "items": ["Prefer LINQ parameters, ExecuteSqlInterpolated, or provider parameters; never concatenate untrusted values into raw SQL.", "Store connection strings in environment-specific secret providers and use a least-privilege database identity per workload.", "Do not enable sensitive-data logging in production because parameter values and personal data can enter logs.", "Bound queries and command timeouts to reduce resource-exhaustion risk, and authorize access before constructing tenant or resource queries.", "Review migration permissions separately from runtime permissions; an application account rarely needs schema-owner rights."]},
+    "performance": {"introduction": "The dominant EF Core cost is usually database work and data shape, not the ORM call itself.", "items": ["Project only required columns, bound every list, and choose pagination that remains efficient at the expected depth.", "Use AsNoTracking for read-only materialization and compiled queries only after measurement shows compilation overhead matters.", "Prevent N+1 queries by projecting related values or loading relationships intentionally; do not add Include automatically.", "Inspect ToQueryString output, database query plans, row counts, round trips, indexes, and telemetry for critical paths.", "Batch writes where appropriate and use provider-native bulk operations when change tracking is the wrong tool for the volume."]},
+    "deployment": {"introduction": "Schema evolution is an operational workflow with availability, compatibility, backup, and rollback consequences.", "items": ["Review generated migrations and test them against production-like schema size and data before release.", "Deploy provider-supported scripts or migration bundles from one controlled job rather than racing migrations across application instances.", "Use expand-and-contract changes when old and new application versions may run concurrently during rollout.", "Back up data, define rollback or forward-fix procedures, monitor locks and duration, and separate provider-specific migration sets when supporting multiple databases.", "Pin and audit EF Core, provider, native database, and migration-tool dependencies as one compatible release set."]},
+    "troubleshooting": [
+      {"symptom": "A LINQ query throws a translation exception.", "cause": "The expression contains a .NET method or shape the selected provider cannot translate.", "fix": "Rewrite the query using supported expressions, split database and in-memory work at an intentional bounded point, and inspect generated SQL."},
+      {"symptom": "A page is slow or sends many database commands.", "cause": "The query loads too many columns or rows, uses offset pagination deeply, lacks an index, or triggers N+1 relationship loading.", "fix": "Capture command telemetry, project the exact read model, bound results, inspect the plan, add the right index, and remove accidental per-row queries."},
+      {"symptom": "SaveChanges throws DbUpdateConcurrencyException.", "cause": "Another writer changed or deleted a row after this context loaded its concurrency token.", "fix": "Reload current values and apply a documented retry, merge, or conflict response; do not blindly overwrite the winner."},
+      {"symptom": "A migration works locally but fails in production.", "cause": "Production has different provider behavior, data volume, locks, permissions, schema history, or incompatible application versions.", "fix": "Test the generated artifact on a production-like copy, use expand-and-contract changes, validate migration history, and deploy from a controlled identity."},
+      {"symptom": "A DbContext reports disposed or concurrent-operation errors.", "cause": "The context escaped its unit of work, was shared across threads, or a query was not awaited before another operation started.", "fix": "Create one short-lived context per unit of work, await each operation, and use IDbContextFactory for parallel or background flows."}
+    ],
+    "bestPractices": ["Keep DbContext short-lived and never share one instance across concurrent operations.", "Use explicit Fluent API mappings and database constraints for important invariants.", "Project bounded read models and use AsNoTracking when updates are not required.", "Inspect generated SQL and database plans for critical queries instead of reasoning from LINQ alone.", "Use concurrency tokens and handle conflicts as an application outcome.", "Review and test migrations as production code, deploying them through one controlled workflow.", "Test provider-specific behavior against the real provider and keep separate migrations when providers diverge.", "Pass cancellation tokens and configure realistic command timeouts for database work."],
+    "productionChecklist": ["EF Core runtime, database provider, native dependencies, and migration tool are pinned to compatible audited versions.", "Connection strings come from a secret provider and runtime identities have least-privilege permissions.", "Critical mappings include deliberate lengths, precision, indexes, constraints, delete behavior, and concurrency tokens.", "Important queries are projected, bounded, observable, cancellation-aware, and verified with generated SQL and query plans.", "N+1 risks, deep pagination, large writes, transaction boundaries, retries, and command timeouts are tested under realistic load.", "Migrations are reviewed, tested on representative data, backed by recovery procedures, and deployed once through a controlled job.", "Provider-realistic integration tests cover schema, constraints, translation, and concurrency without depending on shared developer databases."],
     "interviewQuestions": [
-      {"question": "What is the recommended DbContext lifetime in a web app?", "answer": "Scoped is the common default, aligning one context with one request or unit of work. It is not thread-safe and should not be shared across concurrent operations."},
-      {"question": "What causes the N+1 query problem?", "answer": "Code loads a set of parent rows and then triggers an additional query per row for related data, often through repeated explicit or lazy loading."},
-      {"question": "When should AsNoTracking be used?", "answer": "Use it when entities are read-only in the current unit of work; it avoids change-tracking overhead."}
+      {"question": "What is the recommended DbContext lifetime in a web application?", "answer": "Scoped is the common default because it aligns a context with one request or unit of work. A context is not thread-safe and should not be shared across concurrent operations."},
+      {"question": "What causes the N+1 query problem?", "answer": "The application first loads a set of parent rows and then issues another query for each parent's related data, often through repeated explicit or lazy loading."},
+      {"question": "When should AsNoTracking be used?", "answer": "Use it for read-only materialization when entities will not be changed in the current unit of work. Projection to a DTO often avoids entity tracking entirely."},
+      {"question": "How does optimistic concurrency work in EF Core?", "answer": "A configured token is included in the update or delete predicate. If no row matches the original token, EF Core throws DbUpdateConcurrencyException so the application can resolve the conflict."},
+      {"question": "Why should migrations not automatically run from every production application instance?", "answer": "Concurrent instances can race, application identities gain excessive schema permissions, and long migrations can block startup or traffic. A controlled deployment job provides clearer ownership and recovery."},
+      {"question": "Why can the same LINQ query behave differently across providers?", "answer": "Each provider owns translation, type mapping, functions, SQL generation, and database capabilities. Portability must be verified rather than assumed."}
     ],
-    "note": "LINQ is an abstraction over a provider. A query that is cheap in memory may translate into expensive SQL.",
-    "tip": "Tag important queries and capture their generated SQL during performance investigations.",
-    "warning": "Do not hold a DbContext for the lifetime of an application or use the same instance from concurrent threads.",
-    "sampleId": "ride-sharing-cqrs", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-03", "latestNote": "Query-shaping examples added"
+    "note": "LINQ is an expression for a provider to translate. Code that looks cheap in C# can still produce expensive SQL, excessive rows, or unsupported operations.",
+    "tip": "Use TagWith and ToQueryString during investigation, then correlate the command with database plans, row counts, duration, and application traces.",
+    "warning": "Do not share a DbContext across threads or allow every production instance to race schema migrations during startup.",
+    "resources": [
+      {"label": "EF Core documentation", "url": "https://learn.microsoft.com/ef/core/"},
+      {"label": "Efficient querying", "url": "https://learn.microsoft.com/ef/core/performance/efficient-querying"},
+      {"label": "Change tracking", "url": "https://learn.microsoft.com/ef/core/change-tracking/"},
+      {"label": "Concurrency conflicts", "url": "https://learn.microsoft.com/ef/core/saving/concurrency"},
+      {"label": "Migrations deployment", "url": "https://learn.microsoft.com/ef/core/managing-schemas/migrations/applying"},
+      {"label": "Testing with EF Core", "url": "https://learn.microsoft.com/ef/core/testing/"}
+    ],
+    "sampleId": "ef-core-order-management-gold-standard", "readingMinutes": 27, "level": "Foundation to production", "updated": "2026-08-11", "latestNote": "Gold-standard guide with a dedicated relational sample"
   },
   {
     "slug": "blazor",

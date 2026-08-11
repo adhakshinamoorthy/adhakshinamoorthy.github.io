@@ -109,6 +109,19 @@ try {
   check(await page.locator('.article-nav a').count() === 2, 'Previous/next navigation is incomplete');
   check(await page.locator('.code-block .tok-keyword').count() > 0, 'C# syntax highlighting is missing');
 
+  await page.goto(`${baseUrl}/technologies/entity-framework-core.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'Entity Framework Core', 'Direct topic link did not render Entity Framework Core');
+  check(await page.locator('.topic-status-complete').count() === 1, 'Entity Framework Core is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'EF Core topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'EF Core table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 8, 'EF Core key concepts are incomplete');
+  check(await page.locator('.step-list li').count() === 7, 'EF Core implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 5, 'EF Core troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 7, 'EF Core production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 6, 'EF Core interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'EF Core sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/ef-core-order-management'), 'EF Core sample links to the wrong GitHub path');
+
   const sidebarOrder = await page.locator('.sidebar-link').evaluateAll(links =>
     links.map(link => new URL(link.href).pathname.split('/').at(-1))
   );

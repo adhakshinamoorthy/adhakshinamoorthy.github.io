@@ -66,5 +66,19 @@
     "runCommand": "dotnet run --project src/AspNetCoreApi.Api",
     "testCommand": "dotnet test AspNetCoreApi.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "ef-core-order-management-gold-standard",
+    "topicSlug": "entity-framework-core",
+    "status": "complete",
+    "name": "EF Core Order Management",
+    "description": "A focused .NET 10 console sample demonstrating Fluent API mapping, owned types, relationships, constraints, projected no-tracking queries, transactions, optimistic concurrency, migrations, SQLite tests, and opt-in PostgreSQL verification with Testcontainers.",
+    "technologies": ["EF Core 10", ".NET 10", "SQLite", "PostgreSQL", "xUnit"],
+    "tags": ["dedicated-sample", "migrations", "concurrency", "query-performance", "testcontainers"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/ef-core-order-management",
+    "localPath": "samples/ef-core-order-management/README.md",
+    "runCommand": "dotnet run --project src/EfCoreOrderManagement",
+    "testCommand": "dotnet test EfCoreOrderManagement.slnx",
+    "liveDemoUrl": null
   }
 ]
