@@ -85,6 +85,20 @@ try {
 
   await page.screenshot({ path: join(artifactDirectory, 'home-desktop-light.png'), fullPage: false });
 
+  await page.goto(`${baseUrl}/technologies/dotnet.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === '.NET', 'Direct topic link did not render .NET');
+  check(await page.locator('.topic-status-complete').count() === 1, '.NET is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, '.NET topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, '.NET table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 8, '.NET key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use .NET', '.NET decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, '.NET implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 5, '.NET troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 7, '.NET production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 6, '.NET interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, '.NET sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/dotnet-platform-baseline'), '.NET sample links to the wrong GitHub path');
+
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
   check(await page.locator('.sidebar-disclosure[open]').count() === 1, 'Topic page does not expand exactly one sidebar category');

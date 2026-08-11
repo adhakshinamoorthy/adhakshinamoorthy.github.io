@@ -6,27 +6,96 @@
     "category": "Core Platform",
     "color": "#6e5bd7",
     "shortDescription": "The cross-platform runtime, SDK, libraries, and tooling behind modern C# applications.",
-    "keywords": ["runtime", "CLR", "SDK", "NuGet", "garbage collection", "cross-platform"],
-    "overview": ".NET is a free, open-source developer platform for building web, cloud, desktop, mobile, data, and background applications.",
-    "detail": "Think of .NET as a complete execution and development environment: the SDK compiles and packages applications, the runtime executes managed code, base libraries provide common capabilities, and tooling supports testing, diagnostics, publishing, and deployment across operating systems.",
+    "keywords": ["runtime", "CLR", "SDK", "CLI", "NuGet", "MSBuild", "garbage collection", "JIT", "AOT", "publishing", "diagnostics", "cross-platform"],
+    "contentStatus": "complete",
+    "overview": ".NET is the open-source, cross-platform platform that combines runtimes, SDKs, languages, libraries, build tooling, package management, diagnostics, and deployment models for modern applications.",
+    "detail": "A production .NET system is shaped by distinct choices: the SDK and MSBuild produce assets, the target framework defines compile-time APIs, NuGet resolves dependencies, the runtime loads managed assemblies and executes them through JIT or ahead-of-time compilation, and the publish model decides what ships. Teams must service those layers deliberately, keep builds reproducible, validate configuration, test the published artifact on its target OS and architecture, and use runtime diagnostics before optimizing.",
+    "learningObjectives": [
+      "Distinguish the SDK, CLI, target framework, runtime, host, shared framework, and base class libraries.",
+      "Explain restore, compilation to IL and metadata, assembly loading, JIT execution, garbage collection, and native AOT tradeoffs.",
+      "Create repeatable repositories with global.json, Directory.Build.props, central package management, analyzers, and CI checks.",
+      "Choose framework-dependent, self-contained, single-file, trimmed, native AOT, or container deployment based on operational needs.",
+      "Use configuration, dependency injection, logging, cancellation, async I/O, and diagnostics as platform capabilities.",
+      "Verify package risk, compatibility, publish output, target runtime identifiers, startup, shutdown, and production telemetry."
+    ],
+    "prerequisites": [
+      "Basic C# syntax and familiarity with projects, solutions, files, processes, and command-line tools.",
+      "The .NET 10 SDK and a terminal; the dedicated sample has no database or external-service dependency.",
+      "Basic awareness of operating systems, CPU architectures, environment variables, and application deployment."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Cross-platform web, cloud, worker, desktop, mobile, data, tooling, and service applications that benefit from one managed runtime ecosystem.",
+        "Teams that value strong tooling, mature libraries, built-in diagnostics, long-term-support releases, and multiple deployment models.",
+        "Systems that need productive managed code with selective native interop, runtime compilation, trimming, or native AOT options."
+      ],
+      "avoid": [
+        "A constrained environment where supported .NET runtime or native AOT output cannot meet memory, startup, OS, or architecture limits.",
+        "A platform-mandated codebase whose required native ecosystem, runtime, or ownership makes another stack the safer operational choice.",
+        "Choosing .NET only from synthetic benchmarks without validating expertise, dependencies, deployment, observability, and lifecycle needs."
+      ]
+    },
     "concepts": [
-      {"title": "Runtime and CLR", "description": "Executes managed code and provides garbage collection, type safety, exceptions, and just-in-time compilation."},
-      {"title": "SDK and CLI", "description": "Creates, restores, builds, tests, publishes, and manages projects through consistent dotnet commands."},
-      {"title": "Base class libraries", "description": "Reusable APIs for collections, networking, files, JSON, concurrency, cryptography, and more."},
-      {"title": "NuGet ecosystem", "description": "A package system for sharing versioned libraries and restoring repeatable dependency graphs."}
+      {"title": "SDK, CLI, and MSBuild", "description": "The SDK supplies compilers, templates, targets, and the dotnet CLI; MSBuild evaluates project files and executes restore, build, test, pack, and publish targets."},
+      {"title": "Target frameworks", "description": "A target such as net10.0 selects the compile-time reference API surface; compatibility rules govern referenced projects and packages."},
+      {"title": "Runtime, host, and shared frameworks", "description": "The host selects a compatible runtime, the CLR loads assemblies and manages execution, and shared frameworks provide commonly installed libraries."},
+      {"title": "IL, JIT, and native AOT", "description": "Compilers emit intermediate language and metadata; the runtime normally JIT-compiles methods, while native AOT moves more work to publish time."},
+      {"title": "Managed memory and GC", "description": "The garbage collector reclaims managed objects by generation, while IDisposable and await using define deterministic ownership for scarce resources."},
+      {"title": "NuGet dependency graphs", "description": "Restore resolves direct and transitive packages; central versions, source mapping, lock policy, and audits improve control."},
+      {"title": "Generic Host and extensions", "description": "Configuration, logging, dependency injection, options, lifetime, HTTP clients, caching, and telemetry provide common composition primitives."},
+      {"title": "Publishing and runtime identifiers", "description": "Framework-dependent, self-contained, single-file, trimmed, AOT, and container outputs have different size, patching, startup, and compatibility implications."}
     ],
-    "architecture": {"description": "Source code is compiled into intermediate language and metadata, then loaded by the runtime and executed as native instructions.", "nodes": ["C# source + SDK", "IL assemblies", ".NET runtime", "Operating system"], "colors": ["#6e5bd7", "#8f72db", "#2878c8", "#168c78"]},
-    "code": {"language": "csharp", "label": "Program.cs", "introduction": "A modern console application can use top-level statements, dependency-aware configuration, and async APIs without ceremony.", "code": "using System.Net.Http.Json;\n\nusing var client = new HttpClient\n{\n    BaseAddress = new Uri(\"https://api.example.com\")\n};\n\nvar status = await client.GetFromJsonAsync<ServiceStatus>(\"/health\");\nConsole.WriteLine($\"{status?.Name}: {status?.State}\");\n\npublic sealed record ServiceStatus(string Name, string State);"},
-    "bestPractices": ["Pin the target framework and centralize package versions for predictable builds.", "Use nullable reference types and analyzers to catch defects before runtime.", "Publish with the deployment model—framework-dependent, self-contained, or container—that matches operations.", "Measure with built-in diagnostics before attempting performance optimizations."],
+    "architecture": {"description": "The SDK restores packages and uses MSBuild plus language compilers to produce assemblies. Publish combines assemblies with configuration and optional runtime assets. The .NET host selects the runtime, the CLR loads and executes code, and operating-system resources remain explicitly owned.", "nodes": ["Source + project graph", "Restore + MSBuild", "IL assemblies", "Publish output", ".NET host + CLR", "OS + CPU"], "colors": ["#6e5bd7", "#8f72db", "#6753c7", "#2878c8", "#168dcc", "#168c78"]},
+    "implementationIntroduction": "Create a repeatable repository first, then prove the built and published application on the runtime environment that will own it.",
+    "implementationSteps": [
+      {"title": "Select and record the toolchain", "description": "Choose a supported target framework, record SDK/runtime details, and use global.json when the repository needs deliberate SDK roll-forward behavior."},
+      {"title": "Centralize repository policy", "description": "Use Directory.Build.props for nullable analysis, analyzers, warnings, and build settings, and Directory.Packages.props for reviewed package versions."},
+      {"title": "Design the project graph", "description": "Keep executable entry points, libraries, and tests explicit; enforce dependency direction through project or package references."},
+      {"title": "Make restore reproducible", "description": "Control package sources, centralize versions, use lock policy where needed, cache safely, and fail CI on vulnerable dependencies."},
+      {"title": "Compose platform services", "description": "Load configuration by environment, validate typed options, register owned services, use structured logging, and propagate cancellation."},
+      {"title": "Choose a publish model", "description": "Decide who services the runtime and whether the target requires self-contained, single-file, trimming, AOT, a runtime identifier, or containers."},
+      {"title": "Verify the artifact", "description": "Test Release output, publish from a clean restore, run on each target OS and architecture, exercise shutdown, scan dependencies, and capture diagnostics."}
+    ],
+    "code": {"language": "csharp", "label": "Program.cs", "introduction": "The dedicated sample combines Generic Host configuration, validated options, dependency injection, logging, and a cancellation-aware application boundary.", "code": "var builder = Host.CreateApplicationBuilder(args);\n\nbuilder.Services\n    .AddOptions<ProcessingOptions>()\n    .Bind(builder.Configuration.GetSection(ProcessingOptions.SectionName))\n    .Validate(o => !string.IsNullOrWhiteSpace(o.InputPath), \"InputPath is required.\")\n    .Validate(o => o.MaximumItems is > 0 and <= 10_000, \"MaximumItems is invalid.\")\n    .ValidateOnStart();\n\nbuilder.Services.AddSingleton(TimeProvider.System);\nbuilder.Services.AddSingleton<IManifestProcessor, ManifestProcessor>();\n\nusing var host = builder.Build();\nawait host.Services.GetRequiredService<IManifestProcessor>()\n    .ProcessAsync(CancellationToken.None);"},
+    "testing": {"introduction": "Test source behavior and the produced artifact because Debug builds on a developer machine do not prove restore, publish, platform, trimming, or runtime compatibility.", "items": ["Run unit and integration tests in Release with the same SDK selection, warning policy, and package graph used by CI.", "Use deterministic seams such as TimeProvider and isolated temporary storage instead of sleep-based or machine-dependent tests.", "Publish from a clean restore and run smoke tests against the output directory rather than only using dotnet run.", "Test every supported OS, architecture, runtime identifier, globalization mode, and deployment model in an appropriate runner or container.", "Enable trimming or native AOT analyzers early and test reflection, serialization, configuration binding, native libraries, and dynamic loading."]},
+    "security": {"introduction": "The platform boundary includes source feeds, build agents, packages, runtime servicing, configuration, native dependencies, and published artifacts.", "items": ["Use trusted NuGet sources, package source mapping where appropriate, dependency review, vulnerability auditing, and controlled private-feed credentials.", "Centrally manage direct packages, review transitive changes, and produce an inventory or SBOM for released artifacts.", "Keep secrets out of project files, appsettings, logs, command histories, and images; use an approved runtime secret provider.", "Patch installed runtimes or rebuild self-contained artifacts promptly when runtime servicing updates are published.", "Use least-privilege OS identities, writable directories, network access, native libraries, and container capabilities."]},
+    "performance": {"introduction": "Measure the real workload with runtime diagnostics; allocation, GC, JIT, thread pool, I/O, networking, and dependencies interact.", "items": ["Baseline latency, throughput, CPU, working set, allocation, GC pauses, exceptions, thread-pool behavior, and startup before tuning.", "Use dotnet-counters for live signals, dotnet-trace for traces, dotnet-gcdump for managed heaps, and dotnet-dump for failures.", "Prefer asynchronous APIs for concurrent I/O, propagate cancellation, pool expensive connections through supported clients, and dispose scarce resources.", "Benchmark isolated hot paths with representative inputs and Release settings, then confirm gains end to end.", "Evaluate ReadyToRun, tiered compilation, dynamic PGO, trimming, single-file, and native AOT against startup, throughput, size, diagnostics, and compatibility."]},
+    "deployment": {"introduction": "The deployment model decides artifact contents, compatible targets, runtime servicing ownership, and rollback behavior.", "items": ["Framework-dependent deployment uses a compatible installed runtime; self-contained deployment ships one and makes releases responsible for runtime patches.", "Specify and test runtime identifiers only for platform-specific assets; win-x64 output does not run on Linux or Arm64.", "Treat single-file, trimming, ReadyToRun, and native AOT as independent choices with analyzer and runtime verification requirements.", "Build immutable artifacts once, attach provenance and dependency metadata, promote the same artifact, and keep environment configuration external.", "Verify startup, readiness, graceful shutdown, logs, dumps, roll-forward policy, rollback, and runtime version in the target host or container."]},
+    "troubleshooting": [
+      {"symptom": "The repository builds locally but fails in CI.", "cause": "SDK selection, workload versions, package sources, cached assets, OS behavior, or warning policy differs.", "fix": "Compare dotnet --info, global.json resolution, restore sources, environment variables, and a clean bin/obj-free restore using the CI command."},
+      {"symptom": "The published application reports that a framework is missing.", "cause": "Framework-dependent output reached a host without a compatible shared framework or roll-forward policy.", "fix": "Install and service the required runtime, set deliberate roll-forward behavior, or publish self-contained and accept patch ownership."},
+      {"symptom": "A trimmed, single-file, or AOT build fails after publishing.", "cause": "Reflection, dynamic loading, serializers, configuration binding, or native assets were not visible to analysis or packaging.", "fix": "Enable publish analyzers, use source generation or annotations, inspect warnings and bundle contents, and add artifact tests."},
+      {"symptom": "Memory remains high after work completes.", "cause": "Live references, caches, large objects, pinned buffers, native memory, or GC policy may retain memory.", "fix": "Correlate counters with GC dumps and process metrics, identify retention paths or native owners, then change the measured cause."},
+      {"symptom": "Restore resolves an unexpected package or version.", "cause": "A transitive dependency, central override, floating version, source ordering, cache, or conditional property changed the graph.", "fix": "Inspect transitive packages, generated assets, central props, sources, and lock policy; make the intended dependency explicit."}
+    ],
+    "productionChecklist": [
+      "The target framework is supported, SDK selection and roll-forward behavior are deliberate, and dotnet --info is captured in CI diagnostics.",
+      "Nullable analysis, analyzers, warnings, deterministic builds, package versions, sources, and vulnerability audits are centrally enforced.",
+      "Release tests and published-artifact smoke tests cover every supported OS, architecture, runtime identifier, and deployment model.",
+      "Configuration is validated at startup, secrets remain external, logs are structured, and cancellation plus graceful shutdown are tested.",
+      "Runtime servicing ownership is explicit for framework-dependent, self-contained, and container deployments.",
+      "Diagnostics can capture counters, traces, dumps, and build/runtime metadata without exposing sensitive data.",
+      "Artifacts are immutable, inventoried, promotable across environments, and covered by rollback procedures."
+    ],
+    "resources": [
+      {"label": ".NET documentation", "url": "https://learn.microsoft.com/dotnet/"},
+      {"label": ".NET support policy", "url": "https://dotnet.microsoft.com/platform/support/policy"},
+      {"label": ".NET publishing overview", "url": "https://learn.microsoft.com/dotnet/core/deploying/"},
+      {"label": ".NET diagnostics tools", "url": "https://learn.microsoft.com/dotnet/core/diagnostics/"}
+    ],
+    "bestPractices": ["Treat SDK, target framework, runtime, host, and deployment mode as separate versioned decisions.", "Centralize nullable, analyzer, warning, deterministic-build, and package policy.", "Keep restore sources trusted and explicit; audit direct and transitive dependencies.", "Use validated options, structured logging, async I/O, cancellation, and deterministic disposal.", "Publish once and test the Release artifact on every supported OS and architecture.", "Choose deployment mode based on runtime servicing ownership, not convenience alone.", "Enable trimming and AOT analyzers before adopting those modes and verify dynamic features.", "Measure with counters, traces, dumps, and representative benchmarks before tuning."],
     "interviewQuestions": [
-      {"question": "What is the difference between the .NET SDK and runtime?", "answer": "The runtime executes compiled applications. The SDK includes the runtime plus compilers, templates, build tooling, and commands needed to create and publish them."},
-      {"question": "What does managed code mean?", "answer": "Managed code runs under the CLR, which supplies services such as memory management, type safety, exception handling, and runtime compilation."},
-      {"question": "When would you choose a self-contained deployment?", "answer": "Choose it when the target should not depend on a separately installed runtime and the larger artifact and patching responsibility are acceptable."}
+      {"question": "What is the difference between the .NET SDK, target framework, and runtime?", "answer": "The SDK builds applications, the target framework selects compile-time APIs and compatibility rules, and the runtime executes the application. One SDK can target multiple frameworks and a framework-dependent app needs a compatible host runtime."},
+      {"question": "What does managed code mean?", "answer": "Managed assemblies execute under the CLR, which provides type loading, exceptions, garbage collection, JIT compilation, diagnostics, and other services; unmanaged resources still require explicit ownership."},
+      {"question": "Framework-dependent or self-contained deployment?", "answer": "Framework-dependent output is smaller and relies on a serviced host runtime. Self-contained output includes a runtime but enlarges artifacts and requires application releases for runtime security patches."},
+      {"question": "How do JIT, ReadyToRun, and native AOT differ?", "answer": "JIT compiles IL during execution, ReadyToRun precompiles portions while retaining the runtime, and native AOT creates native output at publish time with stricter limits for dynamic code and reflection."},
+      {"question": "Why use global.json?", "answer": "It controls SDK selection and roll-forward when a repository needs predictable tool behavior. It does not choose the deployed runtime and must be maintained rather than pinned indefinitely."},
+      {"question": "How would you investigate high memory in .NET?", "answer": "Start with process and runtime counters, distinguish managed heap from native and committed memory, capture a GC dump or dump, inspect retention and allocation, then validate the fix under the real workload."}
     ],
-    "note": "The runtime, SDK, and target framework are related but distinct. Record all three when diagnosing build or deployment differences.",
-    "tip": "Keep a global.json when a repository depends on a specific SDK feature or build behavior.",
-    "warning": "Do not assume a successful local build proves the published artifact will run on a different OS or CPU architecture.",
-    "sampleId": "ai-orchestrator", "readingMinutes": 8, "level": "Foundation", "updated": "2026-08-05", "latestNote": "Runtime and deployment guide refreshed"
+    "note": "The SDK used to build, target framework used to compile, and runtime used to execute are related but distinct; capture all three when diagnosing differences.",
+    "tip": "Run the published DLL or executable from a clean output directory in CI so missing content, native assets, configuration, and runtime assumptions fail before deployment.",
+    "warning": "A successful dotnet run on a developer workstation does not prove restore reproducibility, published-artifact completeness, runtime compatibility, trimming safety, or target-platform support.",
+    "sampleId": "dotnet-platform-baseline", "readingMinutes": 30, "level": "Foundation to production", "updated": "2026-08-11", "latestNote": "Gold-standard platform guide with a dedicated runnable sample"
   },
   {
     "slug": "csharp",

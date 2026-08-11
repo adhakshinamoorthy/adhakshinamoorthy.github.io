@@ -94,5 +94,19 @@
     "runCommand": "dotnet run --project src/DapperOrderReporting",
     "testCommand": "dotnet test DapperOrderReporting.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "dotnet-platform-baseline",
+    "topicSlug": "dotnet",
+    "status": "complete",
+    "name": ".NET Platform Baseline",
+    "description": "A focused .NET 10 console sample demonstrating SDK selection, centralized build and package policy, Generic Host configuration, validated options, structured logging, async file I/O, cancellation, source-generated JSON, platform inspection, publishing choices, and deterministic tests.",
+    "technologies": [".NET 10", "Generic Host", "System.Text.Json", "xUnit"],
+    "tags": ["dedicated-sample", "sdk-baseline", "publishing", "diagnostics", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/dotnet-platform-baseline",
+    "localPath": "samples/dotnet-platform-baseline/README.md",
+    "runCommand": "dotnet run --project src/DotnetPlatformBaseline",
+    "testCommand": "dotnet test DotnetPlatformBaseline.slnx",
+    "liveDemoUrl": null
   }
 ]

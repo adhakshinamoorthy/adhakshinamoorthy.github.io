@@ -1,0 +1,7 @@
+{
+  "batchId": "portal-demo",
+  "items": [
+    { "id": "guide", "payload": "Build a complete .NET guide" },
+    { "id": "sample", "payload": "Verify a dedicated runnable sample" }
+  ]
+}
