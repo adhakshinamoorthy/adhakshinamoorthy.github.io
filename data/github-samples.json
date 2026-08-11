@@ -80,5 +80,19 @@
     "runCommand": "dotnet run --project src/EfCoreOrderManagement",
     "testCommand": "dotnet test EfCoreOrderManagement.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "dapper-order-reporting-gold-standard",
+    "topicSlug": "dapper",
+    "status": "complete",
+    "name": "Dapper Order Reporting",
+    "description": "A focused .NET 10 console sample demonstrating parameterized SQL, allowlisted dynamic sorting, bounded pagination, multi-mapping, multiple result sets, explicit connection and transaction ownership, relational constraints, and real SQLite integration tests.",
+    "technologies": ["Dapper 2.1", ".NET 10", "SQLite", "ADO.NET", "xUnit"],
+    "tags": ["dedicated-sample", "explicit-sql", "multi-mapping", "transactions", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/dapper-order-reporting",
+    "localPath": "samples/dapper-order-reporting/README.md",
+    "runCommand": "dotnet run --project src/DapperOrderReporting",
+    "testCommand": "dotnet test DapperOrderReporting.slnx",
+    "liveDemoUrl": null
   }
 ]

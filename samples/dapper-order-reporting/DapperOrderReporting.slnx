@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/DapperOrderReporting/DapperOrderReporting.csproj" />
+  <Project Path="tests/DapperOrderReporting.Tests/DapperOrderReporting.Tests.csproj" />
+</Solution>
