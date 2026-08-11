@@ -122,6 +122,20 @@ try {
   check(await page.locator('#github-sample .sample-commands code').count() === 2, 'EF Core sample run and test commands are missing');
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/ef-core-order-management'), 'EF Core sample links to the wrong GitHub path');
 
+  await page.goto(`${baseUrl}/technologies/dapper.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'Dapper', 'Direct topic link did not render Dapper');
+  check(await page.locator('.topic-status-complete').count() === 1, 'Dapper is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'Dapper topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'Dapper table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 8, 'Dapper key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use Dapper', 'Dapper decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, 'Dapper implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 5, 'Dapper troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 7, 'Dapper production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 6, 'Dapper interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'Dapper sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/dapper-order-reporting'), 'Dapper sample links to the wrong GitHub path');
+
   const sidebarOrder = await page.locator('.sidebar-link').evaluateAll(links =>
     links.map(link => new URL(link.href).pathname.split('/').at(-1))
   );

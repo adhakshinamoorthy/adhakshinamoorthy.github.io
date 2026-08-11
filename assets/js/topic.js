@@ -49,10 +49,10 @@ function renderArticle(topic, technologies, samples) {
     </header>
     <section id="overview" class="article-section"><h2>Overview</h2><p>${escapeHtml(topic.detail)}</p><div class="official-resources"></div></section>
     ${topic.learningObjectives?.length ? '<section id="learning-objectives" class="article-section"><h2>What you will learn</h2><ul class="practice-list learning-objectives"></ul><h3>Prerequisites</h3><ul class="plain-list prerequisites"></ul></section>' : ''}
-    ${topic.decisionGuide ? '<section id="decision-guide" class="article-section"><h2>When to use ASP.NET Core</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul></ul></article></div></section>' : ''}
+    ${topic.decisionGuide ? `<section id="decision-guide" class="article-section"><h2>When to use ${escapeHtml(topic.name)}</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul></ul></article></div></section>` : ''}
     <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"></div></section>
     <section id="architecture" class="article-section"><h2>Architecture</h2><p>${escapeHtml(topic.architecture.description)}</p><div class="architecture-placeholder"><div class="diagram-flow"></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
-    ${topic.implementationSteps?.length ? '<section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>Build the runtime path deliberately, then prove it through HTTP.</p><ol class="step-list"></ol></section>' : ''}
+    ${topic.implementationSteps?.length ? `<section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>${escapeHtml(topic.implementationIntroduction || 'Build the critical path deliberately, then verify its observable behavior.')}</p><ol class="step-list"></ol></section>` : ''}
     <section id="code-example" class="article-section"><h2>Code example</h2><p>${escapeHtml(topic.code.introduction)}</p><div class="code-host"></div></section>
     ${guidanceMarkup('testing', 'Testing strategy', topic.testing)}
     ${guidanceMarkup('security', 'Security considerations', topic.security)}
