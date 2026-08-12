@@ -150,5 +150,19 @@
     "runCommand": "dotnet run --project src/TelemetryDemo",
     "testCommand": "dotnet test SourceGeneratorsTelemetry.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "blazor-interactive-catalog",
+    "topicSlug": "blazor",
+    "status": "complete",
+    "name": "Blazor Interactive Catalog",
+    "description": "A focused .NET 10 Blazor Web App demonstrating static prerendering, interactive server components, scoped per-circuit state, accessible catalog interactions, enhanced navigation, error handling, static assets, and HTTP integration tests.",
+    "technologies": ["Blazor", ".NET 10", "Interactive Server", "Razor Components", "xUnit"],
+    "tags": ["dedicated-sample", "render-modes", "scoped-state", "accessibility", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/blazor-interactive-catalog",
+    "localPath": "samples/blazor-interactive-catalog/README.md",
+    "runCommand": "dotnet run --project src/BlazorInteractiveCatalog",
+    "testCommand": "dotnet test BlazorInteractiveCatalog.slnx",
+    "liveDemoUrl": null
   }
 ]
