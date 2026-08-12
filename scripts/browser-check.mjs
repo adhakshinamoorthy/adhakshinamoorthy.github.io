@@ -129,6 +129,21 @@ try {
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/dependency-injection-lifetimes'), 'Dependency Injection sample links to the wrong GitHub path');
   await page.screenshot({ path: join(artifactDirectory, 'dependency-injection-desktop-light-top.png'), fullPage: false });
 
+  await page.goto(`${baseUrl}/technologies/source-generators.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'Source Generators', 'Direct topic link did not render Source Generators');
+  check(await page.locator('.topic-status-complete').count() === 1, 'Source Generators is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'Source Generators topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'Source Generators table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 10, 'Source Generators key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use Source Generators', 'Source Generators decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, 'Source Generators implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 6, 'Source Generators troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 8, 'Source Generators production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 7, 'Source Generators interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'Source Generators sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/source-generators-telemetry'), 'Source Generators sample links to the wrong GitHub path');
+  await page.screenshot({ path: join(artifactDirectory, 'source-generators-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
   check(await page.locator('.sidebar-disclosure[open]').count() === 1, 'Topic page does not expand exactly one sidebar category');
@@ -351,6 +366,11 @@ try {
   const dependencyInjectionMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   check(dependencyInjectionMobileMetrics.scrollWidth <= dependencyInjectionMobileMetrics.width + 1, `Mobile Dependency Injection horizontal overflow: ${dependencyInjectionMobileMetrics.scrollWidth}px`);
   await mobilePage.screenshot({ path: join(artifactDirectory, 'dependency-injection-mobile-dark-top.png'), fullPage: false });
+  await mobilePage.goto(`${baseUrl}/technologies/source-generators.html`, { waitUntil: 'networkidle' });
+  check((await mobilePage.locator('h1').innerText()) === 'Source Generators', 'Mobile Source Generators topic page did not render');
+  const sourceGeneratorsMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+  check(sourceGeneratorsMobileMetrics.scrollWidth <= sourceGeneratorsMobileMetrics.width + 1, `Mobile Source Generators horizontal overflow: ${sourceGeneratorsMobileMetrics.scrollWidth}px`);
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'source-generators-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();

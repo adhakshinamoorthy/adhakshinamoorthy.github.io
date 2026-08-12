@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/TelemetryGenerator/TelemetryGenerator.csproj" />
+  <Project Path="src/TelemetryDemo/TelemetryDemo.csproj" />
+  <Project Path="tests/TelemetryGenerator.Tests/TelemetryGenerator.Tests.csproj" />
+</Solution>
