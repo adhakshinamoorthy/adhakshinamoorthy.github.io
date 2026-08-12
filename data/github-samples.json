@@ -122,5 +122,19 @@
     "runCommand": "dotnet run --project src/CSharpLanguageWorkbench",
     "testCommand": "dotnet test CSharpLanguageWorkbench.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "dependency-injection-lifetimes",
+    "topicSlug": "dependency-injection",
+    "status": "complete",
+    "name": "Dependency Injection Lifetimes",
+    "description": "A focused .NET 10 console sample demonstrating composition-root organization, validated options, singleton, scoped, and transient ownership, explicit operation scopes, keyed services, container validation, disposal, and deterministic tests.",
+    "technologies": [".NET 10", "Microsoft.Extensions.DependencyInjection", "Options", "xUnit"],
+    "tags": ["dedicated-sample", "service-lifetimes", "keyed-services", "scope-disposal", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/dependency-injection-lifetimes",
+    "localPath": "samples/dependency-injection-lifetimes/README.md",
+    "runCommand": "dotnet run --project src/DependencyInjectionLifetimes",
+    "testCommand": "dotnet test DependencyInjectionLifetimes.slnx",
+    "liveDemoUrl": null
   }
 ]
