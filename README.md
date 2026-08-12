@@ -5,8 +5,8 @@ A modern, responsive static learning portal for the Microsoft .NET ecosystem. It
 ## What is included
 
 - 78 technology topics with honest `Outline`, `In progress`, or `Complete` status labels
-- Three gold-standard complete guides: ASP.NET Core, Entity Framework Core, and Dapper, each covering decisions, implementation, testing, security, performance, deployment, troubleshooting, and production readiness
-- Nine GitHub samples, including dedicated runnable ASP.NET Core, EF Core, and Dapper implementations with focused tests
+- Four gold-standard complete guides: .NET, ASP.NET Core, Entity Framework Core, and Dapper, each covering decisions, implementation, testing, security, performance, deployment, troubleshooting, and production readiness
+- Ten GitHub samples, including dedicated runnable .NET, ASP.NET Core, EF Core, and Dapper implementations with focused tests
 - Light and dark themes with system detection and persisted manual selection
 - Responsive sticky navigation, collapsible mobile sidebar, global search, and keyboard shortcuts
 - Animated, accessible technology blob cloud

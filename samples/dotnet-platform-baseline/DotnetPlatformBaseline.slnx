@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/DotnetPlatformBaseline/DotnetPlatformBaseline.csproj" />
+  <Project Path="tests/DotnetPlatformBaseline.Tests/DotnetPlatformBaseline.Tests.csproj" />
+</Solution>
