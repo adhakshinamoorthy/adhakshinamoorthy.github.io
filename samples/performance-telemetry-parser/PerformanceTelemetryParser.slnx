@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/TelemetryParser/TelemetryParser.csproj" />
+  <Project Path="benchmarks/TelemetryParser.Benchmarks/TelemetryParser.Benchmarks.csproj" />
+  <Project Path="tests/TelemetryParser.Tests/TelemetryParser.Tests.csproj" />
+</Solution>
