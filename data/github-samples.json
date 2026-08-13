@@ -364,5 +364,23 @@
     "description": "A .NET 10 storefront demonstrating business-module ownership, narrow public contracts, in-process collaboration, integration messages, and failure atomicity.",
     "technologies": [".NET 10", "Modular Monolith", "Module Contracts", "xUnit"], "tags": ["dedicated-sample", "module-boundary", "integration-contract", "architecture-testing"],
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/modular-monolith-storefront", "localPath": "samples/modular-monolith-storefront/README.md", "runCommand": "dotnet run --project src/ModularMonolithStorefront", "testCommand": "dotnet test ModularMonolithStorefront.slnx", "liveDemoUrl": null
+  },
+  {
+    "id": "ddd-subscriptions", "topicSlug": "domain-driven-design", "status": "complete", "name": "DDD Subscriptions",
+    "description": "A .NET 10 subscription domain demonstrating an aggregate consistency boundary, behavior-rich entities, validated value objects, ubiquitous language, invariants, and domain events.",
+    "technologies": [".NET 10", "Domain-Driven Design", "Aggregates", "xUnit"], "tags": ["dedicated-sample", "aggregate", "value-objects", "domain-events"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/ddd-subscriptions", "localPath": "samples/ddd-subscriptions/README.md", "runCommand": "dotnet run --project src/DddSubscriptions", "testCommand": "dotnet test DddSubscriptions.slnx", "liveDemoUrl": null
+  },
+  {
+    "id": "cqrs-orders-mediator", "topicSlug": "cqrs-mediatr", "status": "complete", "name": "CQRS Orders Mediator",
+    "description": "A dependency-free .NET 10 implementation of CQRS request handlers and mediator-style pipeline behaviors with separate write and read models, validation, idempotency, and focused tests.",
+    "technologies": [".NET 10", "CQRS", "Mediator Pattern", "xUnit"], "tags": ["dedicated-sample", "commands-queries", "pipeline-behavior", "idempotency"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/cqrs-orders-mediator", "localPath": "samples/cqrs-orders-mediator/README.md", "runCommand": "dotnet run --project src/CqrsOrdersMediator", "testCommand": "dotnet test CqrsOrdersMediator.slnx", "liveDemoUrl": null
+  },
+  {
+    "id": "design-patterns-pricing", "topicSlug": "design-patterns", "status": "complete", "name": "Design Patterns Pricing",
+    "description": "A .NET 10 pricing workflow applying Strategy, Adapter, Decorator, and Factory to real behavior variation, legacy integration, cross-cutting policy, and composition pressures.",
+    "technologies": [".NET 10", "Design Patterns", "SOLID", "xUnit"], "tags": ["dedicated-sample", "strategy", "adapter", "decorator", "factory"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/design-patterns-pricing", "localPath": "samples/design-patterns-pricing/README.md", "runCommand": "dotnet run --project src/DesignPatternsPricing", "testCommand": "dotnet test DesignPatternsPricing.slnx", "liveDemoUrl": null
   }
 ]
