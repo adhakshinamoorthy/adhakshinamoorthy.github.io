@@ -4,8 +4,8 @@ Every batch must preserve the portal completion contract: a full guide, a unique
 
 ## Status
 
-- Complete on `main`: .NET, C#, Dependency Injection, Source Generators, ASP.NET Core, Entity Framework Core, Blazor, Minimal APIs, Dapper
-- Batch 1 ready for review: Authentication & Authorization, API Security & OWASP, Secrets Management
+- Complete on `main`: .NET, C#, Dependency Injection, Source Generators, ASP.NET Core, Entity Framework Core, Blazor, Minimal APIs, Dapper, Authentication & Authorization, API Security & OWASP, Secrets Management
+- Batch 2 ready for review: API Design Best Practices, OpenAPI & Scalar, Webhook Patterns
 
 ## Planned batches
 

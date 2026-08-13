@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/OpenApiScalarCatalog/OpenApiScalarCatalog.csproj" />
+  <Project Path="tests/OpenApiScalarCatalog.Tests/OpenApiScalarCatalog.Tests.csproj" />
+</Solution>
