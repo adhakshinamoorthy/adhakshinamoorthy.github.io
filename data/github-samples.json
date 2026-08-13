@@ -304,5 +304,47 @@
     "runCommand": "dotnet run --project src/GraphQlInventoryCatalog",
     "testCommand": "dotnet test GraphQlInventoryCatalog.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "redis-hybrid-products",
+    "topicSlug": "redis-distributed-caching",
+    "status": "complete",
+    "name": "Redis Hybrid Products",
+    "description": "A .NET 10 API demonstrating HybridCache L1/L2 behavior, Redis integration, stampede protection, bounded versioned keys, explicit invalidation, local development fallback, and source-count integration tests.",
+    "technologies": ["ASP.NET Core 10", "HybridCache", "Redis", "xUnit"],
+    "tags": ["dedicated-sample", "cache-aside", "stampede-protection", "invalidation", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/redis-hybrid-products",
+    "localPath": "samples/redis-hybrid-products/README.md",
+    "runCommand": "dotnet run --project src/RedisHybridProducts",
+    "testCommand": "dotnet test RedisHybridProducts.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "multi-tenant-invoices",
+    "topicSlug": "multi-tenancy-patterns",
+    "status": "complete",
+    "name": "Multi-Tenant Invoices",
+    "description": "A .NET 10 API demonstrating claim-derived immutable tenant context, tenant-scoped repositories and cache keys, cross-tenant non-disclosure, fair quotas, and negative isolation tests.",
+    "technologies": ["ASP.NET Core 10", "Multi-Tenancy", "Authorization", "xUnit"],
+    "tags": ["dedicated-sample", "tenant-context", "data-isolation", "quota", "negative-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/multi-tenant-invoices",
+    "localPath": "samples/multi-tenant-invoices/README.md",
+    "runCommand": "dotnet run --project src/MultiTenantInvoices",
+    "testCommand": "dotnet test MultiTenantInvoices.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "performance-telemetry-parser",
+    "topicSlug": "performance",
+    "status": "complete",
+    "name": "Performance Telemetry Parser",
+    "description": "A .NET 10 measurement sample comparing allocation-heavy string splitting with a span parser through behavior tests and BenchmarkDotNet latency and allocation evidence.",
+    "technologies": [".NET 10", "BenchmarkDotNet", "Span<T>", "xUnit"],
+    "tags": ["dedicated-sample", "benchmark", "allocation", "profiling", "correctness-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/performance-telemetry-parser",
+    "localPath": "samples/performance-telemetry-parser/README.md",
+    "runCommand": "dotnet run -c Release --project benchmarks/TelemetryParser.Benchmarks -- --filter *",
+    "testCommand": "dotnet test PerformanceTelemetryParser.slnx",
+    "liveDemoUrl": null
   }
 ]
