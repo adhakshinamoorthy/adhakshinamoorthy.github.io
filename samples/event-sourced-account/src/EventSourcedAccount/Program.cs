@@ -1,0 +1,1 @@
+using EventSourcedAccount;var store=new EventStore();var id=Guid.NewGuid();var account=Account.Open(id,"Ada");account.Deposit(100m);store.Append(id,-1,account.Changes);account.MarkCommitted();var loaded=Account.Rehydrate(store.Load(id));loaded.Withdraw(25m);Console.WriteLine($"{loaded.Owner}: {loaded.Balance:C}; version={loaded.Version}");
