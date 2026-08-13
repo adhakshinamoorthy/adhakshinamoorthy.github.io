@@ -1,0 +1,1 @@
+using KafkaPartitionLab;var topic=new TopicLog(3);topic.Produce("customer-42","order-1");topic.Produce("customer-42","order-2");var group=new ConsumerGroup(topic);for(var p=0;p<topic.PartitionCount;p++)foreach(var record in group.Poll(p)){Console.WriteLine($"p{p}@{record.Offset}: {record.Value}");group.Commit(record);}
