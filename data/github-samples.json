@@ -346,5 +346,23 @@
     "runCommand": "dotnet run -c Release --project benchmarks/TelemetryParser.Benchmarks -- --filter *",
     "testCommand": "dotnet test PerformanceTelemetryParser.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "clean-architecture-orders", "topicSlug": "clean-architecture", "status": "complete", "name": "Clean Architecture Orders",
+    "description": "A .NET 10 order workflow demonstrating inward dependency direction, domain invariants, application ports, replaceable adapters, deterministic tests, and a single composition root.",
+    "technologies": [".NET 10", "Clean Architecture", "Ports and Adapters", "xUnit"], "tags": ["dedicated-sample", "dependency-rule", "use-case", "architecture-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/clean-architecture-orders", "localPath": "samples/clean-architecture-orders/README.md", "runCommand": "dotnet run --project src/CleanArchitectureOrders", "testCommand": "dotnet test CleanArchitectureOrders.slnx", "liveDemoUrl": null
+  },
+  {
+    "id": "vertical-slice-support", "topicSlug": "vertical-slice-architecture", "status": "complete", "name": "Vertical Slice Support",
+    "description": "A .NET 10 support workflow demonstrating feature-owned commands, queries, validation, mapping, customer-scoped disclosure, and behavior-focused tests.",
+    "technologies": [".NET 10", "Vertical Slice Architecture", "CQRS", "xUnit"], "tags": ["dedicated-sample", "feature-folders", "command-query", "negative-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/vertical-slice-support", "localPath": "samples/vertical-slice-support/README.md", "runCommand": "dotnet run --project src/VerticalSliceSupport", "testCommand": "dotnet test VerticalSliceSupport.slnx", "liveDemoUrl": null
+  },
+  {
+    "id": "modular-monolith-storefront", "topicSlug": "modular-monolith", "status": "complete", "name": "Modular Monolith Storefront",
+    "description": "A .NET 10 storefront demonstrating business-module ownership, narrow public contracts, in-process collaboration, integration messages, and failure atomicity.",
+    "technologies": [".NET 10", "Modular Monolith", "Module Contracts", "xUnit"], "tags": ["dedicated-sample", "module-boundary", "integration-contract", "architecture-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/modular-monolith-storefront", "localPath": "samples/modular-monolith-storefront/README.md", "runCommand": "dotnet run --project src/ModularMonolithStorefront", "testCommand": "dotnet test ModularMonolithStorefront.slnx", "liveDemoUrl": null
   }
 ]
