@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/SignalROperationsRoom/SignalROperationsRoom.csproj" />
+  <Project Path="tests/SignalROperationsRoom.Tests/SignalROperationsRoom.Tests.csproj" />
+</Solution>

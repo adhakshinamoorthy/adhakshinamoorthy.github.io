@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/GraphQlInventoryCatalog/GraphQlInventoryCatalog.csproj" />
+  <Project Path="tests/GraphQlInventoryCatalog.Tests/GraphQlInventoryCatalog.Tests.csproj" />
+</Solution>

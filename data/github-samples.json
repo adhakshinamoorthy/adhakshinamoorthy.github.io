@@ -262,5 +262,47 @@
     "runCommand": "dotnet run --project src/WebhookDurableInbox",
     "testCommand": "dotnet test WebhookDurableInbox.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "grpc-inventory",
+    "topicSlug": "grpc",
+    "status": "complete",
+    "name": "gRPC Inventory",
+    "description": "A contract-first .NET 10 gRPC service demonstrating protobuf evolution, unary and server-streaming calls, metadata authentication, bounded messages, canonical statuses, and real HTTP/2 client tests.",
+    "technologies": ["ASP.NET Core 10", "gRPC", "Protocol Buffers", "xUnit"],
+    "tags": ["dedicated-sample", "http2", "server-streaming", "interceptor", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/grpc-inventory",
+    "localPath": "samples/grpc-inventory/README.md",
+    "runCommand": "dotnet run --project src/GrpcInventory",
+    "testCommand": "dotnet test GrpcInventory.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "signalr-operations-room",
+    "topicSlug": "signalr",
+    "status": "complete",
+    "name": "SignalR Operations Room",
+    "description": "A .NET 10 real-time service demonstrating authenticated connections, strongly typed hub clients, server-controlled groups, bounded messages and snapshots, reconnection design, and real WebSocket client tests.",
+    "technologies": ["ASP.NET Core 10", "SignalR", "WebSockets", "xUnit"],
+    "tags": ["dedicated-sample", "typed-hub", "groups", "authentication", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/signalr-operations-room",
+    "localPath": "samples/signalr-operations-room/README.md",
+    "runCommand": "dotnet run --project src/SignalROperationsRoom",
+    "testCommand": "dotnet test SignalROperationsRoom.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "graphql-inventory-catalog",
+    "topicSlug": "graphql",
+    "status": "complete",
+    "name": "GraphQL Inventory Catalog",
+    "description": "A .NET 10 Hot Chocolate service demonstrating a typed schema, bounded cursor paging, field selection, policy-protected mutation, stable domain errors, and GraphQL-over-HTTP tests.",
+    "technologies": ["ASP.NET Core 10", "Hot Chocolate 16", "GraphQL", "xUnit"],
+    "tags": ["dedicated-sample", "cursor-paging", "authorization", "mutation-payload", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/graphql-inventory-catalog",
+    "localPath": "samples/graphql-inventory-catalog/README.md",
+    "runCommand": "dotnet run --project src/GraphQlInventoryCatalog",
+    "testCommand": "dotnet test GraphQlInventoryCatalog.slnx",
+    "liveDemoUrl": null
   }
 ]
