@@ -475,5 +475,77 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/otel-correlation-lab",
     "localPath": "samples/otel-correlation-lab/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "testing-orders-api",
+    "topicSlug": "testing",
+    "name": "Testing Orders API",
+    "description": "A .NET 10 API demonstrating deterministic unit tests, ASP.NET Core HTTP integration, validation contracts, and a critical create-then-read journey.",
+    "technologies": [
+      "ASP.NET Core 10",
+      "xUnit",
+      "WebApplicationFactory",
+      "TimeProvider"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "unit-testing",
+      "integration-testing",
+      "contract-testing"
+    ],
+    "runCommand": "dotnet run --project src/TestingOrdersApi",
+    "testCommand": "dotnet test TestingOrdersApi.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/testing-orders-api",
+    "localPath": "samples/testing-orders-api/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "architecture-boundary-lab",
+    "topicSlug": "architecture-testing",
+    "name": "Architecture Boundary Lab",
+    "description": "A multi-project .NET 10 sample enforcing inward dependencies, port naming, adapter visibility, and composition with executable reflection fitness functions.",
+    "technologies": [
+      ".NET 10",
+      "Architecture Testing",
+      "Reflection",
+      "xUnit"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "fitness-functions",
+      "dependency-rule",
+      "module-boundary"
+    ],
+    "runCommand": "dotnet run --project src/ArchitectureBoundaryLab",
+    "testCommand": "dotnet test ArchitectureBoundaryLab.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/architecture-boundary-lab",
+    "localPath": "samples/architecture-boundary-lab/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "testcontainers-postgres-inventory",
+    "topicSlug": "testcontainers",
+    "name": "Testcontainers PostgreSQL Inventory",
+    "description": "A .NET 10 integration lab provisioning pinned PostgreSQL with Testcontainers, dynamic endpoints, schema setup, state reset, Npgsql, and real provider tests.",
+    "technologies": [
+      ".NET 10",
+      "Testcontainers 4.13",
+      "PostgreSQL 16",
+      "Npgsql"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "real-provider",
+      "container-fixture",
+      "state-isolation"
+    ],
+    "runCommand": "dotnet run --project src/TestcontainersPostgresInventory",
+    "testCommand": "dotnet test TestcontainersPostgresInventory.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/testcontainers-postgres-inventory",
+    "localPath": "samples/testcontainers-postgres-inventory/README.md",
+    "liveDemoUrl": null
   }
 ]

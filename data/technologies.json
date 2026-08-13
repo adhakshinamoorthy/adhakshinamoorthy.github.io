@@ -1007,27 +1007,269 @@
     "category": "Quality & Growth",
     "color": "#168f72",
     "shortDescription": "Build confidence through focused unit, integration, contract, and end-to-end feedback loops.",
-    "keywords": ["xUnit", "unit tests", "integration", "Testcontainers", "WebApplicationFactory", "contract"],
-    "overview": "Testing provides layered evidence that units, integrations, contracts, and complete user flows behave as intended.",
-    "detail": "Fast unit tests protect deterministic policy; integration tests verify database, HTTP pipeline, serialization, or broker behavior; contract tests protect service compatibility; and a small number of end-to-end tests cover critical journeys. Test shape should follow risk, not a fixed pyramid quota.",
-    "concepts": [
-      {"title": "Unit tests", "description": "Fast, isolated checks of deterministic behavior and edge cases without infrastructure."},
-      {"title": "Integration tests", "description": "Verify real boundaries such as database providers, HTTP middleware, serialization, and authentication."},
-      {"title": "Contract tests", "description": "Assert that producer and consumer expectations remain compatible as services evolve."},
-      {"title": "End-to-end tests", "description": "Exercise a small set of critical user outcomes through the deployed surface."}
+    "keywords": [
+      "xUnit",
+      "unit tests",
+      "integration",
+      "Testcontainers",
+      "WebApplicationFactory",
+      "contract"
     ],
-    "architecture": {"description": "A balanced suite gives broad, fast domain feedback and progressively narrower but higher-fidelity checks at system boundaries.", "nodes": ["Unit tests", "Integration tests", "Contract tests", "Critical journeys"], "colors": ["#168f72", "#2678c8", "#6e5bd7", "#e07036"]},
-    "code": {"language": "csharp", "label": "OrderTests.cs", "introduction": "A useful test names the behavior, arranges only relevant state, and asserts an externally meaningful outcome.", "code": "public sealed class OrderTests\n{\n    [Fact]\n    public void AddLine_WhenQuantityIsZero_RejectsChange()\n    {\n        var order = Order.Create(CustomerId.New());\n\n        var action = () => order.AddLine(ProductId.New(), quantity: 0);\n\n        action.Should().Throw<DomainException>()\n            .WithMessage(\"Quantity must be positive.\");\n        order.Lines.Should().BeEmpty();\n    }\n}"},
-    "bestPractices": ["Name tests after observable behavior, condition, and outcome.", "Use real infrastructure in integration tests when provider behavior matters.", "Control time, identifiers, and randomness through explicit seams.", "Keep tests independent and make failure output reveal the violated behavior."],
+    "overview": "Testing provides layered evidence that units, integrations, contracts, and complete user flows behave as intended.",
+    "detail": "A production test strategy allocates evidence according to risk. Unit tests give fast, deterministic feedback on policy and edge cases; integration tests exercise real framework, serialization, persistence, and authentication boundaries; contract tests protect the shape and meaning exchanged between independently changing components; and a deliberately small set of end-to-end tests proves critical user outcomes in a deployed environment. Test doubles belong at narrow controllable boundaries, not around every class. Reliable suites control time, randomness, identifiers, concurrency, data, and asynchronous completion. They report the violated behavior clearly, run independently in any order, and fail for one diagnosable reason. Coverage is a gap-finding signal rather than a quality target. Teams should define test ownership, quarantine rules, retry policy, fixtures, data reset, and CI lanes, then track flake rate and time-to-diagnosis alongside pass rate.",
+    "concepts": [
+      {
+        "title": "Risk-based strategy",
+        "description": "Choose evidence from failure impact and uncertainty instead of enforcing a fixed pyramid quota."
+      },
+      {
+        "title": "Unit tests",
+        "description": "Exercise deterministic policy and edge cases quickly without infrastructure or process boundaries."
+      },
+      {
+        "title": "Integration tests",
+        "description": "Verify real framework, database, HTTP, serialization, identity, or broker behavior at selected boundaries."
+      },
+      {
+        "title": "Contract tests",
+        "description": "Protect request, response, event, and error compatibility between producers and consumers."
+      },
+      {
+        "title": "End-to-end journeys",
+        "description": "Prove a few business-critical outcomes through the deployed surface and its real integrations."
+      },
+      {
+        "title": "Test doubles",
+        "description": "Use fakes, stubs, or mocks at narrow outbound seams when control or observation is valuable."
+      },
+      {
+        "title": "Determinism and isolation",
+        "description": "Control time, randomness, concurrency, and data so tests can run independently in any order."
+      },
+      {
+        "title": "Suite operations",
+        "description": "Flake ownership, diagnostics, parallel lanes, and failure triage determine whether tests remain trusted."
+      }
+    ],
+    "architecture": {
+      "description": "A balanced suite gives broad, fast domain feedback and progressively narrower but higher-fidelity checks at system boundaries.",
+      "nodes": [
+        "Unit tests",
+        "Integration tests",
+        "Contract tests",
+        "Critical journeys"
+      ],
+      "colors": [
+        "#168f72",
+        "#2678c8",
+        "#6e5bd7",
+        "#e07036"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "OrderTests.cs",
+      "introduction": "A useful test names the behavior, arranges only relevant state, and asserts an externally meaningful outcome.",
+      "code": "public sealed class OrderTests\n{\n    [Fact]\n    public void AddLine_WhenQuantityIsZero_RejectsChange()\n    {\n        var order = Order.Create(CustomerId.New());\n\n        var action = () => order.AddLine(ProductId.New(), quantity: 0);\n\n        action.Should().Throw<DomainException>()\n            .WithMessage(\"Quantity must be positive.\");\n        order.Lines.Should().BeEmpty();\n    }\n}"
+    },
+    "bestPractices": [
+      "Test observable behavior.",
+      "Choose levels from risk.",
+      "Control time and randomness.",
+      "Use real providers where semantics matter.",
+      "Keep fixtures isolated.",
+      "Treat flakes as defects.",
+      "Capture useful failure evidence.",
+      "Delete redundant slow tests."
+    ],
     "interviewQuestions": [
-      {"question": "What should be mocked?", "answer": "Mock narrow outbound boundaries when controlling behavior is valuable. Avoid mocking the object under test, data structures, or every internal collaborator."},
-      {"question": "What is the value of an integration test?", "answer": "It exposes false assumptions about real frameworks and infrastructure—translation, configuration, serialization, transactions, routing, and security."},
-      {"question": "How do you prevent flaky tests?", "answer": "Remove uncontrolled time and concurrency, isolate data, await asynchronous completion, avoid shared mutable state, and capture diagnostic evidence."}
+      {
+        "question": "What should be mocked?",
+        "answer": "Mock narrow outbound boundaries when controlling behavior is valuable; keep domain collaborators concrete."
+      },
+      {
+        "question": "Unit versus integration test?",
+        "answer": "A unit test isolates deterministic policy; an integration test verifies collaboration with a real framework or provider boundary."
+      },
+      {
+        "question": "What is a contract test?",
+        "answer": "It verifies the shape and meaning one component promises another without requiring the entire deployed journey."
+      },
+      {
+        "question": "How do you reduce flakes?",
+        "answer": "Control time, concurrency, data, ports, and async completion, then assign ownership instead of retrying blindly."
+      },
+      {
+        "question": "Why not maximize code coverage?",
+        "answer": "Coverage shows executed lines, not meaningful assertions, missing risks, or production compatibility."
+      },
+      {
+        "question": "When is an end-to-end test justified?",
+        "answer": "For a small business-critical journey whose value depends on the deployed components working together."
+      },
+      {
+        "question": "How should CI tests be layered?",
+        "answer": "Fast deterministic checks first, provider and contract evidence before merge, and deployment smoke journeys after release."
+      }
     ],
     "note": "Coverage is a map of executed code, not proof that the right behaviors and failure cases were asserted.",
     "tip": "Write a regression test that fails for the reported defect before changing production code.",
     "warning": "An in-memory database substitute may not reproduce relational constraints, transactions, collation, or SQL translation.",
-    "sampleId": "ride-sharing-cqrs", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-03", "latestNote": "Integration testing guidance expanded"
+    "sampleId": "testing-orders-api",
+    "readingMinutes": 37,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard strategy with unit, HTTP integration, contract, and journey tests",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Map test levels to concrete product risks.",
+      "Write deterministic behavior-focused unit tests.",
+      "Exercise the real ASP.NET Core HTTP pipeline.",
+      "Protect success and error contracts.",
+      "Control fixtures, time, data, and concurrency.",
+      "Operate a fast and trusted CI suite."
+    ],
+    "prerequisites": [
+      "C# async code, dependency injection, HTTP, and JSON fundamentals.",
+      "A list of critical journeys and expensive failure modes.",
+      "Basic xUnit or equivalent test-runner experience."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Unit tests for dense deterministic policy.",
+        "Integration tests where framework or provider behavior matters.",
+        "End-to-end tests for a small set of critical journeys."
+      ],
+      "avoid": [
+        "Mocking every internal collaborator.",
+        "Using one test level for every risk.",
+        "Retrying failures until a flaky suite looks green."
+      ]
+    },
+    "implementationIntroduction": "The sample separates deterministic order policy tests from real ASP.NET Core HTTP integration, validation-contract checks, and a create-then-read journey.",
+    "implementationSteps": [
+      {
+        "title": "List risks",
+        "description": "Rank critical outcomes, complex policy, integration uncertainty, and costly regressions."
+      },
+      {
+        "title": "Assign evidence",
+        "description": "Select the cheapest test level that can reveal each important failure."
+      },
+      {
+        "title": "Create deterministic seams",
+        "description": "Inject time and external boundaries while keeping domain objects concrete."
+      },
+      {
+        "title": "Test policy",
+        "description": "Cover nominal behavior, boundaries, invalid input, and invariants with fast unit tests."
+      },
+      {
+        "title": "Test integrations",
+        "description": "Run the actual HTTP pipeline, serialization, middleware, and provider where behavior differs."
+      },
+      {
+        "title": "Protect contracts",
+        "description": "Assert stable success, validation, error, and event shapes without overspecifying internals."
+      },
+      {
+        "title": "Operate the suite",
+        "description": "Parallelize safe tests, capture diagnostics, measure flakes, and remove redundant slow checks."
+      }
+    ],
+    "testing": {
+      "introduction": "The testing system itself needs tests and operational rules.",
+      "items": [
+        "Prove tests fail when the behavior is deliberately broken.",
+        "Run in random order and in parallel.",
+        "Repeat timing-sensitive tests under stress.",
+        "Validate fixtures clean up after cancellation.",
+        "Track runtime and flake rate per lane.",
+        "Review contract changes as API changes."
+      ]
+    },
+    "security": {
+      "introduction": "Tests must verify authorization boundaries without turning secrets or personal data into fixtures.",
+      "items": [
+        "Include negative authorization tests.",
+        "Use synthetic non-sensitive data.",
+        "Keep secrets outside source and test output.",
+        "Redact captured requests and snapshots.",
+        "Test abuse limits and validation."
+      ]
+    },
+    "performance": {
+      "introduction": "Fast feedback is a product feature of the suite.",
+      "items": [
+        "Keep policy tests in the fastest lane.",
+        "Share expensive immutable fixtures safely.",
+        "Parallelize isolated tests.",
+        "Move only critical journeys to end-to-end.",
+        "Profile slow tests before adding retries."
+      ]
+    },
+    "deployment": {
+      "introduction": "Different evidence runs at different release stages.",
+      "items": [
+        "Run unit and focused integration tests on every change.",
+        "Run provider and contract tests before merge.",
+        "Run smoke tests after deployment.",
+        "Gate promotion on critical journeys.",
+        "Retain artifacts and diagnostics for failures."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "A test passes alone but fails in suite.",
+        "cause": "State, port, clock, or data is shared.",
+        "fix": "Give each test isolated state and remove ordering assumptions."
+      },
+      {
+        "symptom": "Async test hangs.",
+        "cause": "Work is not awaited or cancellation is ignored.",
+        "fix": "Await completion, apply a timeout, and propagate cancellation."
+      },
+      {
+        "symptom": "Mocks break after refactoring.",
+        "cause": "Tests specify internal collaboration.",
+        "fix": "Assert observable outcomes and mock only stable boundaries."
+      },
+      {
+        "symptom": "Integration result differs in production.",
+        "cause": "A substitute does not match the real provider.",
+        "fix": "Use provider-real infrastructure for provider behavior."
+      },
+      {
+        "symptom": "Suite is green after retries.",
+        "cause": "Retry hides nondeterminism.",
+        "fix": "Quarantine with ownership and fix the uncontrolled input."
+      },
+      {
+        "symptom": "Failures reveal no cause.",
+        "cause": "Assertions and captured context are vague.",
+        "fix": "Name behavior, keep assertions focused, and attach diagnostics."
+      }
+    ],
+    "productionChecklist": [
+      "Critical risks map to test evidence.",
+      "Unit tests are deterministic and fast.",
+      "Real boundaries have integration coverage.",
+      "Success and error contracts are protected.",
+      "Authorization has negative tests.",
+      "Fixtures isolate data and clean up.",
+      "Flake rate and duration are owned.",
+      "Post-deploy smoke evidence is retained."
+    ],
+    "resources": [
+      {
+        "label": ".NET testing overview",
+        "url": "https://learn.microsoft.com/dotnet/core/testing/"
+      },
+      {
+        "label": "ASP.NET Core integration tests",
+        "url": "https://learn.microsoft.com/aspnet/core/test/integration-tests"
+      }
+    ]
   },
   {
     "slug": "performance",
@@ -2226,31 +2468,66 @@
     "category": "Quality & Growth",
     "color": "#6b3fa0",
     "shortDescription": "Enforce dependency rules, naming conventions, and layer boundaries automatically in CI using NetArchTest and custom Roslyn analysers.",
-    "keywords": ["NetArchTest", "architecture tests", "dependency rules", "clean architecture", "fitness functions", "layer boundaries", "namespace rules", "Roslyn analysers"],
+    "keywords": [
+      "NetArchTest",
+      "architecture tests",
+      "dependency rules",
+      "clean architecture",
+      "fitness functions",
+      "layer boundaries",
+      "namespace rules",
+      "Roslyn analysers"
+    ],
     "overview": "Architecture tests verify that structural rules — which layers may reference which, how types must be named, what may not depend on what — are enforced automatically rather than relying on code review alone.",
-    "detail": "Clean Architecture, DDD, Vertical Slice Architecture, and Modular Monolith patterns all depend on dependency direction being respected. Without automated enforcement those boundaries erode silently as teams grow and deadlines approach. NetArchTest provides a fluent API for asserting structural rules against compiled assemblies in ordinary xUnit or NUnit tests. The tests run in CI and fail a pull request the moment a forbidden dependency appears, turning a convention into a contract.",
+    "detail": "Architecture rules decay when they exist only in diagrams and review comments. An architectural fitness function turns an important structural property into executable evidence: domain code has no outward dependency, application code owns ports, modules expose only intended contracts, handlers follow conventions, and adapters remain replaceable. Reflection libraries such as NetArchTest or ArchUnitNET inspect compiled assemblies; Roslyn analyzers provide earlier compiler and IDE feedback; project references and visibility enforce some rules before tests run. Good rules protect consequential boundaries rather than cosmetic preferences, name the violating types, and remain fast enough for every pull request. Existing systems need an explicit baseline and a ratchet that prevents new violations while teams remove old ones incrementally. Rules must evolve with architecture decisions, package or namespace moves, generated code, dynamic loading, and deployment topology, and they complement—not replace—behavior tests and design review.",
     "concepts": [
       {
         "title": "Fitness functions",
-        "description": "An architectural fitness function is any automated check that evaluates a structural property of the system — dependency direction, naming, accessibility, coupling — on every build."
+        "description": "Automated checks continuously evaluate a measurable architectural property."
       },
       {
-        "title": "Dependency direction rules",
-        "description": "Tests assert that inner layers such as Domain and Application never reference outer layers such as Infrastructure or Web, preserving the dependency rule at compile time."
+        "title": "Dependency direction",
+        "description": "Inner domain and application assemblies must not reference outer infrastructure or delivery assemblies."
       },
       {
-        "title": "Naming and accessibility conventions",
-        "description": "Rules can verify that every class in a given namespace implements an expected interface, follows a naming suffix, or has the correct accessibility — catching drift from team conventions automatically."
+        "title": "Module boundaries",
+        "description": "Only explicit public contracts may cross business-module ownership lines."
       },
       {
-        "title": "Module boundary enforcement",
-        "description": "In a Modular Monolith, tests assert that one module's internal types are not referenced directly by another module, keeping cross-module coupling explicit and intentional."
+        "title": "Naming and shape",
+        "description": "Handlers, ports, adapters, and endpoints can follow searchable conventions when those conventions improve design."
+      },
+      {
+        "title": "Visibility",
+        "description": "Internal types and friend assemblies reduce the surface that other modules can couple to."
+      },
+      {
+        "title": "Reflection tests",
+        "description": "Compiled-assembly inspection is easy to add and works in an ordinary test runner."
+      },
+      {
+        "title": "Roslyn analyzers",
+        "description": "Compiler-integrated rules give immediate feedback and can block builds before test execution."
+      },
+      {
+        "title": "Baselines and ratchets",
+        "description": "Legacy violations are recorded while new violations fail and the permitted set only shrinks."
       }
     ],
     "architecture": {
       "description": "Architecture tests run alongside unit and integration tests in CI; they inspect compiled assemblies and fail the build when a structural rule is violated, before code reaches main.",
-      "nodes": ["Compiled assemblies", "NetArchTest rules", "CI quality gate", "Pull request feedback"],
-      "colors": ["#6b3fa0", "#2678c8", "#168c78", "#e07036"]
+      "nodes": [
+        "Compiled assemblies",
+        "NetArchTest rules",
+        "CI quality gate",
+        "Pull request feedback"
+      ],
+      "colors": [
+        "#6b3fa0",
+        "#2678c8",
+        "#168c78",
+        "#e07036"
+      ]
     },
     "code": {
       "language": "csharp",
@@ -2259,33 +2536,203 @@
       "code": "using NetArchTest.Rules;\n\npublic sealed class ArchitectureTests\n{\n    private const string DomainNamespace      = \"Orders.Domain\";\n    private const string ApplicationNamespace = \"Orders.Application\";\n    private const string InfraNamespace       = \"Orders.Infrastructure\";\n    private const string WebNamespace         = \"Orders.Web\";\n\n    [Fact]\n    public void Domain_must_not_reference_application_or_outer_layers()\n    {\n        var result = Types.InAssembly(typeof(Orders.Domain.Order).Assembly)\n            .Should()\n            .NotHaveDependencyOnAny(\n                ApplicationNamespace,\n                InfraNamespace,\n                WebNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Domain layer has forbidden outward dependency:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n\n    [Fact]\n    public void Application_must_not_reference_infrastructure_or_web()\n    {\n        var result = Types.InAssembly(typeof(Orders.Application.PlaceOrderCommand).Assembly)\n            .Should()\n            .NotHaveDependencyOnAny(InfraNamespace, WebNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Application layer has forbidden outward dependency:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n\n    [Fact]\n    public void Repositories_must_implement_IRepository_and_live_in_infrastructure()\n    {\n        var result = Types.InCurrentDomain()\n            .That().ImplementInterface(typeof(IRepository<>))\n            .Should()\n            .ResideInNamespace(InfraNamespace)\n            .GetResult();\n\n        Assert.True(result.IsSuccessful,\n            \"Repository implementation found outside Infrastructure:\\n\" +\n            string.Join(\"\\n\", result.FailingTypeNames ?? []));\n    }\n}"
     },
     "bestPractices": [
-      "Run architecture tests in the same CI pipeline as unit tests so a forbidden dependency blocks a pull request before merge, not after.",
-      "Write one test per meaningful architectural rule and name it as a sentence — Domain_must_not_reference_infrastructure reads clearly to a reviewer who has never seen NetArchTest.",
-      "Include the list of failing type names in the assertion message so the developer knows exactly which class violated the rule without re-running locally.",
-      "Add architecture tests at the start of a project or module — retrofitting them onto a large codebase reveals many violations at once, which is discouraging; fix them in batches grouped by boundary."
+      "Protect consequential boundaries.",
+      "Prefer compile-time enforcement first.",
+      "Name rules as sentences.",
+      "Report violating types.",
+      "Fail on empty scans.",
+      "Baseline legacy debt explicitly.",
+      "Keep exceptions narrow and owned.",
+      "Update rules with ADRs."
     ],
     "interviewQuestions": [
       {
-        "question": "What is an architectural fitness function and why is it useful?",
-        "answer": "A fitness function is any automated check that measures a structural property of the system on every build — dependency direction, naming, coupling, accessibility. It is useful because it turns a convention documented in a README into a failing build, catching drift as soon as it is introduced rather than during an architectural review months later."
+        "question": "What is an architectural fitness function?",
+        "answer": "An automated check that continuously evaluates a structural or operational architecture property."
       },
       {
-        "question": "How does NetArchTest differ from a Roslyn analyser?",
-        "answer": "NetArchTest inspects compiled assemblies at test time using reflection — it runs as an ordinary unit test and is easy to add to any project. A Roslyn analyser runs inside the compiler and reports violations as warnings or errors during the build or in the IDE. Analysers give faster feedback but are harder to write; NetArchTest tests are simpler and sufficient for most structural enforcement needs."
+        "question": "Reflection test versus Roslyn analyzer?",
+        "answer": "Reflection inspects compiled assemblies in a test runner; an analyzer reports during compilation and in the IDE."
       },
       {
-        "question": "What happens when architecture tests reveal many violations in an existing codebase?",
-        "answer": "Do not try to fix them all at once. Introduce the tests with the current violations captured as a known baseline using a predicate or exclusion list, then fix violations in small batches as part of normal work. This gives the safety net without blocking the team with a wall of red tests on day one."
+        "question": "How do project references help?",
+        "answer": "They make coarse dependency direction a compiler-enforced graph rather than a naming convention."
+      },
+      {
+        "question": "How do you adopt rules in legacy code?",
+        "answer": "Record existing violations, fail only on growth, and shrink the baseline through owned increments."
+      },
+      {
+        "question": "Why fail on an empty type selection?",
+        "answer": "Otherwise a rename can make a rule silently test nothing while remaining green."
+      },
+      {
+        "question": "Should every naming convention be tested?",
+        "answer": "No; enforce conventions only when they protect ownership, discovery, safety, or replaceability."
+      },
+      {
+        "question": "Do architecture tests replace review?",
+        "answer": "No; they automate observable invariants while review handles tradeoffs and concepts the code graph cannot express."
       }
     ],
     "note": "Architecture tests verify structure, not behaviour — they complement unit and integration tests rather than replace them, and they only catch the violations that the rules you write describe.",
     "tip": "Start with three rules that match your chosen architecture style: domain does not reference infrastructure, application does not reference web, and infrastructure does not reference web. Those three cover the most common drift patterns in Clean Architecture projects.",
     "warning": "Overly granular rules — asserting the exact namespace of every type — make tests brittle and expensive to maintain as the codebase evolves; focus on the boundaries that matter architecturally, not on folder organisation.",
-    "sampleId": "ride-sharing-cqrs",
-    "readingMinutes": 10,
-    "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on fitness functions, NetArchTest rules, and CI enforcement of layer boundaries"
+    "sampleId": "architecture-boundary-lab",
+    "readingMinutes": 36,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard guide with compiled multi-project architecture fitness functions",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Translate architecture decisions into executable rules.",
+      "Enforce inward project dependency direction.",
+      "Protect module contracts and visibility.",
+      "Choose reflection tests or analyzers.",
+      "Introduce a legacy baseline safely.",
+      "Keep diagnostics actionable and rules maintainable."
+    ],
+    "prerequisites": [
+      "Assemblies, project references, namespaces, and accessibility.",
+      "A documented target architecture and module ownership model.",
+      "A standard unit-test and CI pipeline."
+    ],
+    "decisionGuide": {
+      "use": [
+        "A boundary is important and mechanically observable.",
+        "Multiple contributors can accidentally introduce coupling.",
+        "A legacy boundary needs a no-new-violations ratchet."
+      ],
+      "avoid": [
+        "Rules encode taste with no design consequence.",
+        "A rule duplicates a compiler guarantee.",
+        "Tests replace design review or runtime behavior evidence."
+      ]
+    },
+    "implementationIntroduction": "The sample compiles Domain, Application, Infrastructure, and Host separately, then uses reflection fitness functions to prove reference direction, port naming, adapter visibility, and composition behavior.",
+    "implementationSteps": [
+      {
+        "title": "Record the decision",
+        "description": "State the boundary, rationale, owner, and permitted dependency direction."
+      },
+      {
+        "title": "Choose enforcement",
+        "description": "Use project structure, visibility, reflection tests, analyzers, or a combination."
+      },
+      {
+        "title": "Load target assemblies",
+        "description": "Anchor rules on known types so renames and missing assemblies fail visibly."
+      },
+      {
+        "title": "Express one rule",
+        "description": "Write a sentence-named test for each consequential property."
+      },
+      {
+        "title": "Report violations",
+        "description": "List every offending type or reference in the failure output."
+      },
+      {
+        "title": "Baseline legacy debt",
+        "description": "Capture existing exceptions with an owner and shrink-only removal plan."
+      },
+      {
+        "title": "Run and evolve",
+        "description": "Execute on every pull request and update rules with approved architecture decisions."
+      }
+    ],
+    "testing": {
+      "introduction": "Prove each fitness function can detect a representative forbidden dependency or shape.",
+      "items": [
+        "Use fixture assemblies with deliberate violations.",
+        "Fail when a target assembly is missing.",
+        "Assert every violating type is reported.",
+        "Test generated-code exclusions narrowly.",
+        "Verify baseline entries cannot grow silently.",
+        "Run rules against Release assemblies in CI."
+      ]
+    },
+    "security": {
+      "introduction": "Structural rules can enforce security boundaries before runtime.",
+      "items": [
+        "Keep secret providers out of domain code.",
+        "Restrict unsafe APIs to approved adapters.",
+        "Protect authorization policy ownership.",
+        "Prevent UI modules from referencing persistence.",
+        "Review exclusions as security changes."
+      ]
+    },
+    "performance": {
+      "introduction": "Rules should be cheap enough for every change.",
+      "items": [
+        "Load each assembly once.",
+        "Cache type scans within a test run.",
+        "Prefer project references for coarse boundaries.",
+        "Split expensive repository-wide analysis.",
+        "Track architecture-test duration."
+      ]
+    },
+    "deployment": {
+      "introduction": "Run architecture evidence before packaging so invalid structure never becomes an artifact.",
+      "items": [
+        "Build Release assemblies first.",
+        "Run on every pull request.",
+        "Publish violation reports.",
+        "Block merges on new violations.",
+        "Review baselines during modernization."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Rule finds no types.",
+        "cause": "The namespace or assembly anchor moved.",
+        "fix": "Fail on an empty selection and anchor with a known type."
+      },
+      {
+        "symptom": "Valid generated code fails.",
+        "cause": "The rule scans compiler output indiscriminately.",
+        "fix": "Exclude a narrow generated-code marker with rationale."
+      },
+      {
+        "symptom": "Many legacy violations block adoption.",
+        "cause": "The target rule was enabled without a baseline.",
+        "fix": "Record current debt and enforce no new violations."
+      },
+      {
+        "symptom": "Tests pass despite a project reference.",
+        "cause": "Only type usage was inspected.",
+        "fix": "Assert assembly references or project graph directly."
+      },
+      {
+        "symptom": "Failures are hard to fix.",
+        "cause": "The assertion reports only false.",
+        "fix": "Print violating types and the governing decision."
+      },
+      {
+        "symptom": "Rules fight approved design.",
+        "cause": "Architecture changed but evidence did not.",
+        "fix": "Update the ADR and fitness function in the same change."
+      }
+    ],
+    "productionChecklist": [
+      "Important boundaries have recorded decisions.",
+      "Project references point inward.",
+      "Module contracts are explicit.",
+      "Rules fail on empty selections.",
+      "Violations list concrete types.",
+      "Legacy baselines cannot grow.",
+      "CI blocks new violations.",
+      "Rules evolve with approved decisions."
+    ],
+    "resources": [
+      {
+        "label": ".NET architecture guidance",
+        "url": "https://learn.microsoft.com/dotnet/architecture/"
+      },
+      {
+        "label": "Roslyn analyzers overview",
+        "url": "https://learn.microsoft.com/visualstudio/code-quality/roslyn-analyzers-overview"
+      }
+    ]
   },
   {
     "slug": "testcontainers",
@@ -2294,31 +2741,67 @@
     "category": "Quality & Growth",
     "color": "#1d6fa5",
     "shortDescription": "Spin up real PostgreSQL, Redis, RabbitMQ, and other dependencies as Docker containers inside integration tests — no mocks, no shared test servers.",
-    "keywords": ["Testcontainers", "integration tests", "Docker", "PostgreSQL", "Redis", "RabbitMQ", "WebApplicationFactory", "database testing", "container tests"],
+    "keywords": [
+      "Testcontainers",
+      "integration tests",
+      "Docker",
+      "PostgreSQL",
+      "Redis",
+      "RabbitMQ",
+      "WebApplicationFactory",
+      "database testing",
+      "container tests"
+    ],
     "overview": "Testcontainers for .NET starts real infrastructure — databases, message brokers, caches — as short-lived Docker containers for the duration of a test, then tears them down automatically.",
-    "detail": "In-memory database substitutes miss SQL translation bugs, provider-specific constraints, migration behaviour, and real transaction semantics. Testcontainers solves this by pulling and starting actual Docker images — PostgreSQL, Redis, RabbitMQ, Azurite, and hundreds more — directly from test code. Each container gets its own mapped port so tests run in parallel without conflict. Combined with WebApplicationFactory in ASP.NET Core, the full HTTP stack including middleware, auth, and EF Core migrations runs against a real database in a repeatable, isolated environment.",
+    "detail": "Testcontainers for .NET provisions disposable infrastructure from test code so integration evidence runs against the same database, cache, broker, or service implementation used in production. A typed builder pins an image, configures credentials and wait strategy, starts the resource on a random mapped host port, and exposes the runtime connection string. Fixtures choose the lifecycle boundary: per test for maximum isolation, per class or collection for speed, or per assembly with careful reset. Schema migrations run after readiness, while transactions, schema-per-test, database-per-test, or tools such as Respawn restore known state. Tests must require a healthy Docker-compatible runtime, capture container logs on failure, bound startup and cleanup, and budget CPU, memory, disk, and parallelism in CI. Image tags and digests are supply-chain inputs that need review and vulnerability scanning. Testcontainers complements deterministic unit tests; it is valuable specifically where substitute behavior cannot prove SQL translation, constraints, transactions, network protocols, or broker semantics.",
     "concepts": [
       {
-        "title": "Container lifecycle",
-        "description": "Containers start before the first test in a collection and stop after the last, controlled by IAsyncLifetime or a shared fixture — start once per class or once per assembly depending on isolation needs."
+        "title": "Real provider evidence",
+        "description": "The test uses the same engine and protocol semantics that production code depends on."
       },
       {
-        "title": "Pre-built module builders",
-        "description": "Testcontainers ships typed builders for common images — PostgreSqlBuilder, RedisBuilder, RabbitMqBuilder, MsSqlBuilder — with sensible defaults and a fluent API for image, port, and environment configuration."
+        "title": "Typed builders",
+        "description": "Module builders configure images, credentials, databases, wait strategies, and container behavior."
       },
       {
-        "title": "Dynamic connection strings",
-        "description": "Each container exposes its mapped host port after start; the connection string is built from those values and injected into the application under test, preventing port conflicts between parallel runs."
+        "title": "Lifecycle scope",
+        "description": "Per-test, class, collection, and assembly fixtures trade isolation for startup cost."
       },
       {
-        "title": "WebApplicationFactory integration",
-        "description": "A custom WebApplicationFactory overrides the database connection string with the container's value, runs EF Core migrations on startup, and resets data between tests using transactions or respawn."
+        "title": "Dynamic endpoints",
+        "description": "Random mapped ports and runtime connection strings allow safe parallel execution."
+      },
+      {
+        "title": "Readiness",
+        "description": "A container process start is not enough; tests wait for the service protocol to accept work."
+      },
+      {
+        "title": "Schema and seed",
+        "description": "Migrations or schema setup run against the live provider before controlled test data is inserted."
+      },
+      {
+        "title": "State reset",
+        "description": "Transactions, truncation, Respawn, schemas, or databases restore isolation without accidental leakage."
+      },
+      {
+        "title": "CI and cleanup",
+        "description": "Resource limits, image pulls, logs, cancellation, and the resource reaper make infrastructure tests operable."
       }
     ],
     "architecture": {
       "description": "Test code starts named Docker containers, builds a WebApplicationFactory pointing at them, sends real HTTP requests, and asserts on responses backed by actual infrastructure.",
-      "nodes": ["xUnit test", "Docker containers", "WebApplicationFactory", "Real HTTP + database"],
-      "colors": ["#6e5bd7", "#1d6fa5", "#2678c8", "#168c78"]
+      "nodes": [
+        "xUnit test",
+        "Docker containers",
+        "WebApplicationFactory",
+        "Real HTTP + database"
+      ],
+      "colors": [
+        "#6e5bd7",
+        "#1d6fa5",
+        "#2678c8",
+        "#168c78"
+      ]
     },
     "code": {
       "language": "csharp",
@@ -2327,33 +2810,203 @@
       "code": "using Testcontainers.PostgreSql;\nusing Microsoft.AspNetCore.Mvc.Testing;\nusing Microsoft.EntityFrameworkCore;\n\npublic sealed class OrdersApiFixture : IAsyncLifetime\n{\n    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()\n        .WithImage(\"postgres:16-alpine\")\n        .WithDatabase(\"orders_test\")\n        .WithUsername(\"test\")\n        .WithPassword(\"test\")\n        .Build();\n\n    public HttpClient Client { get; private set; } = default!;\n    private WebApplicationFactory<Program> _factory = default!;\n\n    public async Task InitializeAsync()\n    {\n        await _postgres.StartAsync();\n\n        _factory = new WebApplicationFactory<Program>()\n            .WithWebHostBuilder(host =>\n                host.ConfigureServices(services =>\n                {\n                    services.RemoveAll<DbContextOptions<AppDbContext>>();\n                    services.AddDbContext<AppDbContext>(opts =>\n                        opts.UseNpgsql(_postgres.GetConnectionString()));\n                }));\n\n        // Run migrations against the real container\n        using var scope = _factory.Services.CreateScope();\n        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();\n        await db.Database.MigrateAsync();\n\n        Client = _factory.CreateClient();\n    }\n\n    public async Task DisposeAsync()\n    {\n        await _factory.DisposeAsync();\n        await _postgres.DisposeAsync();\n    }\n}\n\npublic sealed class PlaceOrderTests(OrdersApiFixture fixture)\n    : IClassFixture<OrdersApiFixture>\n{\n    [Fact]\n    public async Task PlaceOrder_returns_201_and_persists_to_database()\n    {\n        var response = await fixture.Client.PostAsJsonAsync(\"/api/orders\",\n            new { CustomerId = Guid.NewGuid(), Lines = new[] { new { ProductId = Guid.NewGuid(), Quantity = 2 } } });\n\n        Assert.Equal(HttpStatusCode.Created, response.StatusCode);\n\n        var body = await response.Content.ReadFromJsonAsync<JsonElement>();\n        var orderId = body.GetProperty(\"id\").GetGuid();\n        Assert.NotEqual(Guid.Empty, orderId);\n    }\n}"
     },
     "bestPractices": [
-      "Share one container per test class using IClassFixture to avoid the startup cost on every test, and use database transactions or Respawn to reset state between individual test methods.",
-      "Pin the Docker image tag explicitly — postgres:16-alpine rather than postgres:latest — so tests do not break silently when a new major version is pulled.",
-      "Run EF Core migrations inside InitializeAsync against the live container so the schema is always in sync with the current migration history, not a static seed script.",
-      "Use parallel test collections with separate container instances where full isolation is needed, and sequential collections where a single shared container is sufficient to control resource usage."
+      "Use the real provider.",
+      "Pin images explicitly.",
+      "Use dynamic mapped ports.",
+      "Wait for protocol readiness.",
+      "Share only with safe reset.",
+      "Bound CI resources.",
+      "Capture failure logs.",
+      "Dispose every resource."
     ],
     "interviewQuestions": [
       {
-        "question": "Why use Testcontainers instead of an in-memory database provider for integration tests?",
-        "answer": "In-memory providers do not execute the same SQL translation, enforce the same constraints, or respect the same transaction semantics as the real database engine. Testcontainers runs the actual provider, so bugs from EF Core query translation, missing indexes, unique constraints, or migration scripts are caught in the test suite rather than in production."
+        "question": "Why not use an in-memory database?",
+        "answer": "It cannot prove provider SQL translation, constraints, locking, transactions, or wire behavior."
       },
       {
-        "question": "How do you prevent Testcontainers tests from conflicting when run in parallel?",
-        "answer": "Each container gets a randomly assigned host port when it starts, so two tests running at the same time receive different connection strings and never share the same database port. Parallel collections can each start their own container without coordination."
+        "question": "How are port conflicts avoided?",
+        "answer": "Testcontainers maps the container port to a random available host port and exposes it after startup."
       },
       {
-        "question": "How would you reset database state between tests without restarting the container?",
-        "answer": "Two common approaches: wrap each test in a transaction that rolls back after the assertion, or use the Respawn library which introspects the database schema and issues DELETE statements in dependency order, resetting to a known baseline faster than dropping and recreating the schema."
+        "question": "What fixture scope should you use?",
+        "answer": "The narrowest scope affordable for startup cost, with an explicit reset strategy when sharing."
+      },
+      {
+        "question": "How do you reset PostgreSQL state?",
+        "answer": "Use rollback, truncation, Respawn, isolated schemas, or databases according to the behavior under test."
+      },
+      {
+        "question": "Why pin an image?",
+        "answer": "Floating tags can change engine behavior and supply-chain contents without a code review."
+      },
+      {
+        "question": "What does a wait strategy solve?",
+        "answer": "It waits for actual service readiness instead of treating process start as usable infrastructure."
+      },
+      {
+        "question": "What must CI provide?",
+        "answer": "A supported container runtime, image access, sufficient resources, bounded parallelism, cleanup, and diagnostic artifacts."
       }
     ],
     "note": "Testcontainers tests are slower than unit tests by design — they start real infrastructure. Keep them in a separate test project, run them in CI on every pull request, and treat them as a confidence layer above unit tests rather than a replacement.",
     "tip": "Combine Testcontainers with WebApplicationFactory and a custom IAlternateSeed fixture to cover full HTTP request-to-database round trips — this single test type catches the most integration bugs for the least test maintenance.",
     "warning": "Testcontainers requires Docker to be running on the build agent; ensure CI runners have Docker available and check that your organisation's container registry policy allows pulling the required images.",
-    "sampleId": "ride-sharing-cqrs",
-    "readingMinutes": 11,
-    "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on real-infrastructure integration tests with Docker containers and WebApplicationFactory"
+    "sampleId": "testcontainers-postgres-inventory",
+    "readingMinutes": 38,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard guide with real pinned PostgreSQL Testcontainers integration tests",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Provision a pinned PostgreSQL container from xUnit.",
+      "Inject a container-derived connection string.",
+      "Choose fixture scope from isolation and cost.",
+      "Create schema and reset state predictably.",
+      "Operate container tests in parallel CI.",
+      "Manage images, vulnerabilities, logs, and cleanup."
+    ],
+    "prerequisites": [
+      "A running Docker-compatible engine and container fundamentals.",
+      "xUnit fixtures and asynchronous lifecycle.",
+      "Provider-specific client knowledge such as Npgsql."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Provider SQL, constraints, transactions, or protocol behavior matters.",
+        "Tests need repeatable isolated infrastructure.",
+        "CI provides a supported container runtime."
+      ],
+      "avoid": [
+        "Pure policy can be tested without infrastructure.",
+        "The test cannot bound or clean resource use.",
+        "An unavailable runtime is silently replaced by a fake."
+      ]
+    },
+    "implementationIntroduction": "The sample pins PostgreSQL, shares one container through an asynchronous xUnit fixture, creates schema after readiness, resets table state between tests, and verifies parameterized Npgsql behavior.",
+    "implementationSteps": [
+      {
+        "title": "Declare prerequisites",
+        "description": "Require a supported Docker engine locally and in CI."
+      },
+      {
+        "title": "Pin the image",
+        "description": "Choose an explicit compatible tag or reviewed digest and scan it."
+      },
+      {
+        "title": "Build the resource",
+        "description": "Configure database, credentials, wait strategy, and resource limits."
+      },
+      {
+        "title": "Start through a fixture",
+        "description": "Select per-test or shared lifecycle and expose the dynamic connection string."
+      },
+      {
+        "title": "Create schema",
+        "description": "Run current migrations or deterministic schema setup after readiness."
+      },
+      {
+        "title": "Reset state",
+        "description": "Use the lightest reset that preserves provider semantics and parallel isolation."
+      },
+      {
+        "title": "Capture and clean",
+        "description": "Collect logs on failure, propagate cancellation, and always dispose resources."
+      }
+    ],
+    "testing": {
+      "introduction": "Container tests prove the integration setup as well as application behavior.",
+      "items": [
+        "Assert the image is explicitly pinned.",
+        "Run real constraint and transaction cases.",
+        "Verify dynamic connection injection.",
+        "Run tests concurrently to detect collisions.",
+        "Cancel startup and confirm cleanup.",
+        "Prove migrations work from an empty database."
+      ]
+    },
+    "security": {
+      "introduction": "Test containers still execute third-party images and handle credentials.",
+      "items": [
+        "Use reviewed official images.",
+        "Scan packages and images.",
+        "Use test-only credentials.",
+        "Do not expose ports beyond the host.",
+        "Protect Docker socket access."
+      ]
+    },
+    "performance": {
+      "introduction": "Reuse infrastructure only where state can be reset safely.",
+      "items": [
+        "Share a container per class or collection.",
+        "Pull images before timed CI lanes.",
+        "Limit parallel container count.",
+        "Use lightweight reset instead of restart.",
+        "Track startup, test, and cleanup duration."
+      ]
+    },
+    "deployment": {
+      "introduction": "CI runners need predictable container capabilities and resource budgets.",
+      "items": [
+        "Document required runtime and architecture.",
+        "Pre-pull or cache pinned images.",
+        "Set CPU, memory, disk, and timeout limits.",
+        "Publish logs on failure.",
+        "Clean orphaned resources after cancellation."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Docker unavailable.",
+        "cause": "The engine is stopped or endpoint is inaccessible.",
+        "fix": "Verify engine responsiveness and runner permissions before tests."
+      },
+      {
+        "symptom": "Container starts but tests cannot connect.",
+        "cause": "The service is not ready or a fixed port was assumed.",
+        "fix": "Use the module wait strategy and runtime connection string."
+      },
+      {
+        "symptom": "Parallel tests corrupt data.",
+        "cause": "Fixtures share state without reset.",
+        "fix": "Use isolated databases or serialize and reset explicitly."
+      },
+      {
+        "symptom": "CI disk fills.",
+        "cause": "Images and stopped resources accumulate.",
+        "fix": "Apply cleanup policy, caching limits, and resource reaping."
+      },
+      {
+        "symptom": "Tests changed after image pull.",
+        "cause": "A floating tag resolved differently.",
+        "fix": "Pin a version or digest and update deliberately."
+      },
+      {
+        "symptom": "Cleanup hangs.",
+        "cause": "Cancellation or disposal is missing.",
+        "fix": "Bound lifecycle calls and dispose fixtures in finally paths."
+      }
+    ],
+    "productionChecklist": [
+      "Docker prerequisites are documented.",
+      "Images are pinned and scanned.",
+      "Fixture scope is justified.",
+      "Endpoints come from the running container.",
+      "Schema starts from current migrations.",
+      "Data reset preserves isolation.",
+      "CI resources and timeouts are bounded.",
+      "Logs and cleanup work after failure."
+    ],
+    "resources": [
+      {
+        "label": "Testcontainers for .NET PostgreSQL module",
+        "url": "https://dotnet.testcontainers.org/modules/postgres/"
+      },
+      {
+        "label": "Testcontainers custom configuration",
+        "url": "https://dotnet.testcontainers.org/custom_configuration/"
+      }
+    ]
   },
   {
     "slug": "semantic-kernel",

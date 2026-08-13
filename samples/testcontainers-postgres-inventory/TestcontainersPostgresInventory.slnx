@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/TestcontainersPostgresInventory/TestcontainersPostgresInventory.csproj" />
+  <Project Path="tests/TestcontainersPostgresInventory.Tests/TestcontainersPostgresInventory.Tests.csproj" />
+</Solution>
