@@ -382,5 +382,23 @@
     "description": "A .NET 10 pricing workflow applying Strategy, Adapter, Decorator, and Factory to real behavior variation, legacy integration, cross-cutting policy, and composition pressures.",
     "technologies": [".NET 10", "Design Patterns", "SOLID", "xUnit"], "tags": ["dedicated-sample", "strategy", "adapter", "decorator", "factory"],
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/design-patterns-pricing", "localPath": "samples/design-patterns-pricing/README.md", "runCommand": "dotnet run --project src/DesignPatternsPricing", "testCommand": "dotnet test DesignPatternsPricing.slnx", "liveDemoUrl": null
+  },
+  {
+    "id":"event-driven-orders","topicSlug":"event-driven-messaging","status":"complete","name":"Event-Driven Orders",
+    "description":"A .NET 10 order workflow demonstrating a transactional-outbox model, relay, at-least-once delivery, and idempotent consumer processing.",
+    "technologies":[".NET 10","Event-Driven Architecture","Transactional Outbox","xUnit"],"tags":["dedicated-sample","outbox","idempotent-consumer","delivery-semantics"],
+    "githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/event-driven-orders","localPath":"samples/event-driven-orders/README.md","runCommand":"dotnet run --project src/EventDrivenOrders","testCommand":"dotnet test EventDrivenOrders.slnx","liveDemoUrl":null
+  },
+  {
+    "id":"rabbitmq-routing-lab","topicSlug":"rabbitmq","status":"complete","name":"RabbitMQ Routing Lab",
+    "description":"A deterministic .NET 10 simulator of topic-exchange wildcard routing, queue fan-out, delivery, acknowledgement, and negative acknowledgement with requeue.",
+    "technologies":[".NET 10","RabbitMQ Semantics","Topic Exchanges","xUnit"],"tags":["dedicated-sample","routing-key","acknowledgement","requeue"],
+    "githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/rabbitmq-routing-lab","localPath":"samples/rabbitmq-routing-lab/README.md","runCommand":"dotnet run --project src/RabbitMqRoutingLab","testCommand":"dotnet test RabbitMqRoutingLab.slnx","liveDemoUrl":null
+  },
+  {
+    "id":"kafka-partition-lab","topicSlug":"apache-kafka","status":"complete","name":"Kafka Partition Lab",
+    "description":"A deterministic .NET 10 simulator of partitioned append-only logs, key ordering, consumer-group offsets, redelivery, and commit advancement.",
+    "technologies":[".NET 10","Apache Kafka Semantics","Partitions","xUnit"],"tags":["dedicated-sample","partitioning","consumer-groups","offsets"],
+    "githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/kafka-partition-lab","localPath":"samples/kafka-partition-lab/README.md","runCommand":"dotnet run --project src/KafkaPartitionLab","testCommand":"dotnet test KafkaPartitionLab.slnx","liveDemoUrl":null
   }
 ]

@@ -5,8 +5,8 @@ A modern, responsive static learning portal for the Microsoft .NET ecosystem. It
 ## What is included
 
 - 78 technology topics with honest `Outline`, `In progress`, or `Complete` status labels
-- Twenty-seven gold-standard complete guides, including .NET, ASP.NET Core, data access, security, HTTP and RPC contracts, real-time, GraphQL, caching, multitenancy, performance, application structure, domain design, CQRS, and design patterns, each covering decisions, implementation, testing, security, deployment, troubleshooting, and production readiness
-- Thirty-three GitHub samples, including a unique runnable implementation with focused tests for every complete guide
+- Thirty gold-standard complete guides, including .NET, ASP.NET Core, data access, security, HTTP and RPC contracts, application structure, domain design, CQRS, design patterns, event-driven messaging, RabbitMQ, and Kafka, each covering decisions, implementation, testing, security, deployment, troubleshooting, and production readiness
+- Thirty-six GitHub samples, including a unique runnable implementation with focused tests for every complete guide
 - Light and dark themes with system detection and persisted manual selection
 - Responsive sticky navigation, collapsible mobile sidebar, global search, and keyboard shortcuts
 - Animated, accessible technology blob cloud

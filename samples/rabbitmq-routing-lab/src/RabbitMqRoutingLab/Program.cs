@@ -1,0 +1,1 @@
+using RabbitMqRoutingLab;var exchange=new TopicExchange();var billing=new QueueState("billing");exchange.Bind("order.*",billing);exchange.Publish(new(Guid.NewGuid(),"order.placed","order-42"));var message=billing.Deliver()!;Console.WriteLine($"Delivered {message.RoutingKey} to {billing.Name}; unacked={billing.Unacked}");billing.Ack(message.Id);
