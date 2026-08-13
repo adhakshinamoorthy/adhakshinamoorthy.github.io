@@ -220,5 +220,47 @@
     "runCommand": "dotnet run --project src/SecretsRotation",
     "testCommand": "dotnet test SecretsRotation.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "api-design-orders",
+    "topicSlug": "api-design-best-practices",
+    "status": "complete",
+    "name": "API Design Orders",
+    "description": "A .NET 10 API demonstrating bounded cursor pagination, idempotent creation, Problem Details, ETags, If-Match optimistic concurrency, and executable HTTP contract tests.",
+    "technologies": ["ASP.NET Core 10", "HTTP Semantics", "Problem Details", "xUnit"],
+    "tags": ["dedicated-sample", "cursor-pagination", "idempotency", "etag", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/api-design-orders",
+    "localPath": "samples/api-design-orders/README.md",
+    "runCommand": "dotnet run --project src/ApiDesignOrders",
+    "testCommand": "dotnet test ApiDesignOrders.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "openapi-scalar-catalog",
+    "topicSlug": "openapi-scalar",
+    "status": "complete",
+    "name": "OpenAPI Scalar Catalog",
+    "description": "A .NET 10 catalog API demonstrating first-party OpenAPI 3.1 generation, stable operation IDs, typed response metadata, development-only Scalar reference UI, and contract inspection tests.",
+    "technologies": ["ASP.NET Core 10", "OpenAPI 3.1", "Scalar", "xUnit"],
+    "tags": ["dedicated-sample", "openapi-contract", "scalar", "typed-results", "contract-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/openapi-scalar-catalog",
+    "localPath": "samples/openapi-scalar-catalog/README.md",
+    "runCommand": "dotnet run --project src/OpenApiScalarCatalog",
+    "testCommand": "dotnet test OpenApiScalarCatalog.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "webhook-durable-inbox",
+    "topicSlug": "webhook-patterns",
+    "status": "complete",
+    "name": "Webhook Durable Inbox",
+    "description": "A .NET 10 receiver demonstrating exact-byte HMAC verification, fixed-time digest comparison, durable-before-ack acceptance, duplicate protection, bounded background processing, recovery, and HTTP tests.",
+    "technologies": ["ASP.NET Core 10", "HMAC SHA-256", "Hosted Services", "xUnit"],
+    "tags": ["dedicated-sample", "webhooks", "durable-inbox", "idempotency", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/webhook-durable-inbox",
+    "localPath": "samples/webhook-durable-inbox/README.md",
+    "runCommand": "dotnet run --project src/WebhookDurableInbox",
+    "testCommand": "dotnet test WebhookDurableInbox.slnx",
+    "liveDemoUrl": null
   }
 ]

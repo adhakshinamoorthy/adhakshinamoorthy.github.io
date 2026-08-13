@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/WebhookDurableInbox/WebhookDurableInbox.csproj" />
+  <Project Path="tests/WebhookDurableInbox.Tests/WebhookDurableInbox.Tests.csproj" />
+</Solution>
