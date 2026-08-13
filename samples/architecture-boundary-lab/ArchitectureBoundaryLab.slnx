@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/ArchitectureBoundaryLab.Domain/ArchitectureBoundaryLab.Domain.csproj" />
+  <Project Path="src/ArchitectureBoundaryLab.Application/ArchitectureBoundaryLab.Application.csproj" />
+  <Project Path="src/ArchitectureBoundaryLab.Infrastructure/ArchitectureBoundaryLab.Infrastructure.csproj" />
+  <Project Path="src/ArchitectureBoundaryLab/ArchitectureBoundaryLab.csproj" />
+  <Project Path="tests/ArchitectureBoundaryLab.Tests/ArchitectureBoundaryLab.Tests.csproj" />
+</Solution>

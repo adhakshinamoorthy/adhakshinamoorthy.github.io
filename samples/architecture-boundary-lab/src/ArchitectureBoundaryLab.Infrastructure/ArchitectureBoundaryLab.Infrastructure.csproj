@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../ArchitectureBoundaryLab.Application/ArchitectureBoundaryLab.Application.csproj" />
+    <ProjectReference Include="../ArchitectureBoundaryLab.Domain/ArchitectureBoundaryLab.Domain.csproj" />
+  </ItemGroup>
+</Project>
