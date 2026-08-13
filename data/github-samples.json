@@ -136,5 +136,19 @@
     "runCommand": "dotnet run --project src/DependencyInjectionLifetimes",
     "testCommand": "dotnet test DependencyInjectionLifetimes.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "source-generators-telemetry",
+    "topicSlug": "source-generators",
+    "status": "complete",
+    "name": "Source Generators Telemetry",
+    "description": "A focused .NET 10 sample demonstrating IIncrementalGenerator, attribute-based discovery, semantic symbol projection, deterministic source emission, compiler diagnostics, analyzer consumption, generated-file inspection, and generator-driver tests.",
+    "technologies": [".NET 10", "C# 14", "Roslyn 5.0", "xUnit"],
+    "tags": ["dedicated-sample", "incremental-generator", "compiler-diagnostics", "deterministic-output", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/source-generators-telemetry",
+    "localPath": "samples/source-generators-telemetry/README.md",
+    "runCommand": "dotnet run --project src/TelemetryDemo",
+    "testCommand": "dotnet test SourceGeneratorsTelemetry.slnx",
+    "liveDemoUrl": null
   }
 ]
