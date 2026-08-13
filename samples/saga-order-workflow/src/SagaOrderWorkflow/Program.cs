@@ -1,0 +1,1 @@
+using SagaOrderWorkflow;var saga=new OrderSaga(Guid.NewGuid());saga.Handle(Guid.NewGuid(),"PaymentCaptured");saga.Handle(Guid.NewGuid(),"InventoryRejected");saga.Handle(Guid.NewGuid(),"PaymentRefunded");Console.WriteLine($"{saga.OrderId}: {saga.Status}; commands={string.Join(',',saga.Commands.Select(x=>x.Type))}");

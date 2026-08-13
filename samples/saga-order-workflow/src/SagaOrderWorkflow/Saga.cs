@@ -1,0 +1,6 @@
+namespace SagaOrderWorkflow;
+public enum SagaStatus{AwaitingPayment,AwaitingInventory,Completed,Compensating,Cancelled}
+public sealed record SagaCommand(string Type,Guid OrderId);
+public sealed class OrderSaga(Guid orderId)
+{private readonly HashSet<Guid> processed=[];private readonly List<SagaCommand> commands=[];public Guid OrderId{get;}=orderId;public SagaStatus Status{get;private set;}=SagaStatus.AwaitingPayment;public IReadOnlyList<SagaCommand> Commands=>commands;
+ public bool Handle(Guid messageId,string messageType){if(!processed.Add(messageId))return false;switch(Status,messageType){case(SagaStatus.AwaitingPayment,"PaymentCaptured"):Status=SagaStatus.AwaitingInventory;commands.Add(new("ReserveInventory",OrderId));break;case(SagaStatus.AwaitingPayment,"PaymentFailed"):Status=SagaStatus.Cancelled;break;case(SagaStatus.AwaitingInventory,"InventoryReserved"):Status=SagaStatus.Completed;break;case(SagaStatus.AwaitingInventory,"InventoryRejected"):Status=SagaStatus.Compensating;commands.Add(new("RefundPayment",OrderId));break;case(SagaStatus.Compensating,"PaymentRefunded"):Status=SagaStatus.Cancelled;break;default:throw new InvalidOperationException($"{messageType} is invalid in {Status}.");}return true;}}
