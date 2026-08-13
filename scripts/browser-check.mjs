@@ -198,6 +198,26 @@ try {
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/minimal-apis-orders'), 'Minimal APIs sample links to the wrong GitHub path');
   await page.screenshot({ path: join(artifactDirectory, 'minimal-apis-desktop-light-top.png'), fullPage: false });
 
+  const securityBatch = [
+    ['authentication-authorization', 'Authentication & Authorization', 8, 6, 8, 7, '/samples/authentication-authorization-documents'],
+    ['api-security-owasp', 'API Security & OWASP', 8, 6, 8, 7, '/samples/api-security-owasp-orders'],
+    ['secrets-management', 'Secrets Management', 8, 6, 8, 7, '/samples/secrets-rotation']
+  ];
+  for (const [slug, heading, concepts, troubleshooting, checklist, faq, samplePath] of securityBatch) {
+    await page.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await page.locator('h1').innerText()) === heading, `${heading} rendered the wrong heading`);
+    check(await page.locator('.topic-status-complete').count() === 1, `${heading} is not marked complete`);
+    check(await page.locator('.article-section').count() === 16, `${heading} does not render all content sections`);
+    check(await page.locator('.toc-link').count() === 16, `${heading} table of contents is incomplete`);
+    check(await page.locator('.concept-card').count() === concepts, `${heading} key concepts are incomplete`);
+    check(await page.locator('.step-list li').count() === 7, `${heading} walkthrough is incomplete`);
+    check(await page.locator('.troubleshooting-card').count() === troubleshooting, `${heading} troubleshooting is incomplete`);
+    check(await page.locator('.checklist li').count() === checklist, `${heading} checklist is incomplete`);
+    check(await page.locator('.faq-item').count() === faq, `${heading} interview FAQ is incomplete`);
+    check((await page.locator('#github-sample .github-link').getAttribute('href')).includes(samplePath), `${heading} sample link is wrong`);
+  }
+  await page.screenshot({ path: join(artifactDirectory, 'security-batch-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/entity-framework-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'Entity Framework Core', 'Direct topic link did not render Entity Framework Core');
   check(await page.locator('.topic-status-complete').count() === 1, 'Entity Framework Core is not marked as a complete guide');
@@ -411,6 +431,17 @@ try {
   const minimalApisMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   check(minimalApisMobileMetrics.scrollWidth <= minimalApisMobileMetrics.width + 1, `Mobile Minimal APIs horizontal overflow: ${minimalApisMobileMetrics.scrollWidth}px`);
   await mobilePage.screenshot({ path: join(artifactDirectory, 'minimal-apis-mobile-dark-top.png'), fullPage: false });
+  for (const [slug, heading] of [
+    ['authentication-authorization', 'Authentication & Authorization'],
+    ['api-security-owasp', 'API Security & OWASP'],
+    ['secrets-management', 'Secrets Management']
+  ]) {
+    await mobilePage.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await mobilePage.locator('h1').innerText()) === heading, `Mobile ${heading} topic did not render`);
+    const metrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width + 1, `Mobile ${heading} horizontal overflow: ${metrics.scrollWidth}px`);
+  }
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'security-batch-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();

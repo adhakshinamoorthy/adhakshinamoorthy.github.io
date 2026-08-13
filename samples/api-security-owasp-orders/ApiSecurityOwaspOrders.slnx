@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/ApiSecurityOwaspOrders/ApiSecurityOwaspOrders.csproj" />
+  <Project Path="tests/ApiSecurityOwaspOrders.Tests/ApiSecurityOwaspOrders.Tests.csproj" />
+</Solution>
