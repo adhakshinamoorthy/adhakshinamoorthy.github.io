@@ -183,6 +183,21 @@ try {
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/blazor-interactive-catalog'), 'Blazor sample links to the wrong GitHub path');
   await page.screenshot({ path: join(artifactDirectory, 'blazor-desktop-light-top.png'), fullPage: false });
 
+  await page.goto(`${baseUrl}/technologies/minimal-apis.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'Minimal APIs', 'Direct topic link did not render Minimal APIs');
+  check(await page.locator('.topic-status-complete').count() === 1, 'Minimal APIs is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'Minimal APIs topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'Minimal APIs table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 10, 'Minimal APIs key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use Minimal APIs', 'Minimal APIs decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, 'Minimal APIs implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 6, 'Minimal APIs troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 8, 'Minimal APIs production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 7, 'Minimal APIs interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'Minimal APIs sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/minimal-apis-orders'), 'Minimal APIs sample links to the wrong GitHub path');
+  await page.screenshot({ path: join(artifactDirectory, 'minimal-apis-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/entity-framework-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'Entity Framework Core', 'Direct topic link did not render Entity Framework Core');
   check(await page.locator('.topic-status-complete').count() === 1, 'Entity Framework Core is not marked as a complete guide');
@@ -391,6 +406,11 @@ try {
   const blazorMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   check(blazorMobileMetrics.scrollWidth <= blazorMobileMetrics.width + 1, `Mobile Blazor horizontal overflow: ${blazorMobileMetrics.scrollWidth}px`);
   await mobilePage.screenshot({ path: join(artifactDirectory, 'blazor-mobile-dark-top.png'), fullPage: false });
+  await mobilePage.goto(`${baseUrl}/technologies/minimal-apis.html`, { waitUntil: 'networkidle' });
+  check((await mobilePage.locator('h1').innerText()) === 'Minimal APIs', 'Mobile Minimal APIs topic page did not render');
+  const minimalApisMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+  check(minimalApisMobileMetrics.scrollWidth <= minimalApisMobileMetrics.width + 1, `Mobile Minimal APIs horizontal overflow: ${minimalApisMobileMetrics.scrollWidth}px`);
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'minimal-apis-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();
