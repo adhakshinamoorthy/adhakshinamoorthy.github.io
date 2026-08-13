@@ -582,28 +582,157 @@
     "symbol": "API",
     "category": "Web & Data",
     "color": "#168dcc",
-    "shortDescription": "Create focused HTTP endpoints with compact route handlers, typed results, filters, and OpenAPI support.",
-    "keywords": ["HTTP", "REST", "endpoints", "routing", "OpenAPI", "typed results"],
-    "overview": "Minimal APIs provide a concise way to define HTTP endpoints while retaining ASP.NET Core's hosting, dependency injection, security, and diagnostics.",
-    "detail": "Route handlers bind input from routes, queries, headers, bodies, services, and custom binders. Endpoint groups, filters, typed results, validation, and OpenAPI metadata support modular APIs without requiring controller classes.",
+    "shortDescription": "Design production HTTP APIs with explicit routes, binding, typed results, filters, OpenAPI, security, tests, and operational limits.",
+    "keywords": ["HTTP", "REST", "route handlers", "routing", "OpenAPI", "typed results", "route groups", "endpoint filters", "WebApplicationFactory", "Problem Details"],
+    "contentStatus": "complete",
+    "overview": "Minimal APIs are ASP.NET Core's streamlined model for HTTP APIs. They remove controller ceremony while retaining the full hosting, routing, dependency injection, configuration, authentication, authorization, diagnostics, rate limiting, OpenAPI, and testing stack.",
+    "detail": "A Minimal API is minimal in syntax, not in engineering responsibility. Route handlers combine an HTTP method and route pattern with parameter binding and a return contract. The framework can bind values from routes, query strings, headers, JSON bodies, forms, services, and custom binders, while route constraints decide which endpoint is eligible before binding occurs. Route groups let a feature share a prefix, tags, authorization, filters, and rate limits without repeating metadata. TypedResults and Results<T1, T2> make success and failure shapes visible to the compiler and OpenAPI generator. Endpoint filters can validate, observe, or short-circuit selected handlers, but cross-cutting behavior that applies to the whole request pipeline still belongs in middleware. A production design keeps handlers thin, uses dedicated request and response contracts, validates every untrusted boundary, attaches stable endpoint names and metadata, enforces authorization on the server, bounds expensive work, emits safe Problem Details, and verifies behavior through the real HTTP pipeline. Minimal APIs can support large systems when features own their endpoint mapping and application logic; a single growing Program.cs file is an organization failure, not a framework limit.",
+    "learningObjectives": [
+      "Choose Minimal APIs or controllers from API requirements, team conventions, and extension needs rather than endpoint count alone.",
+      "Understand route matching, parameter binding precedence, constraints, services, cancellation, and malformed-input behavior.",
+      "Organize endpoints by cohesive feature with route groups, endpoint names, tags, policies, filters, and rate limits.",
+      "Model explicit success and failure contracts with TypedResults, Results unions, Problem Details, and OpenAPI metadata.",
+      "Keep validation, authorization, persistence, and business rules at the correct boundary instead of accumulating logic in handlers.",
+      "Test handlers where useful and integration-test routing, JSON, metadata, authentication, authorization, and errors through HTTP.",
+      "Deploy Minimal APIs with bounded resources, observability, secure proxy configuration, dependency auditing, and graceful shutdown."
+    ],
+    "prerequisites": [
+      "Comfort with C# records, nullable reference types, asynchronous code, and cancellation tokens.",
+      "Basic HTTP knowledge: methods, routes, headers, status codes, content types, caching, and idempotency.",
+      "Familiarity with ASP.NET Core hosting, dependency injection, configuration, logging, and middleware.",
+      "A .NET 10 SDK for running the dedicated sample and its tests.",
+      "Awareness that authentication proves identity while authorization decides whether that identity may perform an action."
+    ],
+    "decisionGuide": {
+      "use": [
+        "New ASP.NET Core HTTP APIs where concise endpoint definitions and direct control of route metadata are useful.",
+        "Vertical-slice or feature-folder designs where each capability maps its own routes and delegates to application services.",
+        "Small services, backend-for-frontend APIs, internal APIs, and larger systems whose teams agree on endpoint conventions.",
+        "Native AOT or trimming-oriented API workloads after verifying every dependency supports the chosen publishing model."
+      ],
+      "avoid": [
+        "A UI-rendering application where Razor Pages, MVC views, or Blazor is the primary interaction model.",
+        "A team that depends heavily on controller-specific filters, conventions, model-binding extensions, or existing controller tooling and would gain little from migration.",
+        "A design whose domain and application boundaries are still unclear; fewer framework types do not replace use cases, contracts, or ownership.",
+        "Protocol requirements better served by gRPC, SignalR, messaging, or a worker without an HTTP endpoint surface."
+      ]
+    },
     "concepts": [
-      {"title": "Route handlers", "description": "Delegates receive bound request values and services, then return serializable or typed HTTP results."},
-      {"title": "Route groups", "description": "Groups share prefixes, metadata, filters, authorization, and naming conventions."},
-      {"title": "Typed results", "description": "Concrete result types improve compile-time contracts, tests, and OpenAPI description."},
-      {"title": "Endpoint filters", "description": "Filters wrap selected handlers for validation, logging, policy, or other endpoint-level behavior."}
+      {"title": "Route matching and constraints", "description": "HTTP method, route pattern, precedence, and constraints select an endpoint. Constraints disambiguate routes; validation explains why a matched value is unacceptable."},
+      {"title": "Parameter binding", "description": "Handler parameters can come from routes, queries, headers, bodies, forms, services, HttpContext, claims, cancellation, or custom TryParse and BindAsync patterns."},
+      {"title": "Route handlers", "description": "Lambdas or named methods receive bound values and collaborators, invoke one use case, and translate its outcome into an HTTP response."},
+      {"title": "Route groups", "description": "MapGroup creates a feature boundary that shares prefixes and metadata such as tags, authorization policies, filters, and rate limits."},
+      {"title": "Typed results", "description": "TypedResults returns concrete HttpResults types, while Results<T1, T2> declares the finite response alternatives and improves compile-time checks and OpenAPI output."},
+      {"title": "Errors and Problem Details", "description": "Expected failures map to deliberate 4xx results; unexpected exceptions flow through centralized handling that returns safe RFC-style problem responses with correlation."},
+      {"title": "Endpoint filters", "description": "Filters wrap selected handlers to inspect arguments, validate input, add feature-level observations, or short-circuit execution; global pipeline concerns remain middleware."},
+      {"title": "Endpoint metadata and OpenAPI", "description": "Stable names, tags, summaries, parameter descriptions, response types, authorization, and exclusion metadata form the contract used by link generation, tooling, and documentation."},
+      {"title": "Authentication and authorization", "description": "Authentication handlers establish a principal; policies attached to groups or endpoints enforce permissions. Hidden documentation or client UI never protects a server resource."},
+      {"title": "Testing boundaries", "description": "Named handlers can be unit-tested, but WebApplicationFactory proves routing, binding, serialization, filters, metadata, middleware, and security work together."}
     ],
-    "architecture": {"description": "An endpoint group applies shared HTTP policy, binds a request contract, calls an application use case, and maps the outcome to typed results.", "nodes": ["HTTP request", "Endpoint group", "Use case", "Typed result"], "colors": ["#168dcc", "#2678c8", "#6556c8", "#168c78"]},
-    "code": {"language": "csharp", "label": "OrderEndpoints.cs", "introduction": "Group related endpoints and make the success and failure contract visible in the handler signature.", "code": "var orders = app.MapGroup(\"/api/orders\")\n    .WithTags(\"Orders\")\n    .RequireAuthorization();\n\norders.MapGet(\"/{id:guid}\", async Task<Results<Ok<OrderDto>, NotFound>>(\n    Guid id, IOrderQueries queries, CancellationToken ct) =>\n{\n    var order = await queries.FindAsync(id, ct);\n    return order is null ? TypedResults.NotFound() : TypedResults.Ok(order);\n})\n.WithName(\"GetOrder\");"},
-    "bestPractices": ["Group endpoints by cohesive capability, not by HTTP verb.", "Use request and response contracts rather than exposing persistence entities.", "Give endpoints stable names and include useful OpenAPI metadata.", "Keep handlers thin by delegating workflow and business policy to application services."],
+    "architecture": {"description": "The ASP.NET Core pipeline handles cross-cutting HTTP concerns, routing selects a feature group, binding and filters establish a safe request contract, a thin handler invokes an application capability, and typed results describe the response while telemetry follows the request end to end.", "nodes": ["Client and trusted proxy", "Middleware pipeline", "Route group + binding", "Endpoint filter", "Application capability", "Repository / dependency", "Typed result + OpenAPI", "Logs, metrics, and traces"], "colors": ["#168dcc", "#2678c8", "#6556c8", "#c14f72", "#168c78", "#d26a2e", "#168dcc", "#6556c8"]},
+    "implementationIntroduction": "The dedicated sample builds an order API as a feature module. Public reads and protected writes share one route group, while validation, authorization, OpenAPI, Problem Details, rate limiting, security headers, storage, and tests each have a clear owner.",
+    "implementationSteps": [
+      {"title": "Register the platform capabilities", "description": "Add Problem Details, first-party OpenAPI generation, authentication, authorization policies, rate limiting, and the feature repository before building the host."},
+      {"title": "Create one feature route group", "description": "Map /api/orders once, attach its tag and rate-limit policy, then add cohesive read and write operations beneath it."},
+      {"title": "Define boundary contracts", "description": "Use separate request and response records so persistence and domain changes cannot silently alter the public JSON schema."},
+      {"title": "Bind explicit inputs", "description": "Let route constraints handle shape, bind optional paging from the query, bind JSON from the body, resolve the repository from DI, and accept cancellation for real I/O."},
+      {"title": "Validate and authorize before effects", "description": "Short-circuit invalid create requests with a validation filter and require a named write policy before the handler mutates state."},
+      {"title": "Return typed HTTP outcomes", "description": "Use Ok, NotFound, BadRequest, CreatedAtRoute, NoContent, and declared result unions so contracts remain visible to code, tests, and OpenAPI."},
+      {"title": "Test through the complete pipeline", "description": "Use WebApplicationFactory to prove a seeded read, unauthorized write, validation response, created-resource location, follow-up read, and generated OpenAPI document."}
+    ],
+    "code": {"language": "csharp", "label": "OrderEndpoints.cs", "introduction": "This feature group shares tags and rate limiting, makes write authorization explicit, validates before mutation, and exposes stable endpoint names for OpenAPI and location generation.", "code": "var orders = app.MapGroup(\"/api/orders\")\n    .WithTags(\"Orders\")\n    .RequireRateLimiting(\"orders\");\n\norders.MapGet(\"/{id:guid}\", GetById)\n    .WithName(\"GetOrder\");\n\norders.MapPost(\"/\", Create)\n    .WithName(\"CreateOrder\")\n    .AddEndpointFilter<CreateOrderValidationFilter>()\n    .ProducesValidationProblem()\n    .RequireAuthorization(\"orders.write\");\n\nstatic Results<Ok<OrderResponse>, NotFound> GetById(\n    Guid id, IOrderRepository repository)\n{\n    var order = repository.Find(id);\n    return order is null\n        ? TypedResults.NotFound()\n        : TypedResults.Ok(OrderResponse.From(order));\n}"},
+    "testing": {
+      "introduction": "Handler unit tests are fast when a named method owns meaningful mapping logic, but only HTTP integration tests prove the endpoint graph and hosting configuration.",
+      "items": [
+        "Use WebApplicationFactory to execute the real routing, binding, JSON options, filters, authentication, authorization, exception handling, and response metadata.",
+        "Test malformed routes, invalid query bounds, absent and invalid credentials, missing resources, validation details, content types, and Location headers—not only 200 responses.",
+        "Assert the generated OpenAPI document includes stable paths, operation identifiers, schemas, security expectations, and declared response codes.",
+        "Keep domain and application rules independently unit-testable; do not require an HTTP server to prove every business permutation.",
+        "Use real infrastructure selectively for critical persistence behavior, while keeping the default suite deterministic and independent of execution order."
+      ]
+    },
+    "security": {
+      "introduction": "Minimal APIs use the same ASP.NET Core security system as controllers. Compact syntax does not change the need for trusted identity, server-side policy, safe input, and deliberate exposure.",
+      "items": [
+        "Validate token issuer, audience, signature, lifetime, and permitted algorithms with an approved authentication handler; never trust decoded claims without validation.",
+        "Attach named authorization policies to route groups or individual endpoints and include negative tests for anonymous, wrong-scope, wrong-tenant, and non-owner callers.",
+        "Treat request bodies, route values, queries, headers, files, and custom binders as untrusted; cap sizes and counts before allocation or downstream work.",
+        "Expose OpenAPI documents and interactive tooling only to the intended environment or authenticated audience; documentation secrecy is not endpoint security.",
+        "Return safe Problem Details without stack traces, secrets, connection strings, or sensitive payloads, and redact logs while preserving correlation."
+      ]
+    },
+    "performance": {
+      "introduction": "Minimal APIs reduce framework ceremony and can work well with trimming and Native AOT, but throughput still depends mainly on I/O, serialization, allocations, downstream latency, and bounded concurrency.",
+      "items": [
+        "Use asynchronous I/O and propagate HttpContext.RequestAborted or the bound CancellationToken into databases, HTTP calls, and messaging operations.",
+        "Bound page sizes, body sizes, uploads, queues, rate limits, retries, concurrency, and downstream timeouts so one client cannot consume unlimited work.",
+        "Stream only when the client and complete dependency path support backpressure and partial-failure semantics; otherwise return a bounded materialized response.",
+        "Measure endpoint latency, allocation rate, serialization cost, database queries, and dependency spans before applying pooling, custom binders, or Native AOT complexity.",
+        "Cache only responses with explicit identity, authorization, variation, freshness, and invalidation rules; never let shared caching leak caller-specific data."
+      ]
+    },
+    "deployment": {
+      "introduction": "The deployed artifact must preserve the same routes and policies behind its real proxy, identity provider, configuration source, and observability pipeline.",
+      "items": [
+        "Publish and smoke-test the exact target artifact or container, run as non-root where applicable, and scan SDK, NuGet, OS, and image dependencies in CI.",
+        "Validate configuration on startup, obtain secrets from an approved provider, and fail clearly when issuer, audience, database, or other required settings are absent.",
+        "Configure forwarded headers only for known proxies, terminate TLS at a trusted boundary, enforce host and request limits, and verify the external base path used by OpenAPI clients.",
+        "Emit structured logs, metrics, and distributed traces with route names and correlation, while avoiding high-cardinality identifiers in metric dimensions.",
+        "Support graceful shutdown, readiness transitions, safe migrations, rollback, and version-compatible contracts during rolling deployment."
+      ]
+    },
+    "troubleshooting": [
+      {"symptom": "A request returns 404 even though a similar route exists.", "cause": "The HTTP method, literal segment, route precedence, constraint, base path, or registration does not match the request.", "fix": "Inspect endpoint metadata, test the exact method and deployed path, and use constraints to disambiguate shape rather than using them as business validation."},
+      {"symptom": "The handler receives an unexpected value or the request returns 400 before the handler runs.", "cause": "Binding inferred a different source, conversion failed, the JSON shape or content type is wrong, or a required value is absent.", "fix": "Make ambiguous sources explicit, inspect the Problem Details response, keep request contracts nullable only when absence is valid, and integration-test representative payloads."},
+      {"symptom": "OpenAPI omits a response or shows a vague schema.", "cause": "The handler returns IResult or mixed anonymous shapes without sufficient typed results and metadata.", "fix": "Prefer TypedResults and Results unions, use stable endpoint names, declare extra validation or problem responses, and assert the generated document in tests."},
+      {"symptom": "A protected endpoint returns 401 or 403 unexpectedly.", "cause": "Authentication did not establish an identity, the scheme did not challenge correctly, or the authorization policy rejected the caller's claims or resource access.", "fix": "Separate identity failure from permission failure, inspect safe authentication diagnostics and claims, and test anonymous, authenticated-but-forbidden, and authorized requests."},
+      {"symptom": "Endpoint filters run in an unexpected order or miss some requests.", "cause": "Filters are scoped to mapped handlers and execute in registration order around the handler; they are not global middleware.", "fix": "Keep endpoint-specific validation or observation in filters, move whole-pipeline concerns to middleware, and test short-circuit plus post-handler behavior."},
+      {"symptom": "The API slows down or exhausts resources under load.", "cause": "Synchronous I/O, unbounded queries or bodies, missing timeouts, excessive retries, large serialization work, or a slow dependency is consuming request capacity.", "fix": "Use traces and runtime metrics, propagate cancellation, bound inputs and concurrency, add safe timeouts, and load-test the complete deployed dependency path."}
+    ],
+    "productionChecklist": [
+      "Every route has an intentional method, pattern, constraint, stable name, tag, and documented success and failure contract.",
+      "Request and response DTOs are separate from persistence entities, and validation covers all untrusted boundary data and collection bounds.",
+      "Authentication configuration is validated and write or sensitive endpoints enforce named authorization policies with negative tests.",
+      "Problem Details, correlation, structured logs, metrics, and traces reveal failures without leaking secrets or sensitive payloads.",
+      "Request sizes, result sizes, concurrency, rate limits, retries, and outbound timeouts are bounded and based on measured capacity.",
+      "OpenAPI output is verified, versioned deliberately, and exposed only to the intended audience; client compatibility is checked before breaking changes.",
+      "Integration tests exercise the real pipeline, while persistence and external dependencies have focused contract or infrastructure tests.",
+      "The published artifact passes dependency audit, security scan, smoke test, proxy-path test, graceful-shutdown test, and rollback rehearsal."
+    ],
+    "bestPractices": [
+      "Group endpoints by cohesive capability, not by HTTP verb, and keep Program.cs as composition rather than a catalog of business logic.",
+      "Use named handler methods when signatures or mapping logic become difficult to scan, and delegate business policy to application services.",
+      "Use request and response contracts rather than exposing persistence or domain entities directly.",
+      "Prefer TypedResults and finite Results unions so code, tests, and OpenAPI share an explicit response contract.",
+      "Use route constraints for route selection and validation for user-facing business or range errors.",
+      "Attach authorization, rate limits, tags, filters, and shared metadata at the narrowest useful route-group boundary.",
+      "Propagate cancellation and bound every client-controlled collection, body, page size, upload, and expensive operation.",
+      "Test through WebApplicationFactory before claiming routing, binding, filters, security, serialization, or OpenAPI work together.",
+      "Return safe Problem Details and correlate failures; never serialize exception details or log credentials and complete sensitive payloads.",
+      "Measure the real deployed path before optimizing or choosing Native AOT, custom serialization, pooling, or streaming complexity."
+    ],
     "interviewQuestions": [
-      {"question": "Are minimal APIs only for small applications?", "answer": "No. They can scale when endpoints are organized by feature and handlers delegate complexity. Their suitability depends more on conventions and team structure than raw endpoint count."},
-      {"question": "How are services injected into a route handler?", "answer": "Registered services are resolved from dependency injection through inferred or explicit parameter binding."},
-      {"question": "What do typed results improve?", "answer": "They provide concrete response types that help compile-time checking, endpoint tests, and generated OpenAPI metadata."}
+      {"question": "Are Minimal APIs only for small applications?", "answer": "No. They can support large systems when endpoints are organized by cohesive feature, conventions are enforced, and handlers delegate to application capabilities. A large Program.cs is an organization problem, not a required Minimal API shape."},
+      {"question": "How does parameter binding decide where a value comes from?", "answer": "The framework uses explicit binding attributes when present and otherwise infers from special framework types, route parameters, services, simple TryParse-compatible values, and body-capable complex types. Ambiguous or security-sensitive sources should be explicit."},
+      {"question": "What is the difference between route constraints and validation?", "answer": "Constraints help routing select an endpoint based on value shape. Validation runs after selection and returns a useful explanation when a matched request violates range, format, or business rules."},
+      {"question": "Why prefer TypedResults and Results<T1, T2>?", "answer": "They expose concrete response alternatives to the compiler, make direct handler assertions easier, and allow OpenAPI generation to infer more of the contract without manual metadata."},
+      {"question": "When should endpoint filters be used instead of middleware?", "answer": "Use filters for behavior tied to selected handlers and their bound arguments, such as feature validation. Use middleware for concerns that must surround broad pipeline traffic, such as global exception handling or correlation."},
+      {"question": "How should a Minimal API be tested?", "answer": "Unit-test domain and application rules directly, optionally test named handler mapping, and use WebApplicationFactory for the critical HTTP paths so routing, binding, JSON, filters, middleware, authentication, authorization, and metadata are proven together."},
+      {"question": "When would controllers be a better choice?", "answer": "Controllers can be better when a team relies on controller conventions, action filters, complex model-binding extensions, MVC-specific tooling, or an established controller codebase whose migration cost has no clear payoff."}
     ],
-    "note": "Minimal syntax does not mean minimal design. Contracts, validation, security, observability, and failure semantics still matter.",
-    "tip": "Use route groups as the module boundary for shared authorization and filters.",
-    "warning": "Avoid returning database entities directly; accidental navigation properties or schema changes can leak into the API contract.",
-    "sampleId": "ai-gatekeeper", "readingMinutes": 8, "level": "Intermediate", "updated": "2026-07-30", "latestNote": "Typed result patterns added"
+    "note": "Minimal syntax does not mean minimal design. Contracts, validation, authorization, observability, operational bounds, and failure semantics still matter.",
+    "tip": "Use route groups as the feature boundary for shared prefixes and metadata, then integration-test the final endpoint graph rather than assuming fluent calls composed as intended.",
+    "warning": "Avoid returning database entities directly or trusting client-side visibility as authorization; both can leak data even when the handler itself looks small.",
+    "resources": [
+      {"label": "Minimal APIs quick reference", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis"},
+      {"label": "Parameter binding in Minimal APIs", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/parameter-binding"},
+      {"label": "Responses in Minimal APIs", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/responses"},
+      {"label": "Filters in Minimal APIs", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/min-api-filters"},
+      {"label": "OpenAPI support in ASP.NET Core", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/openapi/overview"},
+      {"label": "Authentication and authorization in Minimal APIs", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/security"},
+      {"label": "Test Minimal API apps", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/test-min-api"}
+    ],
+    "sampleId": "minimal-apis-orders", "readingMinutes": 30, "level": "Foundation to production", "updated": "2026-08-13", "latestNote": "Gold-standard guide with a dedicated protected order API sample"
   },
   {
     "slug": "authentication-authorization",

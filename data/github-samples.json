@@ -164,5 +164,19 @@
     "runCommand": "dotnet run --project src/BlazorInteractiveCatalog",
     "testCommand": "dotnet test BlazorInteractiveCatalog.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "minimal-apis-orders",
+    "topicSlug": "minimal-apis",
+    "status": "complete",
+    "name": "Minimal APIs Orders",
+    "description": "A focused .NET 10 HTTP API demonstrating feature route groups, parameter binding, typed result unions, endpoint-filter validation, protected writes, first-party OpenAPI, Problem Details, rate limiting, security headers, and end-to-end tests.",
+    "technologies": ["Minimal APIs", "ASP.NET Core 10", "OpenAPI", "xUnit"],
+    "tags": ["dedicated-sample", "typed-results", "endpoint-filters", "authorization", "integration-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/minimal-apis-orders",
+    "localPath": "samples/minimal-apis-orders/README.md",
+    "runCommand": "dotnet run --project src/MinimalApisOrders",
+    "testCommand": "dotnet test MinimalApisOrders.slnx",
+    "liveDemoUrl": null
   }
 ]

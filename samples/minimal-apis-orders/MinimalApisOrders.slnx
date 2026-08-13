@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/MinimalApisOrders/MinimalApisOrders.csproj" />
+  <Project Path="tests/MinimalApisOrders.Tests/MinimalApisOrders.Tests.csproj" />
+</Solution>
