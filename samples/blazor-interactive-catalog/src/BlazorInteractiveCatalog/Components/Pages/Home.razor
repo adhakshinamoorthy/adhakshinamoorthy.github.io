@@ -1,0 +1,45 @@
+@page "/"
+@rendermode InteractiveServer
+@inject ProductCatalog Catalog
+@inject CartState Cart
+
+<PageTitle>Product catalog</PageTitle>
+<HeadContent>
+    <meta name="description" content="A small accessible Blazor interactive server catalog." />
+</HeadContent>
+
+<section class="hero" aria-labelledby="catalog-title">
+    <p class="eyebrow">Dedicated learning sample</p>
+    <h1 id="catalog-title">Product catalog</h1>
+    <p>Server-rendered HTML first, focused interactivity after hydration.</p>
+</section>
+
+<aside class="cart-summary" aria-label="Cart summary">
+    <strong>Your cart</strong>
+    <span id="cart-count" aria-live="polite">@Cart.TotalItems item(s)</span>
+    <span>@Cart.Total.ToString("C")</span>
+    @if (Cart.TotalItems > 0)
+    {
+        <button type="button" class="button-secondary" @onclick="Cart.Clear">Clear cart</button>
+    }
+</aside>
+
+<section aria-labelledby="products-title">
+    <h2 id="products-title">Available products</h2>
+    <div class="product-grid">
+        @foreach (var product in Catalog.GetProducts())
+        {
+            <article class="product-card" @key="product.Id">
+                <p class="product-category">@product.Category</p>
+                <h3>@product.Name</h3>
+                <p>@product.Description</p>
+                <div class="product-action">
+                    <strong>@product.Price.ToString("C")</strong>
+                    <button type="button" @onclick="() => Cart.Add(product)">
+                        Add @product.Name
+                    </button>
+                </div>
+            </article>
+        }
+    </div>
+</section>

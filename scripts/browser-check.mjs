@@ -168,6 +168,21 @@ try {
   check(await page.locator('.article-nav a').count() === 2, 'Previous/next navigation is incomplete');
   check(await page.locator('.code-block .tok-keyword').count() > 0, 'C# syntax highlighting is missing');
 
+  await page.goto(`${baseUrl}/technologies/blazor.html`, { waitUntil: 'networkidle' });
+  check((await page.locator('h1').innerText()) === 'Blazor', 'Direct topic link did not render Blazor');
+  check(await page.locator('.topic-status-complete').count() === 1, 'Blazor is not marked as a complete guide');
+  check(await page.locator('.article-section').count() === 16, 'Blazor topic does not render all sixteen content sections');
+  check(await page.locator('.toc-link').count() === 16, 'Blazor table of contents is incomplete');
+  check(await page.locator('.concept-card').count() === 10, 'Blazor key concepts are incomplete');
+  check((await page.locator('#decision-guide h2').innerText()) === 'When to use Blazor', 'Blazor decision guide title is not topic-specific');
+  check(await page.locator('.step-list li').count() === 7, 'Blazor implementation walkthrough is incomplete');
+  check(await page.locator('.troubleshooting-card').count() === 6, 'Blazor troubleshooting guidance is incomplete');
+  check(await page.locator('.checklist li').count() === 8, 'Blazor production checklist is incomplete');
+  check(await page.locator('.faq-item').count() === 7, 'Blazor interview FAQ is incomplete');
+  check(await page.locator('#github-sample .sample-commands code').count() === 2, 'Blazor sample run and test commands are missing');
+  check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/blazor-interactive-catalog'), 'Blazor sample links to the wrong GitHub path');
+  await page.screenshot({ path: join(artifactDirectory, 'blazor-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/entity-framework-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'Entity Framework Core', 'Direct topic link did not render Entity Framework Core');
   check(await page.locator('.topic-status-complete').count() === 1, 'Entity Framework Core is not marked as a complete guide');
@@ -371,6 +386,11 @@ try {
   const sourceGeneratorsMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   check(sourceGeneratorsMobileMetrics.scrollWidth <= sourceGeneratorsMobileMetrics.width + 1, `Mobile Source Generators horizontal overflow: ${sourceGeneratorsMobileMetrics.scrollWidth}px`);
   await mobilePage.screenshot({ path: join(artifactDirectory, 'source-generators-mobile-dark-top.png'), fullPage: false });
+  await mobilePage.goto(`${baseUrl}/technologies/blazor.html`, { waitUntil: 'networkidle' });
+  check((await mobilePage.locator('h1').innerText()) === 'Blazor', 'Mobile Blazor topic page did not render');
+  const blazorMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+  check(blazorMobileMetrics.scrollWidth <= blazorMobileMetrics.width + 1, `Mobile Blazor horizontal overflow: ${blazorMobileMetrics.scrollWidth}px`);
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'blazor-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();

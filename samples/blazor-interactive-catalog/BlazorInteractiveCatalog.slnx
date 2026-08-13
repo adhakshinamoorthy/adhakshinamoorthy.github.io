@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/BlazorInteractiveCatalog/BlazorInteractiveCatalog.csproj" />
+  <Project Path="tests/BlazorInteractiveCatalog.Tests/BlazorInteractiveCatalog.Tests.csproj" />
+</Solution>
