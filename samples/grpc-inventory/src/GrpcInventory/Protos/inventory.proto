@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcInventory.Contracts";
+package inventory.v1;
+
+service Inventory {
+  rpc GetStock (GetStockRequest) returns (StockReply);
+  rpc WatchStock (WatchStockRequest) returns (stream StockReply);
+}
+
+message GetStockRequest { string sku = 1; }
+message WatchStockRequest { repeated string skus = 1; }
+message StockReply { string sku = 1; int32 available = 2; int64 version = 3; }

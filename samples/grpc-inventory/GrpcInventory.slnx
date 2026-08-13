@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/GrpcInventory/GrpcInventory.csproj" />
+  <Project Path="tests/GrpcInventory.Tests/GrpcInventory.Tests.csproj" />
+</Solution>
