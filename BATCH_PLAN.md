@@ -6,8 +6,8 @@ Every batch must preserve the portal completion contract: a full guide, a unique
 
 - Complete on `main`: .NET, C#, Dependency Injection, Source Generators, ASP.NET Core, Entity Framework Core, Blazor, Minimal APIs, Dapper, Authentication & Authorization, API Security & OWASP, Secrets Management
 - Complete through Batch 2 on `main`: API Design Best Practices, OpenAPI & Scalar, Webhook Patterns
-- Complete through Batch 7 on `main`: gRPC, SignalR, GraphQL in .NET, Redis & Distributed Caching, Multi-Tenancy Patterns, Performance, Clean Architecture, Vertical Slice Architecture, Modular Monolith, Domain-Driven Design, CQRS & MediatR, Design Patterns, Event-Driven Messaging, RabbitMQ, Apache Kafka
-- Batch 8 ready for review: Saga Pattern, Event Sourcing, Background & Hosted Services
+- Complete through Batch 8 on `main`: gRPC, SignalR, GraphQL in .NET, Redis & Distributed Caching, Multi-Tenancy Patterns, Performance, Clean Architecture, Vertical Slice Architecture, Modular Monolith, Domain-Driven Design, CQRS & MediatR, Design Patterns, Event-Driven Messaging, RabbitMQ, Apache Kafka, Saga Pattern, Event Sourcing, Background & Hosted Services
+- Batch 9 ready for review: Resilience & Rate Limiting, Health Checks, Observability & OpenTelemetry
 
 ## Planned batches
 

@@ -1161,27 +1161,269 @@
     "category": "Delivery & Operations",
     "color": "#2f8fae",
     "shortDescription": "Connect traces, metrics, and logs across services so production behavior is diagnosable, not guessed at.",
-    "keywords": ["OpenTelemetry", "tracing", "metrics", "logs", "correlation", "dashboards"],
-    "overview": "Observability means being able to ask new questions about a running system without shipping new code—usually by combining correlated traces, metrics, and structured logs.",
-    "detail": "OpenTelemetry provides a vendor-neutral way to emit traces, metrics, and logs from .NET applications. A trace follows one logical operation across service boundaries, metrics summarize behavior over time, and structured logs give point-in-time detail—together they turn an incident from guesswork into evidence.",
-    "concepts": [
-      {"title": "Traces and spans", "description": "A trace represents one logical operation; spans are its timed steps, connected across process and network boundaries by a shared trace context."},
-      {"title": "Metrics", "description": "Counters, histograms, and gauges summarize behavior—request rate, latency distribution, queue depth—over time without per-event detail."},
-      {"title": "Correlated logs", "description": "Attaching trace and span identifiers to log lines lets you jump from a slow trace straight to the log lines that explain it."},
-      {"title": "Exporters and collectors", "description": "The OpenTelemetry Collector receives telemetry from applications and routes it to one or more backends without coupling code to a specific vendor."}
+    "keywords": [
+      "OpenTelemetry",
+      "tracing",
+      "metrics",
+      "logs",
+      "correlation",
+      "dashboards"
     ],
-    "architecture": {"description": "Instrumented code emits traces, metrics, and logs to a collector, which routes them to a backend where they can be correlated and queried.", "nodes": ["Instrumented service", "OpenTelemetry SDK", "Collector", "Observability backend"], "colors": ["#2f8fae", "#2678c8", "#6e5bd7", "#168c78"]},
-    "code": {"language": "csharp", "label": "Telemetry.cs", "introduction": "Registering OpenTelemetry once at startup instruments ASP.NET Core, HttpClient, and EF Core without touching business code.", "code": "builder.Services.AddOpenTelemetry()\n    .ConfigureResource(resource => resource.AddService(\"orders-api\"))\n    .WithTracing(tracing => tracing\n        .AddAspNetCoreInstrumentation()\n        .AddHttpClientInstrumentation()\n        .AddEntityFrameworkCoreInstrumentation()\n        .AddOtlpExporter())\n    .WithMetrics(metrics => metrics\n        .AddAspNetCoreInstrumentation()\n        .AddRuntimeInstrumentation()\n        .AddOtlpExporter());"},
-    "bestPractices": ["Propagate trace context across every HTTP call, queue message, and background job, not just synchronous requests.", "Instrument at the edges first—HTTP, database, messaging—before adding custom spans for business logic.", "Keep high-cardinality values like user IDs on span attributes, not on metric labels, to avoid metric explosion.", "Alert on symptoms users feel—latency, error rate, saturation—not only on infrastructure metrics."],
+    "overview": "Observability means being able to ask new questions about a running system without shipping new code—usually by combining correlated traces, metrics, and structured logs.",
+    "detail": "Observability is the ability to explain unfamiliar production behavior from emitted evidence. OpenTelemetry gives .NET applications vendor-neutral APIs, SDKs, semantic conventions, context propagation, sampling, processing, and exporters for traces, metrics, and logs. Traces connect causally related spans, metrics summarize rate and distributions, and structured logs capture event detail; correlation turns them into one investigation path. Instrument service boundaries first, then add business spans and low-cardinality measurements that answer operational questions. Propagate W3C trace context across HTTP and message metadata, preserve baggage carefully, and never place secrets or unbounded identifiers in metric dimensions. Sampling and processors control cost but must preserve useful errors and exemplars. Collectors decouple applications from backends, add batching and routing, and become part of capacity planning. Define service-level indicators before dashboards, test telemetry shape, and alert on user-visible symptoms.",
+    "concepts": [
+      {
+        "title": "Signals and questions",
+        "description": "Traces explain a request path, metrics summarize populations, and logs preserve event detail."
+      },
+      {
+        "title": "Activity and spans",
+        "description": "ActivitySource creates timed operations with parent-child context, status, events, and bounded attributes."
+      },
+      {
+        "title": "Meters and instruments",
+        "description": "Counters and histograms record totals and distributions using stable low-cardinality dimensions."
+      },
+      {
+        "title": "Context propagation",
+        "description": "W3C trace context carries causal identity across HTTP, messaging, and background work."
+      },
+      {
+        "title": "Resource identity",
+        "description": "Service name, version, environment, and instance attributes identify the telemetry producer."
+      },
+      {
+        "title": "Sampling and cost",
+        "description": "Head or tail sampling controls volume while policy preserves errors and representative latency."
+      },
+      {
+        "title": "Collector pipeline",
+        "description": "Receivers, processors, and exporters batch, enrich, filter, and route signals independently of application code."
+      },
+      {
+        "title": "SLIs and alerting",
+        "description": "Availability, latency, error, and saturation evidence become objectives and actionable symptom alerts."
+      }
+    ],
+    "architecture": {
+      "description": "Instrumented code emits traces, metrics, and logs to a collector, which routes them to a backend where they can be correlated and queried.",
+      "nodes": [
+        "Instrumented service",
+        "OpenTelemetry SDK",
+        "Collector",
+        "Observability backend"
+      ],
+      "colors": [
+        "#2f8fae",
+        "#2678c8",
+        "#6e5bd7",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "Telemetry.cs",
+      "introduction": "Registering OpenTelemetry once at startup instruments ASP.NET Core, HttpClient, and EF Core without touching business code.",
+      "code": "builder.Services.AddOpenTelemetry()\n    .ConfigureResource(resource => resource.AddService(\"orders-api\"))\n    .WithTracing(tracing => tracing\n        .AddAspNetCoreInstrumentation()\n        .AddHttpClientInstrumentation()\n        .AddEntityFrameworkCoreInstrumentation()\n        .AddOtlpExporter())\n    .WithMetrics(metrics => metrics\n        .AddAspNetCoreInstrumentation()\n        .AddRuntimeInstrumentation()\n        .AddOtlpExporter());"
+    },
+    "bestPractices": [
+      "Start with user-visible questions.",
+      "Instrument boundaries first.",
+      "Follow semantic conventions.",
+      "Propagate W3C context.",
+      "Keep metric labels bounded.",
+      "Redact sensitive data.",
+      "Batch through collectors.",
+      "Test alerts and correlation paths."
+    ],
     "interviewQuestions": [
-      {"question": "What problem does distributed tracing solve that logs alone do not?", "answer": "Logs are scoped to one process; a trace stitches together the spans from every service a single request touched, showing where time was actually spent across the whole call graph."},
-      {"question": "Why is metric cardinality a concern?", "answer": "Metrics backends aggregate by label combination; labels with unbounded values such as user ID or request ID can create a new time series per value and overwhelm the backend."},
-      {"question": "What role does the OpenTelemetry Collector play?", "answer": "It decouples instrumented applications from a specific observability vendor by receiving telemetry once and routing, batching, and exporting it to one or more backends."}
+      {
+        "question": "Why are logs alone insufficient for distributed requests?",
+        "answer": "They lack a causal operation graph unless trace context consistently correlates events across services."
+      },
+      {
+        "question": "Counter versus histogram?",
+        "answer": "A counter totals occurrences; a histogram records a value distribution such as duration or payload size."
+      },
+      {
+        "question": "Why is metric cardinality dangerous?",
+        "answer": "Every unique dimension combination creates a time series and can overwhelm cost and query capacity."
+      },
+      {
+        "question": "What does the collector provide?",
+        "answer": "A vendor-neutral place to batch, enrich, filter, route, and export telemetry."
+      },
+      {
+        "question": "Head versus tail sampling?",
+        "answer": "Head sampling decides near trace start; tail sampling decides after observing more of the completed trace."
+      },
+      {
+        "question": "What belongs in resource attributes?",
+        "answer": "Stable producer identity such as service name, version, environment, and instance."
+      },
+      {
+        "question": "How do traces and logs correlate?",
+        "answer": "Log records include the current trace and span identifiers from the active Activity context."
+      }
     ],
     "note": "Observability is a property of the system's design, not a dashboard added after an incident.",
     "tip": "Pick a small set of golden signals—latency, traffic, errors, saturation—per service and make sure they are wired end to end before adding anything fancier.",
     "warning": "Sampling every trace at high volume can be expensive and slow; use head- or tail-based sampling once traffic grows, but keep error traces at full fidelity.",
-    "sampleId": "solution-architecture-portfolio", "readingMinutes": 11, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on tracing, metrics, and correlated logs"
+    "sampleId": "otel-correlation-lab",
+    "readingMinutes": 38,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard guide with correlated traces and metrics sample",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Choose the right signal for an operational question.",
+      "Create custom ActivitySource and Meter instrumentation.",
+      "Propagate trace context across boundaries.",
+      "Control metric cardinality and sensitive attributes.",
+      "Design sampling and collector pipelines.",
+      "Test telemetry contracts and service-level indicators."
+    ],
+    "prerequisites": [
+      "Structured logging, async flows, HTTP or messaging boundaries.",
+      "Basic latency percentiles and error-rate concepts.",
+      "A telemetry backend or local collector plan for production use."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Distributed operations need causal correlation.",
+        "Teams need vendor-neutral instrumentation.",
+        "Service objectives require measurable indicators."
+      ],
+      "avoid": [
+        "Every object property becomes an attribute.",
+        "Metrics use request IDs or user IDs as dimensions.",
+        "Dashboards are built before operational questions are defined."
+      ]
+    },
+    "implementationIntroduction": "The sample uses built-in ActivitySource and Meter APIs to emit a correlated operation, bounded attributes, an outcome counter, and a duration histogram.",
+    "implementationSteps": [
+      {
+        "title": "Define questions",
+        "description": "List incidents, user journeys, and service objectives telemetry must explain."
+      },
+      {
+        "title": "Set resource identity",
+        "description": "Configure stable service name, version, environment, and instance metadata."
+      },
+      {
+        "title": "Instrument boundaries",
+        "description": "Enable framework HTTP, client, database, and messaging instrumentation."
+      },
+      {
+        "title": "Add business context",
+        "description": "Create custom spans and measurements only for decisions the framework cannot expose."
+      },
+      {
+        "title": "Propagate context",
+        "description": "Carry W3C trace metadata across every synchronous and asynchronous boundary."
+      },
+      {
+        "title": "Control cost and privacy",
+        "description": "Bound attributes, metric dimensions, sampling, retention, and redaction."
+      },
+      {
+        "title": "Validate operations",
+        "description": "Test signal shape, collector failure, dashboards, alerts, and trace-to-log navigation."
+      }
+    ],
+    "testing": {
+      "introduction": "Treat telemetry names, units, attributes, and propagation as versioned operational contracts.",
+      "items": [
+        "Listen for custom Activity names and tags.",
+        "Capture Meter instruments and units.",
+        "Assert independent root trace identifiers.",
+        "Test propagation through HTTP and messages.",
+        "Reject secret and high-cardinality dimensions.",
+        "Load-test exporter and collector backpressure."
+      ]
+    },
+    "security": {
+      "introduction": "Telemetry often crosses trust boundaries and can silently become a sensitive-data store.",
+      "items": [
+        "Classify allowed attributes.",
+        "Redact tokens, payloads, and personal data.",
+        "Encrypt transport and backend storage.",
+        "Restrict query and dashboard access.",
+        "Set retention and deletion policy."
+      ]
+    },
+    "performance": {
+      "introduction": "Instrumentation must remain bounded when traffic or the backend degrades.",
+      "items": [
+        "Prefer low-allocation APIs.",
+        "Control span volume with sampling.",
+        "Keep metric dimensions bounded.",
+        "Batch exports.",
+        "Plan collector queues and memory limits."
+      ]
+    },
+    "deployment": {
+      "introduction": "Ship collection and dashboards with the service so releases remain diagnosable.",
+      "items": [
+        "Version service resource attributes.",
+        "Deploy collectors redundantly.",
+        "Buffer and bound exporter retries.",
+        "Validate dashboards after rollout.",
+        "Alert on telemetry pipeline loss."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Traces stop at a service.",
+        "cause": "Context was not propagated or extracted.",
+        "fix": "Inspect W3C headers or message metadata at the boundary."
+      },
+      {
+        "symptom": "Metrics backend explodes.",
+        "cause": "A dimension has unbounded cardinality.",
+        "fix": "Remove identifiers and keep them on sampled spans or logs."
+      },
+      {
+        "symptom": "Logs cannot join traces.",
+        "cause": "Trace and span identifiers are missing.",
+        "fix": "Enable correlated logging scopes and verify exporter fields."
+      },
+      {
+        "symptom": "Application slows during outage.",
+        "cause": "Exporter retries or queue is unbounded.",
+        "fix": "Batch asynchronously and cap queue, timeout, and retries."
+      },
+      {
+        "symptom": "Important failures are absent.",
+        "cause": "Sampling drops them.",
+        "fix": "Tune policy or use tail sampling that preserves errors."
+      },
+      {
+        "symptom": "Dashboard disagrees with traces.",
+        "cause": "Units, aggregation, or time windows differ.",
+        "fix": "Verify instrument units and query aggregation."
+      }
+    ],
+    "productionChecklist": [
+      "Operational questions and SLIs are defined.",
+      "Resource identity is stable.",
+      "Trace context crosses every boundary.",
+      "Custom attributes are bounded and reviewed.",
+      "Metric dimensions are low cardinality.",
+      "Sampling and retention budgets are explicit.",
+      "Collector failure is bounded.",
+      "Dashboards and alerts are release-tested."
+    ],
+    "resources": [
+      {
+        "label": "OpenTelemetry .NET",
+        "url": "https://opentelemetry.io/docs/languages/dotnet/"
+      },
+      {
+        "label": ".NET diagnostics metrics",
+        "url": "https://learn.microsoft.com/dotnet/core/diagnostics/metrics-instrumentation"
+      }
+    ]
   },
   {
     "slug": "cicd-dotnet",
@@ -1684,27 +1926,269 @@
     "category": "Web & Data",
     "color": "#d9534f",
     "shortDescription": "Protect a service and its callers from cascading failure with retries, circuit breakers, timeouts, and rate limits.",
-    "keywords": ["Polly", "retries", "circuit breaker", "rate limiting", "timeouts", "backpressure"],
-    "overview": "Resilience policies decide how a call behaves when something downstream is slow or failing; rate limiting decides how much load a service accepts in the first place.",
-    "detail": "Polly composes retry, circuit breaker, timeout, and bulkhead policies around outbound calls so transient failures are absorbed without hammering a struggling dependency. ASP.NET Core's built-in rate limiter protects the service itself from being overwhelmed, using algorithms such as fixed window, sliding window, token bucket, or concurrency limits.",
-    "concepts": [
-      {"title": "Retry with backoff", "description": "Retrying a transient failure after an increasing delay, ideally with jitter, avoids hammering a struggling dependency at a fixed interval."},
-      {"title": "Circuit breaker", "description": "After enough failures, a circuit breaker stops sending calls for a cooldown period, giving a struggling dependency room to recover."},
-      {"title": "Timeouts and bulkheads", "description": "Timeouts stop a call from waiting indefinitely; bulkheads cap concurrent calls to one dependency so it cannot exhaust shared resources."},
-      {"title": "Rate limiting algorithms", "description": "Fixed window, sliding window, token bucket, and concurrency limiters trade off burst tolerance, fairness, and memory cost differently."}
+    "keywords": [
+      "Polly",
+      "retries",
+      "circuit breaker",
+      "rate limiting",
+      "timeouts",
+      "backpressure"
     ],
-    "architecture": {"description": "Outbound calls pass through composed resilience policies before reaching a dependency, while inbound requests pass through a rate limiter before reaching application code.", "nodes": ["Inbound request", "Rate limiter", "Application", "Resilience-wrapped outbound call"], "colors": ["#d9534f", "#2678c8", "#6e5bd7", "#168c78"]},
-    "code": {"language": "csharp", "label": "ResilientClient.cs", "introduction": "A named HttpClient gets a standard resilience pipeline once, so every call through it is protected consistently.", "code": "builder.Services.AddHttpClient<IPaymentsClient, PaymentsClient>()\n    .AddResilienceHandler(\"payments\", pipeline =>\n    {\n        pipeline.AddRetry(new HttpRetryStrategyOptions { MaxRetryAttempts = 3 });\n        pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions());\n        pipeline.AddTimeout(TimeSpan.FromSeconds(5));\n    });\n\nbuilder.Services.AddRateLimiter(options =>\n    options.AddFixedWindowLimiter(\"api\", limiter =>\n    {\n        limiter.PermitLimit = 100;\n        limiter.Window = TimeSpan.FromMinutes(1);\n    }));"},
-    "bestPractices": ["Only retry operations known to be safe to repeat, or make them idempotent first.", "Add jitter to retry backoff so many clients retrying together don't synchronize into a new spike.", "Return a clear 429 response with a Retry-After header when rate limiting a client, instead of silently dropping the request.", "Tune circuit breaker thresholds using real failure data, not guessed defaults, and monitor when it opens."],
+    "overview": "Resilience policies decide how a call behaves when something downstream is slow or failing; rate limiting decides how much load a service accepts in the first place.",
+    "detail": "Resilience is controlled failure handling, not a promise that every operation eventually succeeds. Outbound calls need explicit deadlines, bounded retries with jitter, circuit breaking, concurrency limits, and an end-to-end time budget. Inbound rate limiting protects finite capacity and should partition fairly by authenticated client or another trustworthy key. Retry only transient, repeatable operations; use idempotency keys where a repeated write is possible. Choose token bucket for controlled bursts, fixed or sliding windows for quotas, and concurrency limiting for scarce work slots. Emit stable rejection responses and Retry-After guidance, measure attempts and breaker state, and test with deterministic time and injected failures. Layer budgets so retries cannot outlive the caller, and avoid multiplying attempts across clients, gateways, and services.",
+    "concepts": [
+      {
+        "title": "Failure taxonomy",
+        "description": "Classify transient, permanent, overload, cancellation, and timeout outcomes before choosing a response."
+      },
+      {
+        "title": "Timeout budgets",
+        "description": "Bound the whole operation and give each attempt less time than the remaining caller budget."
+      },
+      {
+        "title": "Retry and jitter",
+        "description": "Retry only safe transient failures with bounded exponential delay and randomness that prevents synchronized storms."
+      },
+      {
+        "title": "Circuit breakers",
+        "description": "Stop calls after sustained failure, probe recovery carefully, and expose breaker state to operators."
+      },
+      {
+        "title": "Concurrency isolation",
+        "description": "Limit simultaneous dependency calls so one slow system cannot exhaust every worker or connection."
+      },
+      {
+        "title": "Rate-limit algorithms",
+        "description": "Fixed window, sliding window, token bucket, and concurrency policies offer different burst and fairness behavior."
+      },
+      {
+        "title": "Partitioning and identity",
+        "description": "Partition limits by a trusted tenant, API client, or route instead of attacker-controlled raw input."
+      },
+      {
+        "title": "Backpressure and signals",
+        "description": "Return predictable 429 or 503 responses, Retry-After where useful, and telemetry that explains rejection."
+      }
+    ],
+    "architecture": {
+      "description": "Outbound calls pass through composed resilience policies before reaching a dependency, while inbound requests pass through a rate limiter before reaching application code.",
+      "nodes": [
+        "Inbound request",
+        "Rate limiter",
+        "Application",
+        "Resilience-wrapped outbound call"
+      ],
+      "colors": [
+        "#d9534f",
+        "#2678c8",
+        "#6e5bd7",
+        "#168c78"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "ResilientClient.cs",
+      "introduction": "A named HttpClient gets a standard resilience pipeline once, so every call through it is protected consistently.",
+      "code": "builder.Services.AddHttpClient<IPaymentsClient, PaymentsClient>()\n    .AddResilienceHandler(\"payments\", pipeline =>\n    {\n        pipeline.AddRetry(new HttpRetryStrategyOptions { MaxRetryAttempts = 3 });\n        pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions());\n        pipeline.AddTimeout(TimeSpan.FromSeconds(5));\n    });\n\nbuilder.Services.AddRateLimiter(options =>\n    options.AddFixedWindowLimiter(\"api\", limiter =>\n    {\n        limiter.PermitLimit = 100;\n        limiter.Window = TimeSpan.FromMinutes(1);\n    }));"
+    },
+    "bestPractices": [
+      "Retry only transient repeatable work.",
+      "Budget the entire operation.",
+      "Add jitter to delayed retries.",
+      "Use breakers with measured thresholds.",
+      "Limit dependency concurrency.",
+      "Partition admission with trusted identity.",
+      "Bound limiter state cardinality.",
+      "Tune from telemetry and failure drills."
+    ],
     "interviewQuestions": [
-      {"question": "Why can naive retries make an outage worse?", "answer": "If every client retries immediately and at the same interval after a failure, the retries can synchronize into a load spike that keeps overwhelming the struggling dependency—jittered backoff and circuit breakers exist specifically to prevent this."},
-      {"question": "What is the difference between a circuit breaker and a retry policy?", "answer": "A retry policy repeats a single call after failure; a circuit breaker tracks failures over time and, once a threshold is crossed, stops sending calls entirely for a cooldown period so a struggling dependency gets room to recover."},
-      {"question": "Why rate limit your own API instead of just scaling it?", "answer": "Scaling has limits and cost; rate limiting protects shared resources like a database or downstream dependency from being overwhelmed by a burst, and gives predictable, fair behavior under load instead of an uncontrolled failure."}
+      {
+        "question": "Why can retries worsen an outage?",
+        "answer": "They amplify demand while a dependency has reduced capacity, especially when clients retry together."
+      },
+      {
+        "question": "Retry versus circuit breaker?",
+        "answer": "Retry repeats one operation; a breaker suppresses new calls after aggregate failure crosses a threshold."
+      },
+      {
+        "question": "Why use jitter?",
+        "answer": "It spreads retries over time so callers do not create a synchronized recovery spike."
+      },
+      {
+        "question": "Which limiter allows controlled bursts?",
+        "answer": "A token bucket accumulates permits up to a capacity while replenishing at a configured rate."
+      },
+      {
+        "question": "When is concurrency limiting useful?",
+        "answer": "When the scarce resource is simultaneous work, such as database connections or expensive requests."
+      },
+      {
+        "question": "How should limits be partitioned?",
+        "answer": "By a bounded, trusted identity that matches the fairness boundary, usually tenant or API client."
+      },
+      {
+        "question": "What makes retrying a POST safe?",
+        "answer": "An idempotency contract that returns the same outcome and prevents duplicate side effects."
+      }
     ],
     "note": "Resilience policies manage how you call others; rate limiting manages how others call you—most production APIs need both.",
     "tip": "Test resilience policies by actually injecting failures and latency in a lower environment, not just by reading the configuration.",
     "warning": "Stacking retries at multiple layers—client, gateway, and service—without coordination can multiply load on a struggling dependency instead of protecting it.",
-    "sampleId": "ai-gatekeeper", "readingMinutes": 10, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on Polly policies and ASP.NET Core rate limiting"
+    "sampleId": "resilience-admission-lab",
+    "readingMinutes": 37,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard guide with deterministic retry and token-bucket sample",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Classify failures before applying policies.",
+      "Compose timeout, retry, breaker, and concurrency budgets.",
+      "Choose an inbound limiter from workload behavior.",
+      "Partition admission fairly and securely.",
+      "Make repeated writes idempotent.",
+      "Test failure and refill behavior deterministically."
+    ],
+    "prerequisites": [
+      "ASP.NET Core middleware, HttpClient, async cancellation, and dependency injection.",
+      "Basic latency, throughput, HTTP status, and idempotency concepts.",
+      "A stated capacity and failure budget for the protected operation."
+    ],
+    "decisionGuide": {
+      "use": [
+        "A remote dependency has known transient failures.",
+        "A service must preserve capacity during bursts.",
+        "Clients need predictable overload behavior."
+      ],
+      "avoid": [
+        "Retries wrap non-repeatable writes without idempotency.",
+        "Every layer independently retries.",
+        "Limits use spoofable or unbounded partition keys."
+      ]
+    },
+    "implementationIntroduction": "The sample isolates the policy mechanics with a deterministic token bucket and bounded retry policy, making time and failure assertions fast and repeatable.",
+    "implementationSteps": [
+      {
+        "title": "Define outcomes",
+        "description": "Map exceptions and status codes to transient, permanent, timeout, cancellation, or overload."
+      },
+      {
+        "title": "Set a budget",
+        "description": "Choose an end-to-end deadline, per-attempt timeout, and maximum attempts."
+      },
+      {
+        "title": "Protect repetition",
+        "description": "Require idempotency before retrying mutations and add jitter to backoff."
+      },
+      {
+        "title": "Select admission",
+        "description": "Choose token bucket, window, or concurrency limiting from burst and resource behavior."
+      },
+      {
+        "title": "Partition fairly",
+        "description": "Use authenticated client or tenant identity and bound partition count."
+      },
+      {
+        "title": "Return contracts",
+        "description": "Produce stable problem details, 429 or 503 semantics, and Retry-After guidance."
+      },
+      {
+        "title": "Observe and tune",
+        "description": "Measure attempts, latency, rejections, saturation, and breaker transitions under injected failure."
+      }
+    ],
+    "testing": {
+      "introduction": "Test policies as state machines with fake time and scripted outcomes.",
+      "items": [
+        "Prove transient success within the attempt bound.",
+        "Prove permanent failure is not retried.",
+        "Advance fake time to verify token refill.",
+        "Test cancellation and total timeout.",
+        "Test partition fairness and eviction.",
+        "Load-test rejection before dependency collapse."
+      ]
+    },
+    "security": {
+      "introduction": "Admission controls are also abuse controls, but only when identity and resource accounting are trustworthy.",
+      "items": [
+        "Prefer authenticated client or tenant keys.",
+        "Do not reveal internal dependency details.",
+        "Bound partition cardinality.",
+        "Protect bypass and policy configuration.",
+        "Audit repeated abusive rejection patterns."
+      ]
+    },
+    "performance": {
+      "introduction": "Policies consume latency and capacity, so tune the whole call graph rather than isolated defaults.",
+      "items": [
+        "Keep retries inside the caller budget.",
+        "Measure retry amplification.",
+        "Limit concurrent dependency calls.",
+        "Use jitter to smooth recovery.",
+        "Benchmark limiter partitions at expected cardinality."
+      ]
+    },
+    "deployment": {
+      "introduction": "Roll policy changes gradually because small threshold changes can reshape traffic.",
+      "items": [
+        "Publish rejection and retry contracts.",
+        "Canary threshold changes.",
+        "Align gateway and service policies.",
+        "Alert on saturation and breaker state.",
+        "Rehearse dependency brownouts."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Latency grows during outage.",
+        "cause": "Retries multiply slow attempts.",
+        "fix": "Reduce attempts and enforce an end-to-end timeout."
+      },
+      {
+        "symptom": "Dependency never recovers.",
+        "cause": "Retry storms keep it saturated.",
+        "fix": "Add jitter, circuit breaking, and concurrency isolation."
+      },
+      {
+        "symptom": "Legitimate bursts are rejected.",
+        "cause": "The chosen algorithm has no burst allowance.",
+        "fix": "Use a token bucket or tune queue and replenishment."
+      },
+      {
+        "symptom": "One tenant affects everyone.",
+        "cause": "Limits use a global partition.",
+        "fix": "Partition by trusted tenant and reserve shared capacity deliberately."
+      },
+      {
+        "symptom": "Memory grows with clients.",
+        "cause": "Partition keys are unbounded.",
+        "fix": "Normalize keys and evict idle limiter state."
+      },
+      {
+        "symptom": "Clients retry immediately.",
+        "cause": "Rejections omit useful guidance.",
+        "fix": "Return stable 429 responses and a realistic Retry-After value."
+      }
+    ],
+    "productionChecklist": [
+      "Failure classes are explicit.",
+      "Total and per-attempt timeouts are bounded.",
+      "Writes are idempotent before retry.",
+      "Attempts use backoff and jitter.",
+      "Concurrency protects dependencies.",
+      "Limiter algorithm and partition key are justified.",
+      "Rejections are observable and documented.",
+      "Brownout and recovery tests pass."
+    ],
+    "resources": [
+      {
+        "label": "ASP.NET Core rate limiting",
+        "url": "https://learn.microsoft.com/aspnet/core/performance/rate-limit"
+      },
+      {
+        "label": ".NET HTTP resilience",
+        "url": "https://learn.microsoft.com/dotnet/core/resilience/http-resilience"
+      }
+    ]
   },
   {
     "slug": "structured-logging",
@@ -3939,31 +4423,67 @@
     "category": "Delivery & Operations",
     "color": "#1a7a4a",
     "shortDescription": "Expose meaningful liveness, readiness, and startup signals from .NET applications so orchestrators, load balancers, and dashboards can act on real dependency health.",
-    "keywords": ["health checks", "IHealthCheck", "readiness", "liveness", "startup probe", "AspNetCore.Diagnostics.HealthChecks", "health check UI", "Kubernetes probes", "dependency health"],
+    "keywords": [
+      "health checks",
+      "IHealthCheck",
+      "readiness",
+      "liveness",
+      "startup probe",
+      "AspNetCore.Diagnostics.HealthChecks",
+      "health check UI",
+      "Kubernetes probes",
+      "dependency health"
+    ],
     "overview": "Health checks expose signals that tell orchestrators, load balancers, and monitoring systems whether an application is alive, ready to serve traffic, and has access to its dependencies.",
-    "detail": "ASP.NET Core's built-in health check infrastructure lets teams register custom IHealthCheck implementations, group them by tag, filter them per endpoint, and expose results as JSON. Three distinct signals serve different consumers: liveness tells Kubernetes whether to restart the container, readiness tells the load balancer whether to route traffic, and startup tells the orchestrator to wait before applying either probe. Community libraries extend this with pre-built checks for SQL Server, PostgreSQL, Redis, RabbitMQ, Azure Service Bus, URLs, and disk space. The HealthChecks UI library adds a visual dashboard that polls configured endpoints and displays history.",
+    "detail": "Health endpoints are control-plane contracts, not generic diagnostics. Liveness answers whether the process is irrecoverably stuck and should restart; it must not fail merely because a dependency is unavailable. Readiness answers whether this instance should receive new traffic and may include only dependencies required for serving that traffic. Startup protects slow initialization from premature liveness failures. ASP.NET Core registers IHealthCheck implementations and uses tags and predicates to expose separate endpoints. Checks need short cancellation-aware timeouts, bounded concurrency, stable sanitized output, and failure status chosen from operational consequences. Cache expensive results where appropriate, secure detailed dashboards, and test probe timings against deployment grace periods. A misdesigned probe can create restart loops or synchronized dependency load during the incident it was meant to diagnose.",
     "concepts": [
       {
-        "title": "Liveness vs readiness vs startup",
-        "description": "Liveness answers 'is the process still functioning?' — failure triggers a container restart. Readiness answers 'is the app ready to serve traffic?' — failure removes the pod from load-balancer rotation. Startup answers 'has initialisation completed?' — used to give slow-starting apps time before liveness kicks in."
+        "title": "Liveness",
+        "description": "A lightweight process signal whose failure asks the orchestrator to restart this instance."
       },
       {
-        "title": "Custom IHealthCheck",
-        "description": "Any dependency or business invariant can be checked by implementing IHealthCheck and returning Healthy, Degraded, or Unhealthy with a description and optional data dictionary for diagnostic detail."
+        "title": "Readiness",
+        "description": "A traffic-admission signal that reflects whether the instance can serve its required workload."
       },
       {
-        "title": "Tagging and filtering",
-        "description": "Health checks are tagged at registration and endpoints use a predicate to select which checks to run — database checks on the readiness endpoint, a trivial always-healthy check on the liveness endpoint."
+        "title": "Startup",
+        "description": "An initialization gate that delays normal liveness and readiness evaluation for slow-starting applications."
       },
       {
-        "title": "Health check UI",
-        "description": "The AspNetCore.HealthChecks.UI package polls one or more health endpoints on a schedule and renders a dashboard showing current status, history, and failure details — useful for internal operations teams without a full APM tool."
+        "title": "IHealthCheck",
+        "description": "A cancellation-aware component reports Healthy, Degraded, or Unhealthy plus controlled diagnostic data."
+      },
+      {
+        "title": "Tags and predicates",
+        "description": "Registration tags let separate endpoints select only the checks appropriate for each consumer."
+      },
+      {
+        "title": "Dependency criticality",
+        "description": "Required and optional dependencies map to different aggregate statuses and routing consequences."
+      },
+      {
+        "title": "Probe budgets",
+        "description": "Timeout, period, and failure threshold together define how quickly infrastructure reacts."
+      },
+      {
+        "title": "Operational output",
+        "description": "Machine-readable status supports automation while detailed diagnostics remain protected and sanitized."
       }
     ],
     "architecture": {
       "description": "Kubernetes probes call dedicated health endpoints filtered by tag; the readiness endpoint checks real dependencies while the liveness endpoint stays lightweight, and the UI dashboard polls all endpoints for operator visibility.",
-      "nodes": ["Kubernetes probes", "Liveness endpoint", "Readiness endpoint", "Health check UI"],
-      "colors": ["#2678c8", "#1a7a4a", "#e07036", "#6e5bd7"]
+      "nodes": [
+        "Kubernetes probes",
+        "Liveness endpoint",
+        "Readiness endpoint",
+        "Health check UI"
+      ],
+      "colors": [
+        "#2678c8",
+        "#1a7a4a",
+        "#e07036",
+        "#6e5bd7"
+      ]
     },
     "code": {
       "language": "csharp",
@@ -3972,33 +4492,203 @@
       "code": "using Microsoft.Extensions.Diagnostics.HealthChecks;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services\n    .AddHealthChecks()\n    // Liveness: trivial — if this fails the process is hung\n    .AddCheck(\"self\", () => HealthCheckResult.Healthy(), tags: [\"live\"])\n    // Readiness: real dependencies\n    .AddNpgSql(\n        builder.Configuration.GetConnectionString(\"Database\")!,\n        name: \"database\",\n        failureStatus: HealthStatus.Unhealthy,\n        tags: [\"ready\"])\n    .AddRedis(\n        builder.Configuration.GetConnectionString(\"Redis\")!,\n        name: \"cache\",\n        failureStatus: HealthStatus.Degraded,\n        tags: [\"ready\"])\n    .AddCheck<MessageBusHealthCheck>(\"messaging\", tags: [\"ready\"]);\n\nvar app = builder.Build();\n\n// Liveness: lightweight, no dependency checks\napp.MapHealthChecks(\"/health/live\", new()\n{\n    Predicate = check => check.Tags.Contains(\"live\"),\n    ResponseWriter = WriteJsonResponse\n});\n\n// Readiness: all dependency checks\napp.MapHealthChecks(\"/health/ready\", new()\n{\n    Predicate = check => check.Tags.Contains(\"ready\"),\n    ResponseWriter = WriteJsonResponse\n});\n\napp.Run();\n\n// Custom check: verifies a business-critical queue is reachable\npublic sealed class MessageBusHealthCheck(\n    IServiceBusClientFactory factory) : IHealthCheck\n{\n    public async Task<HealthCheckResult> CheckHealthAsync(\n        HealthCheckContext context, CancellationToken ct)\n    {\n        try\n        {\n            var client = factory.CreateAdminClient();\n            var props = await client.GetQueueRuntimePropertiesAsync(\n                \"order-events\", ct);\n\n            var data = new Dictionary<string, object>\n            {\n                [\"activeMessages\"] = props.Value.ActiveMessageCount,\n                [\"deadLetterMessages\"] = props.Value.DeadLetterMessageCount\n            };\n\n            return props.Value.DeadLetterMessageCount > 1000\n                ? HealthCheckResult.Degraded(\"High dead-letter count\", data: data)\n                : HealthCheckResult.Healthy(data: data);\n        }\n        catch (Exception ex)\n        {\n            return HealthCheckResult.Unhealthy(\n                \"Service Bus unreachable\", ex);\n        }\n    }\n}\n\nstatic Task WriteJsonResponse(HttpContext ctx, HealthReport report) =>\n    ctx.Response.WriteAsJsonAsync(new\n    {\n        status = report.Status.ToString(),\n        checks = report.Entries.Select(e => new\n        {\n            name = e.Key,\n            status = e.Value.Status.ToString(),\n            description = e.Value.Description,\n            data = e.Value.Data\n        })\n    });"
     },
     "bestPractices": [
-      "Never put real dependency checks on the liveness endpoint — a database outage would restart every healthy pod simultaneously, compounding the incident instead of reducing traffic to the affected node.",
-      "Return Degraded rather than Unhealthy for non-critical dependencies such as a cache or secondary queue so the pod stays in rotation but the degraded state is visible to operators and alerts.",
-      "Include diagnostic data — active message count, last successful query time, connection pool state — in the health check result so on-call engineers can triage from the health endpoint without needing a separate dashboard.",
-      "Set Kubernetes startup probes with a generous failure threshold for apps that run migrations or warm caches on startup; this prevents liveness from restarting a healthy but slow-starting container."
+      "Separate probe semantics.",
+      "Keep liveness local.",
+      "Tag checks by consumer.",
+      "Classify dependency criticality.",
+      "Honor cancellation.",
+      "Sanitize public output.",
+      "Bound probe cost.",
+      "Rehearse deployment transitions."
     ],
     "interviewQuestions": [
       {
-        "question": "Why is it dangerous to check database connectivity on the liveness probe?",
-        "answer": "Liveness failure causes Kubernetes to restart the container. If the database goes down, every pod fails liveness simultaneously and Kubernetes restarts them all in a loop — making the outage worse and losing in-flight requests. Liveness should only verify the process itself is alive and not deadlocked. Dependency health belongs on the readiness probe, which removes the pod from traffic rotation without restarting it."
+        "question": "Liveness versus readiness?",
+        "answer": "Liveness decides restart; readiness decides whether this instance receives traffic."
       },
       {
-        "question": "What is the difference between Unhealthy and Degraded?",
-        "answer": "Unhealthy means the check has failed and the dependency is not usable — Kubernetes treats it as a readiness failure and stops routing traffic. Degraded means the dependency is reachable but operating below normal — it signals a warning state to monitoring tools while keeping the pod in rotation, allowing operations to investigate without triggering a traffic disruption."
+        "question": "Why not put database checks in liveness?",
+        "answer": "A shared outage would restart every healthy process and can worsen recovery."
       },
       {
-        "question": "How would you expose health checks in a microservices system so a central dashboard can monitor all services?",
-        "answer": "Each service exposes a standard JSON health endpoint. A Health Checks UI instance is configured with the URLs of all service endpoints and polls them on a schedule, aggregating status and history in a single dashboard. Alternatively, a monitoring platform such as Azure Monitor or Prometheus scrapes the endpoints and feeds a centralised alerting and visualisation layer."
+        "question": "What is a startup probe for?",
+        "answer": "It grants initialization time before normal liveness and readiness thresholds apply."
+      },
+      {
+        "question": "How do tags help?",
+        "answer": "They let endpoints select different registered checks for different consumers."
+      },
+      {
+        "question": "When should a check return Degraded?",
+        "answer": "When an optional capability is impaired but core traffic can still be served."
+      },
+      {
+        "question": "Why must checks honor cancellation?",
+        "answer": "Probe infrastructure has a deadline and abandoned dependency calls consume resources."
+      },
+      {
+        "question": "Should health checks repair systems?",
+        "answer": "No; checks should observe and report, while controlled operators perform remediation."
       }
     ],
     "note": "A health check that always returns Healthy is worse than no health check — it builds false confidence. Check the actual dependency, return meaningful status, and include data that helps an on-call engineer act without additional investigation.",
     "tip": "Add a dead-letter message count check to your Service Bus or RabbitMQ health check — a rising dead-letter count is one of the earliest signals of a processing problem and is nearly free to surface from the broker's management API.",
     "warning": "Health check endpoints should never require authentication from the orchestrator — Kubernetes and load balancers call them without credentials — but restrict them from the public internet using network policy or path-based ingress rules.",
-    "sampleId": "solution-architecture-portfolio",
-    "readingMinutes": 11,
-    "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on liveness, readiness, startup probes, custom checks, and Health Checks UI"
+    "sampleId": "health-readiness-lab",
+    "readingMinutes": 36,
+    "level": "Foundation to production",
+    "updated": "2026-08-13",
+    "latestNote": "Gold-standard guide with startup and readiness aggregation sample",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Separate liveness, readiness, and startup semantics.",
+      "Implement cancellation-aware dependency probes.",
+      "Aggregate required and optional dependency status.",
+      "Configure probe budgets with deployment behavior.",
+      "Protect diagnostic output.",
+      "Test transitions and failure consequences."
+    ],
+    "prerequisites": [
+      "ASP.NET Core routing and dependency injection.",
+      "Container or load-balancer probe fundamentals.",
+      "Known required and optional dependencies."
+    ],
+    "decisionGuide": {
+      "use": [
+        "An orchestrator or load balancer needs an action signal.",
+        "A dependency determines traffic readiness.",
+        "Startup initialization needs a distinct grace window."
+      ],
+      "avoid": [
+        "Liveness performs every dependency query.",
+        "A public endpoint exposes exception details.",
+        "Checks trigger repairs or destructive side effects."
+      ]
+    },
+    "implementationIntroduction": "The sample models startup state, required and optional dependencies, cancellation, and deterministic aggregate results without external infrastructure.",
+    "implementationSteps": [
+      {
+        "title": "Name consumers",
+        "description": "List who calls each endpoint and what action they take."
+      },
+      {
+        "title": "Separate signals",
+        "description": "Keep process liveness distinct from startup and traffic readiness."
+      },
+      {
+        "title": "Classify dependencies",
+        "description": "Mark dependencies required, optional, or irrelevant to a route."
+      },
+      {
+        "title": "Implement probes",
+        "description": "Use short cancellation-aware checks with controlled result data."
+      },
+      {
+        "title": "Aggregate status",
+        "description": "Map required failures to Unhealthy and optional failures to Degraded."
+      },
+      {
+        "title": "Configure timing",
+        "description": "Align timeout, interval, threshold, startup grace, and shutdown drain."
+      },
+      {
+        "title": "Secure and observe",
+        "description": "Protect details, monitor transitions, and rehearse failure and recovery."
+      }
+    ],
+    "testing": {
+      "introduction": "Test the state transitions and the infrastructure action each status is meant to cause.",
+      "items": [
+        "Verify startup is unhealthy until initialization completes.",
+        "Fail a required dependency and assert readiness.",
+        "Fail an optional dependency and assert degradation.",
+        "Prove cancellation reaches slow probes.",
+        "Test endpoint tag selection.",
+        "Rehearse probe timing during deploy and drain."
+      ]
+    },
+    "security": {
+      "introduction": "Health data can reveal architecture and credentials if responses are not deliberately constrained.",
+      "items": [
+        "Expose only status publicly.",
+        "Protect detailed dashboards.",
+        "Never return connection strings or exception stacks.",
+        "Rate limit expensive diagnostic endpoints.",
+        "Audit operator access."
+      ]
+    },
+    "performance": {
+      "introduction": "Frequent probes from many replicas can become production load.",
+      "items": [
+        "Keep liveness dependency-free.",
+        "Set short timeouts.",
+        "Cache expensive readiness checks briefly.",
+        "Avoid sequential slow probes.",
+        "Measure probe latency and call volume."
+      ]
+    },
+    "deployment": {
+      "introduction": "Probe timings must match startup, traffic drain, and shutdown behavior.",
+      "items": [
+        "Set startup grace from measured startup.",
+        "Remove readiness before shutdown.",
+        "Keep liveness threshold tolerant of pauses.",
+        "Version response contracts.",
+        "Test rolling deployment and dependency outage."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Pods restart during database outage.",
+        "cause": "Liveness checks the database.",
+        "fix": "Move dependency checks to readiness."
+      },
+      {
+        "symptom": "Traffic arrives before initialization.",
+        "cause": "No startup or readiness gate exists.",
+        "fix": "Report startup state until initialization completes."
+      },
+      {
+        "symptom": "Probe requests time out.",
+        "cause": "A dependency call ignores cancellation.",
+        "fix": "Apply a short timeout and propagate the token."
+      },
+      {
+        "symptom": "Probe creates database load.",
+        "cause": "Every caller runs an expensive query.",
+        "fix": "Use a cheap query and bounded caching."
+      },
+      {
+        "symptom": "Dashboard leaks internals.",
+        "cause": "Detailed output is public.",
+        "fix": "Authenticate details and return minimal public JSON."
+      },
+      {
+        "symptom": "Pod never receives traffic.",
+        "cause": "Readiness failure lacks component evidence.",
+        "fix": "Log sanitized per-check status and inspect thresholds."
+      }
+    ],
+    "productionChecklist": [
+      "Consumers and actions are documented.",
+      "Liveness is lightweight.",
+      "Startup grace is measured.",
+      "Readiness includes only required dependencies.",
+      "Checks honor cancellation and timeout.",
+      "Public output is sanitized.",
+      "Probe timing matches drain behavior.",
+      "Outage and rolling-deploy drills pass."
+    ],
+    "resources": [
+      {
+        "label": "ASP.NET Core health checks",
+        "url": "https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks"
+      },
+      {
+        "label": "Kubernetes probes",
+        "url": "https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/"
+      }
+    ]
   },
   {
     "slug": "orleans",

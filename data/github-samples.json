@@ -403,5 +403,77 @@
   },
   {"id":"saga-order-workflow","topicSlug":"saga-pattern","status":"complete","name":"Saga Order Workflow","description":"A .NET 10 orchestrated order saga demonstrating explicit state transitions, idempotent message handling, emitted commands, invalid transitions, and payment compensation.","technologies":[".NET 10","Saga Pattern","State Machine","xUnit"],"tags":["dedicated-sample","orchestration","compensation","idempotency"],"githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/saga-order-workflow","localPath":"samples/saga-order-workflow/README.md","runCommand":"dotnet run --project src/SagaOrderWorkflow","testCommand":"dotnet test SagaOrderWorkflow.slnx","liveDemoUrl":null},
   {"id":"event-sourced-account","topicSlug":"event-sourcing","status":"complete","name":"Event-Sourced Account","description":"A .NET 10 bank-account aggregate demonstrating decision-time events, ordered replay, uncommitted changes, stream versions, and optimistic concurrency.","technologies":[".NET 10","Event Sourcing","Optimistic Concurrency","xUnit"],"tags":["dedicated-sample","event-stream","rehydration","expected-version"],"githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/event-sourced-account","localPath":"samples/event-sourced-account/README.md","runCommand":"dotnet run --project src/EventSourcedAccount","testCommand":"dotnet test EventSourcedAccount.slnx","liveDemoUrl":null},
-  {"id":"hosted-work-queue","topicSlug":"background-services","status":"complete","name":"Hosted Work Queue","description":"A .NET 10 bounded Channel work queue demonstrating backpressure, cancellation, graceful drain, and per-item failure isolation.","technologies":[".NET 10","BackgroundService Semantics","Channels","xUnit"],"tags":["dedicated-sample","bounded-queue","backpressure","graceful-shutdown"],"githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/hosted-work-queue","localPath":"samples/hosted-work-queue/README.md","runCommand":"dotnet run --project src/HostedWorkQueue","testCommand":"dotnet test HostedWorkQueue.slnx","liveDemoUrl":null}
+  {"id":"hosted-work-queue","topicSlug":"background-services","status":"complete","name":"Hosted Work Queue","description":"A .NET 10 bounded Channel work queue demonstrating backpressure, cancellation, graceful drain, and per-item failure isolation.","technologies":[".NET 10","BackgroundService Semantics","Channels","xUnit"],"tags":["dedicated-sample","bounded-queue","backpressure","graceful-shutdown"],"githubUrl":"https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/hosted-work-queue","localPath":"samples/hosted-work-queue/README.md","runCommand":"dotnet run --project src/HostedWorkQueue","testCommand":"dotnet test HostedWorkQueue.slnx","liveDemoUrl":null},
+  {
+    "id": "resilience-admission-lab",
+    "topicSlug": "resilience-rate-limiting",
+    "status": "complete",
+    "name": "Resilience Admission Lab",
+    "description": "A deterministic .NET 10 sample demonstrating bounded transient retries, permanent failure handling, token-bucket admission, rejection, and fake-time refill tests.",
+    "technologies": [
+      ".NET 10",
+      "Resilience",
+      "Rate Limiting",
+      "xUnit"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "retry",
+      "token-bucket",
+      "fake-time"
+    ],
+    "runCommand": "dotnet run --project src/ResilienceAdmissionLab",
+    "testCommand": "dotnet test ResilienceAdmissionLab.slnx",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/resilience-admission-lab",
+    "localPath": "samples/resilience-admission-lab/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "health-readiness-lab",
+    "topicSlug": "health-checks",
+    "status": "complete",
+    "name": "Health Readiness Lab",
+    "description": "A deterministic .NET 10 sample demonstrating startup state, required and optional dependency aggregation, degraded readiness, and cancellation-aware probes.",
+    "technologies": [
+      ".NET 10",
+      "Health Checks",
+      "Readiness",
+      "xUnit"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "startup",
+      "readiness",
+      "cancellation"
+    ],
+    "runCommand": "dotnet run --project src/HealthReadinessLab",
+    "testCommand": "dotnet test HealthReadinessLab.slnx",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/health-readiness-lab",
+    "localPath": "samples/health-readiness-lab/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "otel-correlation-lab",
+    "topicSlug": "observability",
+    "status": "complete",
+    "name": "OpenTelemetry Correlation Lab",
+    "description": "A dependency-free .NET 10 instrumentation sample demonstrating ActivitySource traces, bounded tags, Meter counters and histograms, sampling, and focused listener tests.",
+    "technologies": [
+      ".NET 10",
+      "OpenTelemetry APIs",
+      "ActivitySource",
+      "xUnit"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "tracing",
+      "metrics",
+      "correlation"
+    ],
+    "runCommand": "dotnet run --project src/OtelCorrelationLab",
+    "testCommand": "dotnet test OtelCorrelationLab.slnx",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/otel-correlation-lab",
+    "localPath": "samples/otel-correlation-lab/README.md",
+    "liveDemoUrl": null
+  }
 ]
