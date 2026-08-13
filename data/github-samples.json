@@ -178,5 +178,47 @@
     "runCommand": "dotnet run --project src/MinimalApisOrders",
     "testCommand": "dotnet test MinimalApisOrders.slnx",
     "liveDemoUrl": null
+  },
+  {
+    "id": "authentication-authorization-documents",
+    "topicSlug": "authentication-authorization",
+    "status": "complete",
+    "name": "Authentication & Authorization Documents",
+    "description": "A .NET 10 API demonstrating authentication challenge and forbid behavior, fallback policy, scope authorization, resource ownership, administrator override, non-disclosure, and negative HTTP tests.",
+    "technologies": ["ASP.NET Core 10", "Authentication", "Policy Authorization", "xUnit"],
+    "tags": ["dedicated-sample", "fallback-policy", "resource-authorization", "negative-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/authentication-authorization-documents",
+    "localPath": "samples/authentication-authorization-documents/README.md",
+    "runCommand": "dotnet run --project src/AuthenticationAuthorizationDocuments",
+    "testCommand": "dotnet test AuthenticationAuthorizationDocuments.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "api-security-owasp-orders",
+    "topicSlug": "api-security-owasp",
+    "status": "complete",
+    "name": "API Security & OWASP Orders",
+    "description": "A .NET 10 API demonstrating tenant and object authorization, bounded resources, minimal contracts, SSRF destination controls, security headers, safe errors, and OWASP-aligned negative tests.",
+    "technologies": ["ASP.NET Core 10", "OWASP API Security", "Rate Limiting", "xUnit"],
+    "tags": ["dedicated-sample", "bola", "resource-bounds", "ssrf", "negative-testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/api-security-owasp-orders",
+    "localPath": "samples/api-security-owasp-orders/README.md",
+    "runCommand": "dotnet run --project src/ApiSecurityOwaspOrders",
+    "testCommand": "dotnet test ApiSecurityOwaspOrders.slnx",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "secrets-rotation",
+    "topicSlug": "secrets-management",
+    "status": "complete",
+    "name": "Secrets Rotation",
+    "description": "A dependency-free .NET 10 sample demonstrating secret-provider boundaries, versioned lookup, bounded caching, rotation without restart, deterministic time, redacted diagnostics, and failure-safe tests.",
+    "technologies": [".NET 10", "TimeProvider", "Secrets Management", "xUnit"],
+    "tags": ["dedicated-sample", "rotation", "redaction", "bounded-cache", "testing"],
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/secrets-rotation",
+    "localPath": "samples/secrets-rotation/README.md",
+    "runCommand": "dotnet run --project src/SecretsRotation",
+    "testCommand": "dotnet test SecretsRotation.slnx",
+    "liveDemoUrl": null
   }
 ]
