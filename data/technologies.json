@@ -791,27 +791,281 @@
     "category": "Cloud & Architecture",
     "color": "#0878c9",
     "shortDescription": "Run, integrate, observe, and secure .NET workloads using Azure-managed services and identity.",
-    "keywords": ["cloud", "App Service", "Container Apps", "Functions", "Service Bus", "Key Vault", "managed identity"],
-    "overview": "Azure offers managed compute, data, messaging, identity, secrets, and observability services that integrate naturally with .NET.",
-    "detail": "A sound Azure design begins with workload requirements rather than a service catalog. Choose compute based on execution and scaling needs, prefer managed identity over stored credentials, design transient-failure handling, and make telemetry, cost, network boundaries, and deployment part of the architecture.",
-    "concepts": [
-      {"title": "Managed compute", "description": "App Service, Container Apps, Functions, and Kubernetes offer different control, scaling, and operational trade-offs."},
-      {"title": "Managed identity", "description": "Workloads obtain Entra-backed tokens for Azure resources without shipping long-lived application secrets."},
-      {"title": "Messaging", "description": "Service Bus and Event Hubs decouple workloads across commands, events, streams, retries, and backpressure."},
-      {"title": "Observability", "description": "OpenTelemetry and Azure Monitor connect traces, metrics, logs, alerts, and dependency context."}
+    "keywords": [
+      "cloud",
+      "App Service",
+      "Container Apps",
+      "Functions",
+      "Service Bus",
+      "Key Vault",
+      "managed identity"
     ],
-    "architecture": {"description": "A managed entry point routes traffic to .NET compute, which uses identity-based access to data and messaging while emitting correlated telemetry.", "nodes": ["Edge / gateway", ".NET compute", "Data + messaging", "Azure Monitor"], "colors": ["#0878c9", "#2678c8", "#168c78", "#d26a2e"]},
-    "code": {"language": "csharp", "label": "AzureClient.cs", "introduction": "DefaultAzureCredential supports local developer identity and managed identity in Azure without changing application code.", "code": "using Azure.Identity;\nusing Azure.Storage.Blobs;\n\nvar accountUri = new Uri(builder.Configuration[\"Storage:AccountUri\"]!);\nvar credential = new DefaultAzureCredential();\n\nbuilder.Services.AddSingleton(new BlobServiceClient(\n    accountUri,\n    credential));\n\n// Local: developer credential chain\n// Azure: managed identity when configured"},
-    "bestPractices": ["Use managed identity and role assignments instead of embedded credentials.", "Define infrastructure as code and promote the same templates through environments.", "Set timeouts, retries with jitter, and circuit breaking only for transient operations.", "Design telemetry, budgets, backup, recovery objectives, and region strategy before production."],
+    "overview": "Azure gives .NET workloads managed compute, data, messaging, identity, secrets, networking, delivery, and observability building blocks. A production design maps workload requirements to those capabilities, keeps authentication secret-free with managed identity, treats service limits and transient failure as architecture inputs, and proves security, reliability, performance, recovery, and cost through automation and telemetry.",
+    "detail": "A sound Azure design begins with workload requirements rather than a service catalog. Record critical flows, data classification, latency and availability objectives, recovery targets, scale shape, residency, integrations, and team responsibilities before selecting services. Choose compute by execution and control needs; choose data by access, consistency, partition, backup, and recovery needs; add messaging when buffering or temporal decoupling is valuable. In .NET, reuse Azure SDK clients and credential instances, use a convenient developer credential chain locally, and select ManagedIdentityCredential deterministically in hosted production. Assign only required data-plane roles. Bound timeouts and retries, make replayed effects idempotent, control concurrency before dependencies saturate, and carry cancellation and trace context throughout the call path. Infrastructure, private networking and DNS, immutable delivery, observability, quotas, budgets, backup, restore, regional recovery, and incident ownership are parts of the application architecture rather than work postponed until release.",
+    "concepts": [
+      {
+        "title": "Workload and service selection",
+        "description": "Map latency, execution model, scale, network, recovery, compliance, and team-operating needs to services; do not begin from a favorite product."
+      },
+      {
+        "title": "Azure SDK client lifecycle",
+        "description": "Register thread-safe Azure SDK clients once, reuse credential and transport state, configure bounded retries, and pass cancellation to every asynchronous operation."
+      },
+      {
+        "title": "Identity and authorization",
+        "description": "Use developer credentials locally, a deterministic managed identity in Azure, and least-privilege data-plane RBAC at the narrowest practical scope."
+      },
+      {
+        "title": "Configuration and secrets",
+        "description": "Keep endpoints and non-secret settings in typed configuration; reference secrets from Key Vault and rotate rather than embedding keys or connection strings."
+      },
+      {
+        "title": "Compute selection",
+        "description": "App Service, Container Apps, Functions, and AKS trade platform control for operational responsibility, scale behavior, networking capabilities, and cost shape."
+      },
+      {
+        "title": "Data and messaging",
+        "description": "Choose data stores from access and consistency requirements, and use Service Bus or Event Hubs when buffering, temporal decoupling, or stream ingestion is required."
+      },
+      {
+        "title": "Resilience and idempotency",
+        "description": "Bound attempts with timeouts, retry only transient and safe operations, control concurrency, and make side effects idempotent before replay."
+      },
+      {
+        "title": "Observability and governance",
+        "description": "Correlate traces, metrics, logs, deployments, cost, security posture, quotas, backup, and recovery evidence around workload service-level objectives."
+      }
+    ],
+    "architecture": {
+      "description": "A managed entry point routes traffic to .NET compute, which uses identity-based access to data and messaging while emitting correlated telemetry.",
+      "nodes": [
+        "Edge / gateway",
+        ".NET compute",
+        "Data + messaging",
+        "Azure Monitor"
+      ],
+      "colors": [
+        "#0878c9",
+        "#2678c8",
+        "#168c78",
+        "#d26a2e"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "AzureClient.cs",
+      "introduction": "DefaultAzureCredential supports local developer identity and managed identity in Azure without changing application code.",
+      "code": "using Azure.Identity;\nusing Azure.Storage.Blobs;\n\nvar accountUri = new Uri(builder.Configuration[\"Storage:AccountUri\"]!);\nvar credential = new DefaultAzureCredential();\n\nbuilder.Services.AddSingleton(new BlobServiceClient(\n    accountUri,\n    credential));\n\n// Local: developer credential chain\n// Azure: managed identity when configured"
+    },
+    "bestPractices": [
+      "Choose Azure services from documented workload requirements and explicit responsibility boundaries.",
+      "Use DefaultAzureCredential for local development and a specific ManagedIdentityCredential in hosted production.",
+      "Reuse Azure SDK clients and credentials; do not create them for each request.",
+      "Assign minimal data-plane RBAC and separate application, deployment, and human identities.",
+      "Configure timeouts and bounded retry policies from operation semantics and downstream capacity.",
+      "Use private networking only with a complete DNS, egress, observability, and operational design.",
+      "Deploy immutable artifacts and infrastructure as code with staged validation and post-deployment smoke checks.",
+      "Define SLOs, alerts, budgets, quotas, backup, restore, and regional recovery before production traffic."
+    ],
     "interviewQuestions": [
-      {"question": "When would you choose Azure Container Apps over AKS?", "answer": "Container Apps suits teams wanting container-based scaling and revisions with less cluster operations; AKS fits workloads needing Kubernetes APIs, ecosystem control, or specialized cluster capabilities."},
-      {"question": "What problem does managed identity solve?", "answer": "It lets an Azure resource obtain short-lived Entra tokens for other resources without storing and rotating a client secret in the application."},
-      {"question": "How should transient Azure failures be handled?", "answer": "Use bounded retries with backoff and jitter for operations known to be safe to retry, plus timeouts, observability, and idempotency where side effects are possible."}
+      {
+        "question": "Why use deterministic credentials in production?",
+        "answer": "A fixed ManagedIdentityCredential prevents an unexpected credential in a chain from succeeding after configuration drift and makes the application identity auditable."
+      },
+      {
+        "question": "Why should Azure SDK clients be reused?",
+        "answer": "They are designed to be thread-safe and reuse transports and token caches; per-request construction adds connections, authentication calls, latency, and resource pressure."
+      },
+      {
+        "question": "When does messaging improve an Azure design?",
+        "answer": "When producers need buffering, independent scaling, retry isolation, fan-out, temporal decoupling, or durable acceptance before slower processing."
+      },
+      {
+        "question": "What does a private endpoint not solve?",
+        "answer": "It does not by itself solve DNS, outbound control, identity, authorization, data exfiltration, monitoring, high availability, or application-layer security."
+      },
+      {
+        "question": "How do you choose between system and user-assigned identity?",
+        "answer": "Use system-assigned for lifecycle-coupled simplicity; use user-assigned when identity must survive resource replacement or be shared deliberately across instances."
+      },
+      {
+        "question": "How should Azure service limits influence architecture?",
+        "answer": "Treat quotas, throttles, connection limits, scale units, and regional availability as design inputs, test near expected peaks, and automate quota monitoring."
+      },
+      {
+        "question": "What is the safe response to a regional dependency outage?",
+        "answer": "Follow a tested recovery design with idempotent failover, replicated or restorable data, controlled traffic movement, dependency validation, and clear consistency trade-offs."
+      }
     ],
     "note": "Cloud-native is an operating model as much as a hosting location: automated delivery, observability, resiliency, and ownership all matter.",
     "tip": "Use the same credential abstraction locally and in Azure, but verify exactly which credential wins in each environment.",
     "warning": "Retries can amplify an outage or duplicate effects. Bound them, add jitter, and make write operations idempotent before retrying.",
-    "sampleId": "solution-architecture-portfolio", "readingMinutes": 12, "level": "Intermediate", "updated": "2026-07-31", "latestNote": "Managed identity guidance refreshed"
+    "sampleId": "azure-dotnet-service-baseline",
+    "readingMinutes": 38,
+    "level": "Intermediate",
+    "updated": "2026-08-14",
+    "latestNote": "Complete guide to Azure workload design, identity, SDK clients, reliability, delivery, and operations",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Select Azure compute, data, messaging, identity, networking, and observability services from workload requirements.",
+      "Configure Azure SDK clients and deterministic authentication correctly in .NET.",
+      "Design least-privilege managed identity and secret-free service access.",
+      "Handle transient failure, throttling, duplicate delivery, concurrency, and dependency pressure safely.",
+      "Build an immutable delivery path with infrastructure as code and production validation.",
+      "Operate Azure workloads against measurable reliability, security, performance, and cost objectives."
+    ],
+    "prerequisites": [
+      "ASP.NET Core dependency injection, configuration, logging, and asynchronous programming.",
+      "Cloud identity, RBAC, networking, DNS, and distributed-system basics.",
+      "An Azure subscription is optional for reading and local tests but required for deployment exercises."
+    ],
+    "decisionGuide": {
+      "use": [
+        "A .NET workload benefits from managed compute, identity, data, messaging, scaling, and Azure-native operations.",
+        "The team can automate infrastructure, monitor service behavior, and own cost and recovery outcomes.",
+        "Service capabilities and regional availability meet the workload requirements."
+      ],
+      "avoid": [
+        "A portable on-premises runtime or another cloud is a hard business constraint.",
+        "A managed service cannot meet required protocols, residency, latency, or control boundaries.",
+        "The organization cannot yet operate identity, networking, delivery, telemetry, backup, and cost safely."
+      ]
+    },
+    "implementationIntroduction": "The Azure .NET service baseline validates a storage endpoint, selects developer credentials locally and deterministic managed identity when hosted, reuses an Azure Blob client, exposes health, and tests identity selection without contacting Azure.",
+    "implementationSteps": [
+      {
+        "title": "Define the workload",
+        "description": "Document users, critical flows, data classifications, SLOs, RTO, RPO, throughput, latency, residency, integration, and cost constraints."
+      },
+      {
+        "title": "Choose service boundaries",
+        "description": "Compare compute and managed dependencies by responsibility, limits, regions, networking, recovery, and operating burden."
+      },
+      {
+        "title": "Design identity first",
+        "description": "Create application and delivery identities, assign minimal RBAC, and decide system versus user-assigned lifecycle."
+      },
+      {
+        "title": "Register SDK clients",
+        "description": "Validate typed endpoints, reuse credentials and clients, set operation-aware timeouts and retries, and propagate cancellation."
+      },
+      {
+        "title": "Build reliability controls",
+        "description": "Add idempotency, admission control, backpressure, health semantics, dependency isolation, and degraded behavior."
+      },
+      {
+        "title": "Instrument the workload",
+        "description": "Emit correlated traces, metrics, structured logs, business outcomes, dependency signals, and deployment annotations."
+      },
+      {
+        "title": "Automate delivery",
+        "description": "Provision with reviewed infrastructure as code, publish immutable artifacts, scan dependencies, and use short-lived deployment identity."
+      },
+      {
+        "title": "Prove operations",
+        "description": "Load test, fail dependencies, verify backup and restore, exercise regional recovery, validate alerts, and compare actual cost to budget."
+      }
+    ],
+    "testing": {
+      "introduction": "Evidence must cover code behavior, Azure integration contracts, deployment, failure, and recovery.",
+      "items": [
+        "Unit test configuration, identity selection, idempotency, mapping, and retry classification.",
+        "Run integration tests against emulators only where semantics are representative; use isolated Azure resources for authoritative tests.",
+        "Test RBAC success and forbidden paths with the deployed workload identity.",
+        "Load test dependency throttling, connection reuse, timeouts, backpressure, and scale behavior.",
+        "Inject dependency, DNS, identity, and region failures and verify alerts and degraded behavior.",
+        "Restore backups and execute the recovery runbook against defined RTO and RPO."
+      ]
+    },
+    "security": {
+      "introduction": "Azure security combines Entra identity, authorization, network boundaries, data protection, supply-chain controls, and continuous evidence.",
+      "items": [
+        "Use ManagedIdentityCredential and least-privilege RBAC instead of account keys.",
+        "Separate control-plane deployment rights from application data-plane access.",
+        "Use Key Vault references for unavoidable secrets and rotate with overlap.",
+        "Encrypt in transit and at rest, restrict public exposure, and verify private DNS paths.",
+        "Scan source, packages, images, templates, and deployed configuration.",
+        "Log privileged changes and authentication failures without recording tokens or sensitive payloads."
+      ]
+    },
+    "performance": {
+      "introduction": "Measure the whole request path and tune around downstream capacity, not only compute utilization.",
+      "items": [
+        "Reuse SDK clients, credentials, HttpClient transports, and database pools.",
+        "Set bounded concurrency and queue prefetch from dependency throughput.",
+        "Cache only with ownership, invalidation, staleness, and failure semantics.",
+        "Load test warm, cold, burst, and sustained traffic with production-shaped data.",
+        "Track percentile latency, throttling, saturation, connection counts, and cost per business operation.",
+        "Scale out only after removing serialization, hot partitions, and downstream bottlenecks."
+      ]
+    },
+    "deployment": {
+      "introduction": "Promote the same immutable application and infrastructure definitions with environment-specific parameters.",
+      "items": [
+        "Build, test, audit, sign, and publish one immutable artifact.",
+        "Preview infrastructure changes and gate identity, network, deletion, and cost risk.",
+        "Use federated delivery identity with minimal environment scope.",
+        "Deploy progressively with health, telemetry, and business-metric gates.",
+        "Run identity, dependency, and critical-path smoke tests after deployment.",
+        "Prefer forward repair while keeping tested rollback and data-recovery procedures."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Works locally but receives 403 in Azure",
+        "cause": "The hosted identity is missing, the wrong identity is selected, or data-plane RBAC is absent or scoped incorrectly.",
+        "fix": "Log the credential mode without secrets, inspect the resource identity, role assignment scope, token audience, and allow propagation time."
+      },
+      {
+        "symptom": "Requests stall during an outage",
+        "cause": "Unbounded retries, long default timeouts, or connection exhaustion are consuming the latency budget.",
+        "fix": "Capture dependency timing, bound timeout and attempts, add jitter and admission control, and verify safe retry semantics."
+      },
+      {
+        "symptom": "Private endpoint name resolves publicly",
+        "cause": "The private DNS zone, virtual-network link, forwarding path, or record is missing.",
+        "fix": "Trace DNS from the workload subnet and correct zone links and resolvers before changing application code."
+      },
+      {
+        "symptom": "Scale-out increases failures",
+        "cause": "A downstream quota, connection pool, hot partition, or synchronized retry wave is saturated.",
+        "fix": "Limit concurrency, reuse connections, add jitter and buffering, repartition if needed, and raise quotas only with evidence."
+      },
+      {
+        "symptom": "Telemetry has disconnected traces",
+        "cause": "Propagation headers, Activity sources, exporters, or sampling configuration are inconsistent.",
+        "fix": "Verify W3C trace context across ingress, messaging, SDK calls, and workers; retain errors and representative traces."
+      },
+      {
+        "symptom": "Failover causes duplicate effects",
+        "cause": "In-flight work replayed or both regions processed the same operation.",
+        "fix": "Use globally meaningful idempotency keys, conditional writes, explicit ownership, and rehearsed traffic and consumer failover."
+      }
+    ],
+    "productionChecklist": [
+      "Workload requirements, SLO, RTO, RPO, residency, and ownership are approved.",
+      "Compute and managed services are selected against limits and regional capabilities.",
+      "Hosted code uses deterministic managed identity and minimal data-plane RBAC.",
+      "SDK clients are reused with bounded timeouts, retries, cancellation, and concurrency.",
+      "Network, DNS, egress, encryption, secret rotation, and audit paths are verified.",
+      "Telemetry and alerts cover user outcomes, dependencies, deployments, saturation, and cost.",
+      "Immutable delivery, infrastructure review, smoke tests, and recovery controls are automated.",
+      "Load, failure, backup, restore, and regional recovery exercises meet acceptance targets."
+    ],
+    "resources": [
+      {
+        "label": "Azure for .NET developers",
+        "url": "https://learn.microsoft.com/en-us/dotnet/azure/"
+      },
+      {
+        "label": "Azure SDK authentication best practices",
+        "url": "https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/best-practices"
+      },
+      {
+        "label": "Azure Architecture Center",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/"
+      }
+    ]
   },
   {
     "slug": "microservices",
@@ -4296,28 +4550,282 @@
     "category": "Cloud Platforms",
     "color": "#0063b1",
     "shortDescription": "Build event-driven .NET workloads with triggers, bindings, isolated workers, elastic hosting, durable workflows, and production-safe operations.",
-    "keywords": ["Azure Functions", "serverless", ".NET isolated worker", "triggers", "bindings", "Durable Functions", "Flex Consumption", "event-driven"],
+    "keywords": [
+      "Azure Functions",
+      "serverless",
+      ".NET isolated worker",
+      "triggers",
+      "bindings",
+      "Durable Functions",
+      "Flex Consumption",
+      "event-driven"
+    ],
     "overview": "Azure Functions runs event-driven code on managed, elastic compute and integrates .NET handlers with HTTP, schedules, queues, streams, storage, and other services.",
     "detail": "A function app groups functions that share deployment, configuration, scaling, and hosting. Triggers start executions and bindings integrate data, while the .NET isolated worker uses the standard hosting and dependency-injection model outside the Functions host process. Hosting plan, scale behavior, cold starts, concurrency, retries, poison handling, idempotency, networking, identity, observability, package deployment, and execution duration all affect whether a serverless design meets its workload goals.",
     "concepts": [
-      {"title": "Triggers and bindings", "description": "One trigger starts a function; input and output bindings connect supported services, while SDK clients handle advanced operations explicitly."},
-      {"title": ".NET isolated worker", "description": "A separate .NET process provides modern target-framework control, middleware, dependency injection, configuration, and familiar hosting patterns."},
-      {"title": "Hosting and scale", "description": "Flex Consumption, Premium, dedicated, and container options differ in scale, networking, cold-start, duration, instance, and cost behavior."},
-      {"title": "Delivery correctness", "description": "At-least-once events require idempotency, retry policies, poison handling, checkpoint awareness, correlation, and durable workflow state."}
+      {
+        "title": "Function app boundary",
+        "description": "Functions in one app deploy, configure, secure, and usually scale together; group only handlers with compatible lifecycle, risk, and load."
+      },
+      {
+        "title": "Triggers and bindings",
+        "description": "One trigger starts an invocation; bindings simplify supported data flow, while SDK clients are clearer for advanced transactions, batching, and control."
+      },
+      {
+        "title": "Isolated worker model",
+        "description": "The .NET worker runs separately from the host and supports modern .NET, dependency injection, middleware, configuration, logging, and testable handler services."
+      },
+      {
+        "title": "Hosting plans",
+        "description": "Flex Consumption, Premium, Dedicated, and container hosting differ in cold start, networking, scale, duration, availability, instance size, and price."
+      },
+      {
+        "title": "At-least-once processing",
+        "description": "Queue and stream events may repeat after retries, locks, crashes, or checkpoint behavior, so durable idempotency and poison handling are mandatory."
+      },
+      {
+        "title": "Concurrency and scale",
+        "description": "Trigger concurrency, batching, prefetch, instance scale, connections, and downstream capacity interact; higher parallelism can reduce reliability."
+      },
+      {
+        "title": "Durable workflows",
+        "description": "Durable Functions persists orchestration history for timers, fan-out, compensation, and human interaction; orchestrator code must remain deterministic."
+      },
+      {
+        "title": "Operations and delivery",
+        "description": "Package deployment, slots or rolling updates, host storage, telemetry, alerts, quotas, replay, and disaster recovery define production behavior."
+      }
     ],
-    "architecture": {"description": "Events enter through Functions triggers, isolated .NET workers execute stateless handlers and call managed dependencies, while durable state, retries, and telemetry support reliable scale.", "nodes": ["HTTP + events", "Functions trigger", "Isolated .NET worker", "Services + telemetry"], "colors": ["#0063b1", "#5b5fc7", "#168c78", "#d18415"]},
-    "code": {"language": "csharp", "label": "CreateOrderFunction.cs", "introduction": "An isolated-worker HTTP function uses constructor injection, structured logging, cancellation, and an explicit response contract.", "code": "using Microsoft.Azure.Functions.Worker;\nusing Microsoft.Azure.Functions.Worker.Http;\nusing Microsoft.Extensions.Logging;\nusing System.Net;\n\npublic sealed class CreateOrderFunction(\n    OrderService orders, ILogger<CreateOrderFunction> logger)\n{\n    [Function(nameof(CreateOrder))]\n    public async Task<HttpResponseData> CreateOrder(\n        [HttpTrigger(AuthorizationLevel.Function, \"post\", Route = \"orders\")]\n        HttpRequestData request, CancellationToken ct)\n    {\n        var command = await request.ReadFromJsonAsync<CreateOrder>(ct);\n        var orderId = await orders.CreateAsync(command!, ct);\n\n        logger.LogInformation(\"Created order {OrderId}\", orderId);\n        var response = request.CreateResponse(HttpStatusCode.Created);\n        await response.WriteAsJsonAsync(new { orderId }, ct);\n        return response;\n    }\n}"},
-    "bestPractices": ["Use the .NET isolated worker for new C# function apps, pin supported runtime and extension versions, and automate infrastructure and package deployment.", "Design event handlers as idempotent operations with bounded retries, poison-message handling, timeouts, cancellation, and correlation.", "Choose hosting from measured latency, scale, networking, duration, concurrency, availability, and cost requirements rather than the serverless label alone.", "Use managed identity, least privilege, centralized configuration, OpenTelemetry or Application Insights, health signals, and production-shaped load tests."],
+    "architecture": {
+      "description": "Events enter through Functions triggers, isolated .NET workers execute stateless handlers and call managed dependencies, while durable state, retries, and telemetry support reliable scale.",
+      "nodes": [
+        "HTTP + events",
+        "Functions trigger",
+        "Isolated .NET worker",
+        "Services + telemetry"
+      ],
+      "colors": [
+        "#0063b1",
+        "#5b5fc7",
+        "#168c78",
+        "#d18415"
+      ]
+    },
+    "code": {
+      "language": "csharp",
+      "label": "CreateOrderFunction.cs",
+      "introduction": "An isolated-worker HTTP function uses constructor injection, structured logging, cancellation, and an explicit response contract.",
+      "code": "using Microsoft.Azure.Functions.Worker;\nusing Microsoft.Azure.Functions.Worker.Http;\nusing Microsoft.Extensions.Logging;\nusing System.Net;\n\npublic sealed class CreateOrderFunction(\n    OrderService orders, ILogger<CreateOrderFunction> logger)\n{\n    [Function(nameof(CreateOrder))]\n    public async Task<HttpResponseData> CreateOrder(\n        [HttpTrigger(AuthorizationLevel.Function, \"post\", Route = \"orders\")]\n        HttpRequestData request, CancellationToken ct)\n    {\n        var command = await request.ReadFromJsonAsync<CreateOrder>(ct);\n        var orderId = await orders.CreateAsync(command!, ct);\n\n        logger.LogInformation(\"Created order {OrderId}\", orderId);\n        var response = request.CreateResponse(HttpStatusCode.Created);\n        await response.WriteAsJsonAsync(new { orderId }, ct);\n        return response;\n    }\n}"
+    },
+    "bestPractices": [
+      "Use the .NET isolated worker and supported runtime and extension versions for new C# apps.",
+      "Keep functions thin and move business logic into host-independent services.",
+      "Make every event-driven side effect idempotent with a durable atomic receipt or state transition.",
+      "Configure bounded retries, visibility or lock duration, poison handling, timeout, and cancellation together.",
+      "Choose hosting from measured latency, networking, availability, duration, scale, and cost requirements.",
+      "Reuse clients and bound trigger concurrency to downstream capacity and connection limits.",
+      "Deploy immutable packages with infrastructure as code and production-shaped integration tests.",
+      "Alert on failures, retries, poison events, age or lag, saturation, cold starts, host health, and cost."
+    ],
     "interviewQuestions": [
-      {"question": "What is the .NET isolated worker model?", "answer": "Function code runs in a separate .NET process from the Functions host, enabling independent framework targeting and familiar dependency injection, middleware, configuration, and hosting patterns."},
-      {"question": "Why must queue-triggered functions be idempotent?", "answer": "Event delivery and retries can invoke a handler more than once. Idempotency prevents duplicate charges, writes, notifications, or other side effects."},
-      {"question": "When might Azure Functions be the wrong compute choice?", "answer": "When workloads need highly predictable always-warm latency, unusual host control, very long or specialized compute, incompatible networking, or a stable load whose economics favor another hosting model."}
+      {
+        "question": "Why prefer isolated worker for new .NET functions?",
+        "answer": "It decouples the application process from the Functions host and provides modern framework targeting, dependency injection, middleware, configuration, and worker lifecycle control."
+      },
+      {
+        "question": "Why is exactly-once processing not assumed?",
+        "answer": "A crash after a side effect but before acknowledgement causes delivery to repeat; distributed acknowledgement and business state are not one atomic transaction."
+      },
+      {
+        "question": "How should functions be grouped into apps?",
+        "answer": "Group handlers that share deployment, configuration, scale profile, security boundary, availability needs, and blast radius; split conflicting workloads."
+      },
+      {
+        "question": "Flex Consumption versus Premium?",
+        "answer": "Flex targets dynamic scale with configurable memory, per-function scaling, networking, and always-ready options; Premium provides prewarmed instances and dedicated plan capacity for demanding workloads."
+      },
+      {
+        "question": "When use Durable Functions?",
+        "answer": "For stateful coordination such as fan-out, long timers, external events, and compensation where persisted orchestration and replay semantics fit."
+      },
+      {
+        "question": "Why can more concurrency make throughput worse?",
+        "answer": "It can exhaust connections, trigger throttling, extend lock times, amplify retries, and overload databases or APIs until useful throughput falls."
+      },
+      {
+        "question": "When is Functions the wrong choice?",
+        "answer": "When execution is a continuously running service, requires unsupported host control or protocols, has predictable steady economics elsewhere, or cannot fit hosting, duration, or networking constraints."
+      }
     ],
     "note": "Serverless transfers server management and scaling responsibilities; it does not remove capacity limits, distributed-systems behavior, security, or operations.",
     "tip": "Load test cold and warm executions with real bindings and observe instance scale, dependency pressure, retries, and end-to-end latency.",
     "warning": "Do not assume exactly-once event delivery; build handlers and downstream effects to tolerate duplicates and partial failure.",
-    "resources": [{"label": "Azure Functions documentation", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/"}, {"label": ".NET isolated worker guide", "url": "https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide"}],
-    "sampleId": "ai-orchestrator", "readingMinutes": 15, "level": "Intermediate", "updated": "2026-08-06", "latestNote": "New guide on isolated workers, event delivery, hosting, and scale"
+    "resources": [
+      {
+        "label": "Azure Functions documentation",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-functions/"
+      },
+      {
+        "label": ".NET isolated worker guide",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide"
+      },
+      {
+        "label": "Azure Functions best practices",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-best-practices"
+      }
+    ],
+    "sampleId": "functions-isolated-order-processor",
+    "readingMinutes": 39,
+    "level": "Intermediate",
+    "updated": "2026-08-14",
+    "latestNote": "Complete guide to isolated workers, triggers, hosting, reliable event processing, scale, delivery, and operations",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Explain function apps, triggers, bindings, isolated workers, hosting plans, scale, and deployment units.",
+      "Design reliable queue, stream, HTTP, timer, and durable workflow handlers.",
+      "Implement durable idempotency, retries, poison routing, cancellation, and correlation.",
+      "Tune batching, concurrency, connection reuse, and instance scale against dependencies.",
+      "Secure host storage, identities, endpoints, settings, packages, and networks.",
+      "Test and operate cold starts, replays, deployments, outages, recovery, and cost."
+    ],
+    "prerequisites": [
+      "C# async programming, dependency injection, configuration, and structured logging.",
+      "Queues, streams, HTTP, retries, idempotency, and distributed-system failure basics.",
+      "Azure Functions Core Tools and Azurite for the local sample; Azure is optional."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Work starts from HTTP, schedules, queues, streams, storage, or other events and benefits from managed elastic execution.",
+        "Handlers can be stateless between invocations or coordinate through durable external state.",
+        "The selected plan meets latency, networking, availability, duration, scale, and cost needs."
+      ],
+      "avoid": [
+        "A continuously running service, unsupported protocol, specialized compute, or deep host control is required.",
+        "Predictable steady load is more economical and operationally clearer on another compute service.",
+        "The workload cannot tolerate the available cold-start, regional, networking, quota, or execution constraints."
+      ]
+    },
+    "implementationIntroduction": "The isolated order processor is a real .NET 10 Functions worker with a queue trigger, a host-independent processor, validated events, atomic idempotency receipts, bounded queue retries, poison routing, cancellation, structured logs, and local tests.",
+    "implementationSteps": [
+      {
+        "title": "Define event contracts",
+        "description": "Version schemas, choose stable event and correlation IDs, document ordering, retention, maximum size, and compatibility."
+      },
+      {
+        "title": "Choose the app boundary",
+        "description": "Group functions by deployment, security, configuration, scaling, availability, and dependency profile."
+      },
+      {
+        "title": "Create the isolated worker",
+        "description": "Pin runtime, worker SDK, and extensions; register services and keep trigger methods as thin adapters."
+      },
+      {
+        "title": "Make effects idempotent",
+        "description": "Use a durable conditional write or state transition keyed by event ID in the same consistency boundary as the effect."
+      },
+      {
+        "title": "Configure delivery behavior",
+        "description": "Set retry, backoff, lock or visibility, poison destination, timeout, cancellation, batching, and concurrency coherently."
+      },
+      {
+        "title": "Secure connections",
+        "description": "Use managed identity and least privilege where supported; protect required host storage and remove public endpoints when justified."
+      },
+      {
+        "title": "Instrument outcomes",
+        "description": "Correlate invocation, event, retry, dependency, business result, poison routing, lag, and cold-start signals."
+      },
+      {
+        "title": "Deploy and prove",
+        "description": "Publish one immutable package, validate settings and infrastructure, load test, inject failures, rehearse replay, and verify regional recovery."
+      }
+    ],
+    "testing": {
+      "introduction": "Separate fast domain tests from worker adapter, trigger integration, deployed platform, load, and recovery evidence.",
+      "items": [
+        "Unit test handlers, validation, idempotency, retry classification, and cancellation without the Functions host.",
+        "Run worker integration tests with representative serialized events and local services.",
+        "Use isolated Azure resources to verify authoritative trigger, binding, identity, lock, retry, and poison semantics.",
+        "Load test cold and warm starts, batching, concurrency, instance scale, and downstream saturation.",
+        "Crash after the side effect and before acknowledgement to prove duplicate safety.",
+        "Deploy a package, validate telemetry and settings, replay poison events, and execute recovery procedures."
+      ]
+    },
+    "security": {
+      "introduction": "Secure each function endpoint, workload identity, host storage, binding connection, deployment package, network path, and telemetry stream.",
+      "items": [
+        "Use managed identity and least-privilege data-plane roles where triggers and SDKs support it.",
+        "Protect the mandatory host storage account and understand its availability dependency.",
+        "Require appropriate HTTP authentication and authorization; never rely only on obscurity of a function key.",
+        "Keep secrets out of local settings, packages, logs, and source; rotate unavoidable credentials.",
+        "Restrict inbound and outbound networking with a complete DNS and dependency design.",
+        "Scan and pin worker, extensions, packages, and deployment artifacts."
+      ]
+    },
+    "performance": {
+      "introduction": "Useful throughput depends on the complete trigger-to-dependency path, not invocation count alone.",
+      "items": [
+        "Use async I/O and reuse SDK, HTTP, database, and messaging clients.",
+        "Tune batch, prefetch, and concurrency from downstream capacity and lock duration.",
+        "Measure event age, lag, useful completions, retries, throttles, connections, and percentile latency.",
+        "Use always-ready or Premium capacity when measured cold-start latency violates objectives.",
+        "Avoid large payloads; pass durable references when event size and repeated transfer are costly.",
+        "Set maximum scale and application backpressure before dependencies collapse."
+      ]
+    },
+    "deployment": {
+      "introduction": "The function app is the deployment unit; ship all its functions as one immutable, observable package.",
+      "items": [
+        "Build, test, audit, and publish a run-from-package artifact.",
+        "Provision plan, app, host storage, identity, settings, networking, alerts, and dependencies through code.",
+        "Use federated deployment identity and keep application data access separate.",
+        "Use supported slots or Flex rolling updates and understand trigger behavior during overlap.",
+        "Run HTTP and event smoke tests, verify telemetry, and watch retry and poison signals.",
+        "Prefer forward repair; replay only after the defect is fixed and idempotency is proven."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Function is not discovered",
+        "cause": "Worker SDK generation, target framework, Function attribute, extension, or deployment output is incorrect.",
+        "fix": "Inspect generated metadata and startup logs, pin compatible packages, clean and rebuild, and verify the deployed package layout."
+      },
+      {
+        "symptom": "Queue message repeats forever",
+        "cause": "The handler throws, exceeds visibility, loses a lock, crashes after an effect, or poison handling is absent.",
+        "fix": "Inspect delivery count and duration, fix idempotency, align timeout and visibility, bound retries, and monitor poison routing."
+      },
+      {
+        "symptom": "Scaling rises but event age grows",
+        "cause": "Per-instance concurrency or a downstream limit is reducing useful throughput.",
+        "fix": "Graph age, completions, retries, throttles, connections, and instances; reduce concurrency or increase the actual bottleneck safely."
+      },
+      {
+        "symptom": "Works locally but trigger is idle in Azure",
+        "cause": "Connection configuration, identity RBAC, network path, extension settings, or source name differs.",
+        "fix": "Check host logs, exact setting names, token audience, role scope, DNS, firewall, and trigger source configuration."
+      },
+      {
+        "symptom": "Telemetry is missing or duplicated",
+        "cause": "Host and worker pipelines, sampling, exporter configuration, or correlation propagation conflict.",
+        "fix": "Configure host and worker logging deliberately, retain errors, verify sampling, and trace one event end to end."
+      },
+      {
+        "symptom": "Deployment processes mixed versions",
+        "cause": "Old and new instances or slots consume the same trigger during rollout.",
+        "fix": "Design compatible schemas and idempotency, understand plan deployment behavior, and isolate consumers when strict version ownership is required."
+      }
+    ],
+    "productionChecklist": [
+      "Function app boundaries match deployment, scale, security, availability, and dependency profiles.",
+      "Runtime, worker SDK, extensions, and hosting plan are supported and pinned.",
+      "Event contracts, idempotency, retries, poison routing, timeouts, cancellation, and correlation are tested.",
+      "Managed identity, host storage, endpoint authorization, secrets, network, and RBAC are verified.",
+      "Batching, concurrency, connections, maximum scale, and always-ready capacity come from load tests.",
+      "Immutable deployment and infrastructure automation include smoke and telemetry gates.",
+      "Alerts cover failures, retries, poison events, age, lag, cold starts, saturation, host health, and cost.",
+      "Replay, rollback or forward repair, backup, restore, and regional recovery are rehearsed."
+    ]
   },
   {
     "slug": "azure-logic-apps",
@@ -4619,31 +5127,68 @@
     "category": "Cloud Platforms",
     "color": "#0078d4",
     "shortDescription": "Run containerised .NET workloads on serverless infrastructure with built-in scaling, service discovery, Dapr, and .NET Aspire integration.",
-    "keywords": ["Azure Container Apps", "ACA", "KEDA", "Dapr", "serverless containers", "scale to zero", "revision", "ingress", "Container Apps Environment", ".NET Aspire"],
+    "keywords": [
+      "Azure Container Apps",
+      "ACA",
+      "KEDA",
+      "Dapr",
+      "serverless containers",
+      "scale to zero",
+      "revision",
+      "ingress",
+      "Container Apps Environment",
+      ".NET Aspire"
+    ],
     "overview": "Azure Container Apps runs containers on fully managed infrastructure, handling scaling, service discovery, ingress, certificates, and revision traffic-splitting without exposing Kubernetes cluster management.",
     "detail": "Container Apps sit between Azure Functions and AKS in the control spectrum. The platform abstracts Kubernetes and KEDA, letting teams focus on container configuration, scaling rules, traffic policies, secrets, managed identity, and observability. Each app runs as one or more replicas inside a shared Container Apps Environment, scales to zero when idle, and routes traffic across revisions for safe deployments. Dapr integration adds distributed application runtime capabilities — state, pub/sub, service invocation, and bindings — as a sidecar. .NET Aspire can target Container Apps for cloud deployment directly from the AppHost manifest.",
     "concepts": [
       {
-        "title": "Container Apps Environment",
-        "description": "A shared boundary for a group of container apps that provides a virtual network, internal DNS, log sink, Dapr configuration, and workload profile selection."
+        "title": "Environment boundary",
+        "description": "A Container Apps environment provides shared networking, internal DNS, logs, certificates, Dapr configuration, and workload profiles; choose its ownership deliberately."
       },
       {
-        "title": "Revisions and traffic splitting",
-        "description": "Each deployment creates a new immutable revision; traffic can be split across revisions by percentage for canary releases, A/B tests, or safe rollouts."
+        "title": "Apps, revisions, and replicas",
+        "description": "An app is the stable endpoint, a revision is an immutable versioned snapshot, and replicas are runtime instances that scale for each active revision."
       },
       {
-        "title": "Scaling rules",
-        "description": "Apps scale on HTTP concurrency, CPU, memory, Azure Service Bus queue depth, or custom KEDA scalers — including scale-to-zero for cost efficiency."
+        "title": "Ingress and discovery",
+        "description": "Managed HTTP or TCP ingress, internal names, custom domains, certificates, and traffic weights expose only the endpoints the workload requires."
       },
       {
-        "title": "Dapr integration",
-        "description": "Enabling Dapr adds a sidecar that provides state management, pub/sub messaging, service invocation, secret access, and output bindings without SDK coupling."
+        "title": "Probes and lifecycle",
+        "description": "Startup, liveness, and readiness probes answer different questions; graceful shutdown must stop new work and finish bounded in-flight work."
+      },
+      {
+        "title": "KEDA scaling",
+        "description": "HTTP concurrency and event scalers create replicas from demand; minimum, maximum, polling, cooldown, and authentication shape behavior."
+      },
+      {
+        "title": "Jobs and services",
+        "description": "Continuously running apps serve traffic, while manual, scheduled, and event-driven jobs execute finite tasks with completion and retry semantics."
+      },
+      {
+        "title": "Identity and secrets",
+        "description": "Managed identity supports Azure access, registry pulls, and some scaler authentication; secret references still require rotation and access boundaries."
+      },
+      {
+        "title": "Releases and observability",
+        "description": "Single or multiple revision mode, labels, traffic splitting, logs, metrics, traces, and deployment gates enable controlled rollouts."
       }
     ],
     "architecture": {
       "description": "External traffic enters through managed ingress, routes to the active revision of a container app inside the environment, which scales with demand and calls dependencies via internal DNS or Dapr.",
-      "nodes": ["Managed ingress", "Container Apps Environment", "Scaled container app", "Dapr + dependencies"],
-      "colors": ["#0078d4", "#5b5fc7", "#168c78", "#e07036"]
+      "nodes": [
+        "Managed ingress",
+        "Container Apps Environment",
+        "Scaled container app",
+        "Dapr + dependencies"
+      ],
+      "colors": [
+        "#0078d4",
+        "#5b5fc7",
+        "#168c78",
+        "#e07036"
+      ]
     },
     "code": {
       "language": "csharp",
@@ -4652,33 +5197,214 @@
       "code": "using Aspire.Hosting.Azure;\n\nvar builder = DistributedApplication.CreateBuilder(args);\n\nvar postgres = builder.AddAzurePostgresFlexibleServer(\"postgres\")\n    .AddDatabase(\"orders\");\n\nvar serviceBus = builder.AddAzureServiceBus(\"messaging\")\n    .AddTopic(\"order-events\", [\"inventory-subscription\"]);\n\nvar api = builder.AddProject<Projects.Orders_Api>(\"orders-api\")\n    .WithReference(postgres)\n    .WithReference(serviceBus)\n    .WithExternalHttpEndpoints();\n\nbuilder.AddProject<Projects.Orders_Worker>(\"orders-worker\")\n    .WithReference(postgres)\n    .WithReference(serviceBus);\n\nbuilder.Build().Run();\n\n// Deploy to Azure Container Apps:\n// azd init && azd up\n// Aspire generates the Container Apps manifest from the AppHost graph."
     },
     "bestPractices": [
-      "Use a dedicated Container Apps Environment per workload group or environment tier; share an environment only for apps that genuinely need internal DNS resolution between them.",
-      "Set minimum replicas to zero for background workers and event-driven apps, but keep at least one replica for APIs where cold-start latency affects user experience.",
-      "Prefer managed identity and Azure RBAC for all resource access; store secrets as Container Apps secrets or Key Vault references, never in image layers or environment literals.",
-      "Define scaling rules from measured load rather than defaults — HTTP concurrency, queue depth, or CPU rules should match real traffic patterns observed in staging."
+      "Treat each environment as a workload and network boundary with explicit owners.",
+      "Use immutable image digests from a private registry and run as a non-root user.",
+      "Separate startup, liveness, and readiness probes and test graceful termination.",
+      "Keep one minimum replica when user-facing cold-start latency is unacceptable.",
+      "Set maximum replicas and concurrency from downstream capacity and quota evidence.",
+      "Use managed identity for registry, dependency, and scaler access where supported.",
+      "Promote revisions progressively and gate traffic on health and business telemetry.",
+      "Monitor replica, restart, ingress, scale, dependency, revision, quota, and cost signals."
     ],
     "interviewQuestions": [
       {
-        "question": "When would you choose Azure Container Apps over AKS?",
-        "answer": "Container Apps suits teams that need container-based deployment, scale-to-zero, HTTP ingress, and event-driven scaling without managing Kubernetes cluster infrastructure, upgrades, node pools, or networking. AKS is the right choice when workloads need Kubernetes APIs, custom operators, specialised node types, cluster-level networking policy, or capabilities that Container Apps does not expose."
+        "question": "What creates a new revision?",
+        "answer": "Revision-scope changes such as container image, environment variables, resources, probes, and scale rules create an immutable revision; app-scope configuration can change without one."
       },
       {
-        "question": "What is the difference between a Container App revision and a deployment in Kubernetes?",
-        "answer": "A revision is an immutable snapshot of an app's container image, environment, and scale configuration. Revisions are retained and traffic can be split across them by percentage, enabling canary releases without a separate ingress controller or rollout strategy resource."
+        "question": "Single versus multiple revision mode?",
+        "answer": "Single mode moves traffic to the newest ready revision; multiple mode allows several active revisions and explicit percentage or label routing."
       },
       {
-        "question": "What does Dapr add when enabled on a Container App?",
-        "answer": "Dapr injects a sidecar that provides state management, pub/sub messaging, service-to-service invocation, secret access, and output bindings through a consistent local HTTP or gRPC API. Application code calls the sidecar rather than cloud-specific SDKs, reducing coupling to a particular broker or state store."
+        "question": "Why separate liveness and readiness?",
+        "answer": "Liveness decides whether to restart a broken replica; readiness decides whether it should receive traffic, including during startup and graceful drain."
+      },
+      {
+        "question": "How does scale-to-zero affect HTTP APIs?",
+        "answer": "The first request after idle waits for replica activation, so startup time becomes user latency and dependencies may receive synchronized reconnects."
+      },
+      {
+        "question": "When should a Container Apps job be used?",
+        "answer": "For finite manual, scheduled, or event-triggered executions whose success is completion rather than a continuously addressable service."
+      },
+      {
+        "question": "How do managed identity scale rules help?",
+        "answer": "Supported KEDA Azure scalers can authenticate without storing broker secrets, reducing rotation and leakage risk while preserving least privilege."
+      },
+      {
+        "question": "What remains your responsibility?",
+        "answer": "Image security, application correctness, identity, data, scaling limits, traffic policy, network design, observability, recovery, cost, and incident response."
       }
     ],
     "note": "Container Apps abstracts Kubernetes but still runs on it — understanding replica behaviour, cold starts, revision limits, environment quotas, and networking boundaries matters for production design even though the cluster is not directly managed.",
     "tip": "Start with the .NET Aspire Azure Container Apps publisher so the same AppHost that describes your local topology generates the cloud deployment manifest — this keeps local and cloud parity without a separate infrastructure definition.",
     "warning": "Scale-to-zero means a first request after idle hits a cold start; measure startup time under real configuration and dependencies before committing to zero minimum replicas for latency-sensitive paths.",
-    "sampleId": "solution-architecture-portfolio",
-    "readingMinutes": 12,
+    "sampleId": "container-apps-revision-api",
+    "readingMinutes": 37,
     "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on revisions, scaling, Dapr, and Aspire deployment to Container Apps"
+    "updated": "2026-08-14",
+    "latestNote": "Complete guide to environments, revisions, ingress, probes, scaling, identity, delivery, and operations",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Model environments, apps, revisions, replicas, jobs, ingress, and internal discovery.",
+      "Design probes, lifecycle, scaling, and cold-start behavior for .NET containers.",
+      "Operate identity, secrets, registries, networking, and Dapr safely.",
+      "Release with revision traffic splitting and measurable promotion gates.",
+      "Troubleshoot image, probe, DNS, scaling, quota, and dependency failures.",
+      "Decide when Container Apps, Functions, App Service, or AKS is the better compute boundary."
+    ],
+    "prerequisites": [
+      "Containers, image registries, HTTP, DNS, and basic distributed systems.",
+      "ASP.NET Core health endpoints, configuration, logging, and graceful shutdown.",
+      "Azure identity, virtual networking, infrastructure as code, and observability basics."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Containerized services or jobs need managed ingress, revisions, internal discovery, and event-driven scaling.",
+        "The team wants Kubernetes-backed capabilities without owning cluster operations.",
+        "Supported networking, region, quota, workload profile, and protocol capabilities fit."
+      ],
+      "avoid": [
+        "The workload requires Kubernetes APIs, custom operators, daemon sets, privileged containers, or cluster-level control.",
+        "A simple web app fits App Service better or a trigger-centric handler fits Functions better.",
+        "Unsupported protocol, hardware, tenancy, networking, or regional requirements are mandatory."
+      ]
+    },
+    "implementationIntroduction": "The revision API is a .NET 10 service with revision metadata, separate probes, graceful readiness transitions, JSON logs, a non-root chiseled image, and Bicep for identity, HTTPS ingress, revision mode, probes, and bounded scaling.",
+    "implementationSteps": [
+      {
+        "title": "Define the environment",
+        "description": "Choose region, network, zone resilience, workload profile, logging destination, ownership, quotas, and isolation boundary."
+      },
+      {
+        "title": "Build the container",
+        "description": "Publish a small non-root image, listen on the configured port, handle termination, scan dependencies, and identify it by digest."
+      },
+      {
+        "title": "Expose correct health",
+        "description": "Implement startup, liveness, and readiness semantics that avoid restart loops and prevent traffic before dependencies are usable."
+      },
+      {
+        "title": "Configure identity and network",
+        "description": "Assign minimal managed identity roles, private registry access, ingress exposure, DNS, egress, and private endpoints."
+      },
+      {
+        "title": "Model scaling",
+        "description": "Select HTTP or event metrics, authenticate scalers, and set minimum, maximum, concurrency, cooldown, and queue behavior from tests."
+      },
+      {
+        "title": "Create a revision",
+        "description": "Deploy immutable configuration and observe provisioning, probe, startup, dependency, and telemetry status before traffic."
+      },
+      {
+        "title": "Shift traffic safely",
+        "description": "Use revision labels or percentages and promote based on latency, errors, saturation, and business results."
+      },
+      {
+        "title": "Operate and recover",
+        "description": "Alert on replicas, restarts, revisions, quotas, and dependencies; rehearse rollback, regional recovery, and job replay."
+      }
+    ],
+    "testing": {
+      "introduction": "Test the application, image, deployment contract, platform lifecycle, and scaling with production-shaped dependencies.",
+      "items": [
+        "Unit test health state, configuration, idempotency, and shutdown behavior.",
+        "Build and scan the exact image, run it as non-root, and smoke all endpoints.",
+        "Compile and lint infrastructure definitions and inspect deployment previews.",
+        "Verify ingress, identity, DNS, registry, secret, and private dependency paths.",
+        "Load test cold start, sustained traffic, scale out, scale in, and downstream saturation.",
+        "Deploy a canary revision, inject failures, validate traffic gates, rollback, and recovery."
+      ]
+    },
+    "security": {
+      "introduction": "The platform removes cluster management but application, image, identity, network, and supply-chain security remain workload responsibilities.",
+      "items": [
+        "Use trusted minimal base images, digest pinning, scanning, signing, and non-root execution.",
+        "Use managed identity and minimal RBAC for dependencies, registry pulls, and scalers.",
+        "Keep secrets out of images, command lines, templates, logs, and plain environment values.",
+        "Expose only required ingress and design private DNS and controlled egress completely.",
+        "Separate application and deployment identities and audit control-plane changes.",
+        "Patch and redeploy immutable images promptly; never repair running replicas manually."
+      ]
+    },
+    "performance": {
+      "introduction": "Tune startup, replica resources, concurrency, and scale rules as one system with dependency limits.",
+      "items": [
+        "Minimize image and startup work and reuse outbound clients and pools.",
+        "Measure cold and warm percentiles for each workload profile.",
+        "Set HTTP concurrency from per-replica testing, not platform defaults.",
+        "Cap replicas before downstream quotas and apply application backpressure.",
+        "Use event lag and age, not queue depth alone, to judge consumer health.",
+        "Track cost per request or job across idle, burst, and sustained profiles."
+      ]
+    },
+    "deployment": {
+      "introduction": "A safe release creates an observable immutable revision and moves traffic only after evidence.",
+      "items": [
+        "Build once, scan and sign, push to a private registry, and deploy by digest.",
+        "Preview infrastructure and protect identity, network, scale, and deletion changes.",
+        "Wait for provisioning and probes before assigning traffic.",
+        "Canary with small traffic or a revision label and compare business and platform metrics.",
+        "Promote gradually, then deactivate old revisions according to rollback policy.",
+        "Retain deployment evidence and automate forward repair or tested traffic rollback."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Revision fails to activate",
+        "cause": "The image, registry authorization, port, resource request, environment setting, or startup command is invalid.",
+        "fix": "Inspect system logs and revision state, verify digest pull access, target port, architecture, resources, and command locally."
+      },
+      {
+        "symptom": "Replica restarts repeatedly",
+        "cause": "Liveness begins too early or the process crashes, exhausts memory, or blocks startup.",
+        "fix": "Separate startup and liveness probes, inspect exit reason and logs, right-size resources, and remove blocking initialization."
+      },
+      {
+        "symptom": "App is healthy but receives no traffic",
+        "cause": "Readiness fails, ingress target port is wrong, traffic weight is zero, or the revision is inactive.",
+        "fix": "Check readiness from inside the replica, ingress configuration, active revision mode, labels, and weights."
+      },
+      {
+        "symptom": "App never scales from zero",
+        "cause": "The scaler cannot authenticate, metadata is wrong, or no supported event reaches it.",
+        "fix": "Inspect scale rule status, identity role and scope, trigger metadata, event lag, min replicas, and platform metrics."
+      },
+      {
+        "symptom": "Scale-out overloads a dependency",
+        "cause": "Replica and per-replica concurrency limits exceed downstream capacity.",
+        "fix": "Lower maximum replicas or concurrency, add backpressure and jitter, and coordinate dependency capacity."
+      },
+      {
+        "symptom": "Internal name fails to resolve",
+        "cause": "Apps are in different environments or private DNS and network paths are incomplete.",
+        "fix": "Verify environment membership, internal FQDN, VNet DNS, routes, firewalls, and private endpoint records."
+      }
+    ],
+    "productionChecklist": [
+      "Environment ownership, region, network, quotas, resilience, and logging are approved.",
+      "Image is minimal, scanned, signed, digest-pinned, and runs non-root.",
+      "Startup, liveness, readiness, termination, and health dependencies are tested.",
+      "Managed identity and least-privilege registry, scaler, and dependency roles are verified.",
+      "Ingress, certificates, DNS, private networking, egress, and secrets are controlled.",
+      "Minimum, maximum, concurrency, cooldown, and job retry settings come from load tests.",
+      "Revision canary, promotion, rollback, deactivation, and recovery are automated.",
+      "Alerts and budgets cover user outcomes, replicas, restarts, scaling, dependencies, quotas, and cost."
+    ],
+    "resources": [
+      {
+        "label": "Azure Container Apps documentation",
+        "url": "https://learn.microsoft.com/en-us/azure/container-apps/"
+      },
+      {
+        "label": "Scaling in Azure Container Apps",
+        "url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+      },
+      {
+        "label": "Health probes in Azure Container Apps",
+        "url": "https://learn.microsoft.com/en-us/azure/container-apps/health-probes"
+      }
+    ]
   },
   {
     "slug": "azure-well-architected",

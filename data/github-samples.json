@@ -631,5 +631,77 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/arm-secure-storage",
     "localPath": "samples/arm-secure-storage/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "azure-dotnet-service-baseline",
+    "topicSlug": "azure-for-dotnet",
+    "name": "Azure .NET Service Baseline",
+    "description": "A .NET 10 API demonstrating validated Azure endpoints, reusable SDK clients, local developer credentials, deterministic production managed identity, health reporting, and identity-selection tests.",
+    "technologies": [
+      ".NET 10",
+      "Azure SDK",
+      "Managed Identity",
+      "Azure Storage"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "managed-identity",
+      "azure-sdk",
+      "least-privilege"
+    ],
+    "runCommand": "dotnet run --project src/AzureDotNetServiceBaseline",
+    "testCommand": "dotnet test AzureDotNetServiceBaseline.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/azure-dotnet-service-baseline",
+    "localPath": "samples/azure-dotnet-service-baseline/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "container-apps-revision-api",
+    "topicSlug": "azure-container-apps",
+    "name": "Container Apps Revision API",
+    "description": "A revision-aware .NET 10 API with liveness and readiness, graceful drain, JSON logs, a non-root chiseled container, and Bicep for identity, ingress, probes, revisions, and scaling.",
+    "technologies": [
+      ".NET 10",
+      "Azure Container Apps",
+      "Docker",
+      "Bicep"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "revisions",
+      "health-probes",
+      "keda-scaling"
+    ],
+    "runCommand": "dotnet run --project src/ContainerAppsRevisionApi",
+    "testCommand": "dotnet test ContainerAppsRevisionApi.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/container-apps-revision-api",
+    "localPath": "samples/container-apps-revision-api/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "functions-isolated-order-processor",
+    "topicSlug": "azure-functions-serverless",
+    "name": "Functions Isolated Order Processor",
+    "description": "A .NET 10 isolated-worker queue function with host-independent processing, event validation, idempotency receipts, bounded retries, poison routing, cancellation, and focused tests.",
+    "technologies": [
+      ".NET 10",
+      "Azure Functions",
+      "Isolated Worker",
+      "Azure Queue Storage"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "serverless",
+      "idempotency",
+      "poison-queue"
+    ],
+    "runCommand": "func start --script-root src/FunctionsIsolatedOrderProcessor",
+    "testCommand": "dotnet test FunctionsIsolatedOrderProcessor.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/functions-isolated-order-processor",
+    "localPath": "samples/functions-isolated-order-processor/README.md",
+    "liveDemoUrl": null
   }
 ]

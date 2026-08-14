@@ -614,6 +614,30 @@ try {
     const metrics = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
     check(metrics.scrollWidth <= metrics.width + 1, `${heading} has desktop horizontal overflow`);
   }
+
+  const azureApplicationPlatformBatch = [
+    ['azure-for-dotnet', 'Azure for .NET', 8, 6, 8, 7, 8, '/samples/azure-dotnet-service-baseline'],
+    ['azure-container-apps', 'Azure Container Apps', 8, 6, 8, 7, 8, '/samples/container-apps-revision-api'],
+    ['azure-functions-serverless', 'Azure Functions & Serverless', 8, 6, 8, 7, 8, '/samples/functions-isolated-order-processor']
+  ];
+  for (const [slug, heading, concepts, troubleshooting, checklist, faq, steps, samplePath] of azureApplicationPlatformBatch) {
+    await page.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await page.locator('h1').innerText()) === heading, `${heading} rendered the wrong heading`);
+    check(await page.locator('.topic-status-complete').count() === 1, `${heading} is not marked complete`);
+    check(await page.locator('.article-section').count() === 16, `${heading} does not render all content sections`);
+    check(await page.locator('.toc-link').count() === 16, `${heading} table of contents is incomplete`);
+    check(await page.locator('.concept-card').count() === concepts, `${heading} key concepts are incomplete`);
+    check(await page.locator('.step-list li').count() === steps, `${heading} walkthrough is incomplete`);
+    check(await page.locator('.troubleshooting-card').count() === troubleshooting, `${heading} troubleshooting is incomplete`);
+    check(await page.locator('.checklist li').count() === checklist, `${heading} checklist is incomplete`);
+    check(await page.locator('.faq-item').count() === faq, `${heading} interview FAQ is incomplete`);
+    check(await page.locator('#github-sample .sample-commands code').count() === 2, `${heading} sample commands are missing`);
+    check((await page.locator('#github-sample .github-link').getAttribute('href')).includes(samplePath), `${heading} sample link is wrong`);
+    check(await page.locator('.official-resource-links a').count() >= 3, `${heading} official resources are incomplete`);
+    const metrics = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width, `${heading} overflows the desktop viewport`);
+  }
+  await page.screenshot({ path: join(artifactDirectory, 'azure-application-platform-batch-desktop-light-top.png'), fullPage: false });
   await page.screenshot({ path: join(artifactDirectory, 'infrastructure-as-code-batch-desktop-light-top.png'), fullPage: false });
 
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
