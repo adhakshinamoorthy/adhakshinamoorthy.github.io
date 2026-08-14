@@ -1,0 +1,116 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Secure, observable storage baseline for an application workload."
+  },
+  "parameters": {
+    "workloadName": {
+      "type": "string",
+      "defaultValue": "orders",
+      "minLength": 3,
+      "maxLength": 18,
+      "metadata": { "description": "Short workload name used in deterministic resource naming." }
+    },
+    "environment": {
+      "type": "string",
+      "allowedValues": ["dev", "test", "prod"],
+      "metadata": { "description": "Deployment environment." }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": { "description": "Azure region for the storage account." }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": { "description": "Additional governance tags." }
+    }
+  },
+  "variables": {
+    "storageName": "[toLower(take(format('st{0}{1}{2}', parameters('workloadName'), parameters('environment'), uniqueString(resourceGroup().id)), 24))]",
+    "requiredTags": {
+      "environment": "[parameters('environment')]",
+      "managed-by": "arm-template",
+      "workload": "[parameters('workloadName')]"
+    },
+    "allTags": "[union(parameters('tags'), variables('requiredTags'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('storageName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('allTags')]",
+      "sku": { "name": "Standard_ZRS" },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": false,
+        "defaultToOAuthAuthentication": true,
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Deny",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "requireInfrastructureEncryption": true,
+          "services": {
+            "blob": { "enabled": true, "keyType": "Account" },
+            "file": { "enabled": true, "keyType": "Account" }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/default', variables('storageName'))]",
+      "dependsOn": ["[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"],
+      "properties": {
+        "deleteRetentionPolicy": { "enabled": true, "days": 14 },
+        "containerDeleteRetentionPolicy": { "enabled": true, "days": 14 },
+        "isVersioningEnabled": true,
+        "changeFeed": { "enabled": true, "retentionInDays": 30 }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/default', variables('storageName'))]",
+      "dependsOn": ["[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageName'), 'default')]"],
+      "properties": {
+        "policy": {
+          "rules": [
+            {
+              "enabled": true,
+              "name": "tier-old-content",
+              "type": "Lifecycle",
+              "definition": {
+                "filters": { "blobTypes": ["blockBlob"] },
+                "actions": { "baseBlob": { "tierToCool": { "daysAfterModificationGreaterThan": 30 } } }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "storageAccountName": {
+      "type": "string",
+      "value": "[variables('storageName')]"
+    },
+    "storageAccountResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+    }
+  }
+}

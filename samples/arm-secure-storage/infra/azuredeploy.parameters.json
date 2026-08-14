@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workloadName": { "value": "orders" },
+    "environment": { "value": "dev" },
+    "tags": {
+      "value": {
+        "owner": "platform-team",
+        "cost-center": "learning"
+      }
+    }
+  }
+}

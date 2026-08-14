@@ -4159,7 +4159,11 @@
       {
         "title": "Deployment modes and resource locks",
         "description": "Incremental mode adds or updates resources without touching others in the group; complete mode deletes any resource not in the template. Resource locks — CanNotDelete and ReadOnly — prevent accidental or unauthorised changes outside the deployment pipeline."
-      }
+      },
+      {"title": "Resource providers and API versions", "description": "Each Azure service registers resource types and versioned control-plane schemas that define supported properties, operations, regions, and behavior."},
+      {"title": "Templates, deployments, and operations", "description": "ARM templates create deployment records whose nested operations expose validation, dependency, policy, and provider failures."},
+      {"title": "What-if and deployment stacks", "description": "What-if previews proposed changes while deployment stacks add explicit ownership and controlled handling of resources removed from the declaration."},
+      {"title": "Management plane and data plane", "description": "ARM controls resource lifecycle and configuration, while service-specific data APIs have separate permissions, endpoints, and operational risks."}
     ],
     "architecture": {
       "description": "Every Azure operation — portal, CLI, SDK, or IaC — passes through the ARM API, which authenticates via Entra ID, evaluates RBAC and Policy, and routes to the target resource provider.",
@@ -4186,7 +4190,9 @@
       "Design the management group and subscription hierarchy before deploying workloads — retrofitting governance scope after resources exist is significantly more complex and disruptive.",
       "Assign Azure roles at the narrowest practical scope—usually a subscription or resource group—and reserve management-group assignments for genuinely shared platform responsibilities.",
       "Use Azure Policy deny effects for non-negotiable standards — allowed locations, required tags, SKU restrictions — and audit effects for visibility before escalating to deny.",
-      "Apply CanNotDelete locks to production resource groups containing stateful resources so accidental complete-mode deployments or manual deletions require an explicit lock removal step."
+      "Apply CanNotDelete locks to production resource groups containing stateful resources so accidental complete-mode deployments or manual deletions require an explicit lock removal step.",
+      "Use managed identities and least-privilege roles for automation instead of long-lived owner credentials.",
+      "Preview deployments, retain operation evidence, and use deployment stacks for explicit deletion ownership."
     ],
     "interviewQuestions": [
       {
@@ -4200,16 +4206,20 @@
       {
         "question": "How would you enforce a tagging standard across all resources in an Azure tenant?",
         "answer": "Assign an Azure Policy at the management group scope with a deny effect that requires specified tag keys on all resource writes. For existing untagged resources, use a modify policy with a remediation task to apply default tag values. This ensures compliance for new resources immediately and provides a path to remediate existing ones."
-      }
+      },
+      {"question": "What is an Azure resource provider?", "answer": "A resource provider implements ARM resource types and operations for a service, publishes API versions, and performs the control-plane work after ARM authorizes and validates a request."},
+      {"question": "How are Azure RBAC and Azure Policy different?", "answer": "RBAC decides who may perform an action at a scope; Policy evaluates whether a resource state or requested change complies with organizational rules."},
+      {"question": "Why use deployment stacks?", "answer": "Stacks record deployment ownership, can protect managed resources with deny assignments, and define what happens when a resource disappears from the declaration."},
+      {"question": "How do you troubleshoot a failed ARM deployment?", "answer": "Start with the deployment and nested operation records, correlation ID, provider error details, activity log, policy evaluation, permissions, quota, and the exact API version and request."}
     ],
     "note": "ARM governance decisions — hierarchy design, policy scope, RBAC model — are very difficult to change after workloads are deployed. Treat the ARM layer as foundational architecture that deserves the same design rigour as application architecture.",
     "tip": "Use the Azure Resource Graph to query the live state of all resources across subscriptions using KQL — it is far faster than iterating through the ARM SDK and essential for compliance reporting and cost visibility at scale.",
     "warning": "Complete deployment mode deletes resources that are absent from the template and is not recommended for new deletion workflows. Prefer deployment stacks, and always review a what-if result before any potentially destructive deployment.",
-    "sampleId": "solution-architecture-portfolio",
-    "readingMinutes": 12,
-    "level": "Advanced",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on ARM hierarchy, RBAC, Azure Policy, deployment modes, and resource locks",
+    "sampleId": "arm-secure-storage",
+    "readingMinutes": 39,
+    "level": "Foundation to production",
+    "updated": "2026-08-14",
+    "latestNote": "Gold-standard guide with dedicated secure storage template sample",
     "resources": [
       {
         "label": "Azure Resource Manager overview",
@@ -4219,7 +4229,35 @@
         "label": "ARM deployment modes",
         "url": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-modes"
       }
-    ]
+    ],
+    "contentStatus": "complete",
+    "learningObjectives": ["Explain ARM hierarchy, scopes, control-plane routing, resource providers, and API versions.", "Distinguish management-plane and data-plane identity and authorization.", "Author and interpret native ARM templates, parameters, functions, dependencies, and outputs.", "Apply RBAC, Policy, locks, tags, and deployment ownership safely.", "Preview, deploy, monitor, and troubleshoot resource operations.", "Choose Bicep, Terraform, native templates, SDKs, or the portal based on lifecycle needs."],
+    "prerequisites": ["Azure tenant, subscription, resource group, Entra ID, and RBAC fundamentals.", "Basic JSON and declarative deployment experience.", "Azure CLI access for optional what-if and deployment exercises."],
+    "decisionGuide": {"use": ["You need to understand or integrate directly with Azure's native control plane.", "A generated or vendor-supplied ARM template must be reviewed, secured, or operated.", "A resource feature is available through ARM before a higher-level tool supports it."], "avoid": ["Hand-authoring large JSON templates when Bicep provides equivalent typed coverage.", "Using management-plane automation for high-volume service data operations.", "Bypassing established platform modules, governance, or deployment ownership without a clear reason."]},
+    "implementationIntroduction": "The ARM Secure Storage sample is a strict native JSON deployment with deterministic naming, validated inputs, tag merging, HTTPS and TLS controls, OAuth-first access, deny-by-default networking, encryption, recovery, lifecycle policy, and an executable template inspector.",
+    "implementationSteps": [
+      {"title": "Select deployment scope", "description": "Choose tenant, management group, subscription, or resource group scope and understand inherited RBAC and Policy."},
+      {"title": "Choose resource APIs", "description": "Select supported resource types and API versions whose schemas expose the needed properties in target regions."},
+      {"title": "Define parameters and variables", "description": "Validate environment inputs, document contracts, calculate deterministic names, and merge mandatory governance tags."},
+      {"title": "Declare secure resources", "description": "Use explicit identities, network defaults, encryption, diagnostics, recovery, and service-specific security properties."},
+      {"title": "Express dependencies", "description": "Use resourceId, reference, and dependsOn only where operation order genuinely requires it."},
+      {"title": "Validate and preview", "description": "Parse strict JSON, validate the template, run policy checks, and review what-if at the intended scope."},
+      {"title": "Deploy and observe", "description": "Use a least-privilege identity, stable deployment naming, operation logs, correlation IDs, and post-deployment tests."},
+      {"title": "Govern lifecycle", "description": "Use Policy, locks, deployment stacks, Resource Graph, activity logs, and explicit removal procedures to manage change."}
+    ],
+    "testing": {"introduction": "Test JSON structure, ARM expression contracts, control-plane changes, governance, and the resulting service behavior.", "items": ["Parse templates and parameter files as strict JSON.", "Run ARM validation and template-toolkit policy checks.", "Inspect what-if for create, update, replace, delete, role, and network effects.", "Deploy to an isolated resource group under representative Policy.", "Verify data-plane access through the intended managed identity.", "Test stack removal, locks, policy denial, rollback, and disaster recovery." ]},
+    "security": {"introduction": "ARM is the enforcement path for management operations, but each service retains separate data-plane controls.", "items": ["Use workload identity and narrow deployment roles at the smallest practical scope.", "Use managed identity and data roles instead of shared keys.", "Apply Policy for non-negotiable locations, SKUs, tags, identity, diagnostics, and network controls.", "Keep secrets out of parameters, outputs, tags, deployment names, and operation logs.", "Use deny-by-default networking and private endpoints where required.", "Protect stateful production resources with deliberate locks and removal approvals." ]},
+    "performance": {"introduction": "ARM deployments are asynchronous control-plane workflows constrained by provider latency and throttling.", "items": ["Express accurate dependencies so independent resources deploy in parallel.", "Avoid serial dependsOn chains that do not represent real requirements.", "Split unrelated resources into sensible deployment boundaries.", "Respect subscription and provider throttling with bounded retries.", "Use Resource Graph for cross-subscription inventory instead of serial ARM reads.", "Track deployment duration and slow nested operations." ]},
+    "deployment": {"introduction": "Treat every ARM deployment as an authenticated, policy-evaluated, auditable control-plane transaction.", "items": ["Validate syntax and policy before protected credentials are available.", "Run what-if and require review for destructive or privilege-sensitive changes.", "Deploy through short-lived identity with environment concurrency controls.", "Retain deployment and nested operation records.", "Use incremental deployments and stacks for explicit removal ownership.", "Run post-deployment management-plane and data-plane checks." ]},
+    "troubleshooting": [
+      {"symptom": "Deployment reports InvalidTemplate.", "cause": "JSON, expression, parameter, dependency, scope, or API schema is invalid.", "fix": "Validate locally, inspect the exact nested error target, and compare the resource with its API-version schema."},
+      {"symptom": "AuthorizationFailed appears for one resource.", "cause": "The identity lacks a required action at that resource or parent scope.", "fix": "Use the failed action and scope to select the narrowest role and allow role propagation before retrying."},
+      {"symptom": "RequestDisallowedByPolicy blocks deployment.", "cause": "An inherited policy denies the proposed resource state.", "fix": "Inspect policy evaluation details and remediate the template; use exemptions only through governed approval."},
+      {"symptom": "A dependent resource cannot find its parent.", "cause": "The reference or dependsOn relationship is missing or uses the wrong resource ID.", "fix": "Construct the ID at the correct scope and express the actual dependency."},
+      {"symptom": "What-if predicts recurring changes.", "cause": "The provider returns defaults or runtime values differently from the declaration.", "fix": "Specify stable supported values, inspect provider behavior, and document narrowly justified noise."},
+      {"symptom": "Deployment succeeded but the app cannot access data.", "cause": "Management deployment worked while data-plane role, network, firewall, or DNS access did not.", "fix": "Test identity token, data role, private endpoint, DNS, and service firewall as a separate data-plane path."}
+    ],
+    "productionChecklist": ["Hierarchy, scope, ownership, and inheritance are documented.", "Resource types and API versions are supported and tested.", "Parameters are validated and secrets never enter deployment records.", "RBAC, Policy, locks, tags, and network controls are intentional.", "What-if and destructive-change review gate deployment.", "Deployment identity is short-lived and least privilege.", "Operations, correlation IDs, activity logs, and Resource Graph evidence are retained.", "Stack removal, lock recovery, provider failure, and data-plane access are rehearsed."]
   },
   {
     "slug": "azure-api-management",
@@ -5041,26 +5079,62 @@
     "shortDescription": "Declare cloud infrastructure as versioned, reviewable code that can be planned before it's applied, across any provider.",
     "keywords": ["Terraform", "infrastructure as code", "HCL", "state", "providers", "modules"],
     "overview": "Terraform describes infrastructure—networks, databases, compute, permissions—as declarative configuration, then plans and applies the changes needed to make real infrastructure match that configuration.",
-    "detail": "A provider maps Terraform's HCL configuration to a specific cloud's APIs, so the same workflow applies whether you're targeting Azure, AWS, or another platform. Terraform tracks real infrastructure in a state file, computes a plan showing exactly what will be created, changed, or destroyed before anything happens, and lets teams share reusable modules for common infrastructure shapes.",
+    "detail": "A provider maps Terraform's HCL configuration to versioned platform APIs, so one workflow can manage Azure, AWS, SaaS, and other systems. Terraform refreshes remote objects into protected state, builds a dependency graph, and computes a plan showing creates, updates, replacements, and destroys before any change is applied. Teams use typed variables, validation, modules, outputs, remote backends, locking, imports, and moved blocks to manage infrastructure throughout its lifecycle. Production practice also requires pinned providers, reviewed saved plans, short-lived identity, policy checks, drift ownership, secret-safe state, and recovery procedures.",
     "concepts": [
       {"title": "Providers", "description": "A provider translates Terraform configuration into calls against a specific platform's API, letting one tool and workflow target multiple clouds."},
       {"title": "State", "description": "Terraform records the real infrastructure it manages in a state file, using it to compute the difference between desired and actual on every run."},
       {"title": "Plan and apply", "description": "Plan shows exactly what will be created, changed, or destroyed before anything happens; apply executes only that reviewed plan."},
-      {"title": "Modules", "description": "Reusable, parameterized configuration packages let teams share a tested infrastructure shape—like a standard app environment—instead of duplicating raw resources."}
+      {"title": "Modules", "description": "Reusable, parameterized configuration packages let teams share a tested infrastructure shape—like a standard app environment—instead of duplicating raw resources."},
+      {"title": "Resource graph", "description": "References between resources create a dependency graph that Terraform evaluates in parallel where safe and in order where required."},
+      {"title": "Lifecycle and drift", "description": "Refresh, import, moved blocks, lifecycle rules, and replacement semantics control how configuration converges with infrastructure that already exists."},
+      {"title": "Variables and outputs", "description": "Typed inputs, validation, locals, and non-sensitive outputs make configuration reusable without hiding important environment decisions."},
+      {"title": "Backends and locking", "description": "A remote backend protects shared state, coordinates locking, controls access, and provides recovery history for team workflows."}
     ],
     "architecture": {"description": "Configuration is planned against current state to compute a diff, then applied through the provider to create the real infrastructure.", "nodes": ["HCL configuration", "State file", "Plan (diff)", "Provider API"], "colors": ["#7c4dff", "#4c6ef5", "#ae3ec9", "#168c78"]},
     "code": {"language": "hcl", "label": "main.tf", "introduction": "A module call provisions a standard app environment with parameters instead of duplicating the underlying resources per project.", "code": "module \"orders_api\" {\n  source              = \"./modules/app-service\"\n  name                = \"orders-api\"\n  resource_group_name = azurerm_resource_group.main.name\n  sku_name            = \"P1v3\"\n  app_settings = {\n    ASPNETCORE_ENVIRONMENT = \"Production\"\n  }\n}\n\noutput \"orders_api_url\" {\n  value = module.orders_api.default_hostname\n}"},
-    "bestPractices": ["Store state remotely with locking so two runs can't apply conflicting changes to the same infrastructure at once.", "Always review a plan's output before applying it, especially destroy actions—treat plan as a required gate, not a formality.", "Package repeated infrastructure shapes as modules with clear inputs and outputs instead of copy-pasting resource blocks.", "Keep secrets out of state and configuration; reference them from a secrets manager instead of hardcoding values."],
+    "bestPractices": ["Store state remotely with locking so two runs can't apply conflicting changes to the same infrastructure at once.", "Always review a plan's output before applying it, especially destroy actions—treat plan as a required gate, not a formality.", "Package repeated infrastructure shapes as modules with clear inputs and outputs instead of copy-pasting resource blocks.", "Keep secrets out of state and configuration; reference them from a secrets manager instead of hardcoding values.", "Pin Terraform and provider versions and commit the dependency lock file.", "Use workload identity, least-privilege cloud roles, policy checks, and an audited apply pipeline."],
     "interviewQuestions": [
       {"question": "What is Terraform state, and why does losing it matter?", "answer": "State is Terraform's record of the real infrastructure it manages, used to compute what's changed on every run; without it, Terraform has no way to know what already exists and can plan to recreate or orphan real resources."},
       {"question": "Why review a Terraform plan before applying it?", "answer": "The plan shows exactly what will be created, changed, or destroyed as a result of a configuration change, catching unintended consequences—like a destroy triggered by a renamed resource—before they happen against real infrastructure."},
-      {"question": "What problem do Terraform modules solve?", "answer": "They let a team package a tested, parameterized shape of infrastructure—like a standard app environment—and reuse it across projects, instead of every project hand-writing and maintaining its own copy of similar resource blocks."}
+      {"question": "What problem do Terraform modules solve?", "answer": "They let a team package a tested, parameterized shape of infrastructure—like a standard app environment—and reuse it across projects, instead of every project hand-writing and maintaining its own copy of similar resource blocks."},
+      {"question": "What is infrastructure drift?", "answer": "Drift is a difference between configuration, recorded state, and real provider state, often caused by manual changes or external automation; refresh and plan reveal its likely reconciliation."},
+      {"question": "When should terraform import be used?", "answer": "Import associates an existing remote object with a resource address so it can be brought under management after matching configuration is written and reviewed."},
+      {"question": "Why save a plan artifact?", "answer": "Applying the reviewed saved plan ensures the executed change is the same proposal reviewers approved, provided state and provider constraints remain valid."},
+      {"question": "How should Terraform state be protected?", "answer": "Use an encrypted remote backend, locking, version history, least-privilege access, audit logs, backups, and careful treatment because state can contain sensitive values."}
     ],
     "note": "Terraform's plan/apply split exists specifically so infrastructure changes can be reviewed like code changes, before they touch anything real.",
     "tip": "Run Terraform in CI with a required plan-review step on every pull request, the same way you'd require a code review.",
     "warning": "Manually changing infrastructure that Terraform manages, outside of Terraform, causes state drift that can lead to a later apply silently reverting or fighting your manual change.",
     "resources": [{"label": "Terraform documentation", "url": "https://developer.hashicorp.com/terraform/docs"}, {"label": "AzureRM provider", "url": "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs"}],
-    "sampleId": "solution-architecture-portfolio", "readingMinutes": 10, "level": "Intermediate", "updated": "2026-08-07", "latestNote": "New guide on providers, state, and plan/apply"
+    "sampleId": "terraform-azure-web-platform", "readingMinutes": 37, "level": "Foundation to production", "updated": "2026-08-14", "latestNote": "Gold-standard guide with dedicated Azure web platform sample",
+    "contentStatus": "complete",
+    "learningObjectives": ["Explain providers, configuration, state, graph planning, and apply behavior.", "Design protected remote-state and locking boundaries.", "Create reusable typed modules without hiding important decisions.", "Import, move, replace, and retire resources safely.", "Secure provider identity, state, plans, variables, and outputs.", "Operate Terraform through reviewed plans, policy gates, drift detection, and recovery."],
+    "prerequisites": ["Basic cloud resource, identity, networking, and CLI concepts.", "Familiarity with Git review and environment promotion.", "Terraform CLI and provider credentials for optional real plan exercises."],
+    "decisionGuide": {"use": ["One workflow must manage infrastructure across multiple providers or platforms.", "Teams need explicit state, plan review, reusable modules, and lifecycle control.", "An ecosystem provider supports the required resources and maturity level."], "avoid": ["The target is Azure-only and first-party Bicep coverage and support are the stronger fit.", "A service-specific platform already owns provisioning and exposing raw infrastructure adds risk.", "State ownership, identity, review, and recovery cannot be operated responsibly."]},
+    "implementationIntroduction": "The Terraform Azure Web Platform provisions a .NET 10 App Service baseline with validated environments, mandatory tags, observability, managed identity, HTTPS, health checks, and a local executable contract inspector.",
+    "implementationSteps": [
+      {"title": "Define ownership", "description": "Choose a state boundary whose resources share lifecycle, access, blast radius, and deployment cadence."},
+      {"title": "Pin tooling", "description": "Constrain Terraform and provider versions, initialize providers, and commit the generated dependency lock file."},
+      {"title": "Configure the backend", "description": "Use encrypted remote state with locking, version history, audit logs, least privilege, and tested recovery."},
+      {"title": "Model typed inputs", "description": "Use descriptions, types, validation, locals, and governance tags so invalid environments fail before planning."},
+      {"title": "Compose resources and modules", "description": "Express real references to build the dependency graph and keep modules cohesive with narrow contracts."},
+      {"title": "Plan with evidence", "description": "Format, validate, refresh, run policy and security checks, and publish a saved plan for review."},
+      {"title": "Apply through automation", "description": "Use short-lived identity, environment approval, concurrency control, the reviewed plan artifact, and retained logs."},
+      {"title": "Operate lifecycle", "description": "Detect drift, import existing objects, use moved blocks for refactoring, rehearse state recovery, and retire resources deliberately."}
+    ],
+    "testing": {"introduction": "Terraform evidence progresses from static configuration checks to plans and ephemeral deployment tests.", "items": ["Run fmt and validate for every change.", "Execute module contract and policy tests.", "Inspect the full saved plan including replacements and destroys.", "Test representative modules in an isolated subscription or account.", "Verify outputs, identity, security posture, and observability after apply.", "Exercise import, move, rollback, and state recovery procedures."]},
+    "security": {"introduction": "Configuration, state, plans, providers, and the apply identity are all supply-chain or control-plane assets.", "items": ["Use workload identity and least-privilege provider roles.", "Encrypt and tightly restrict remote state and plan artifacts.", "Never assume sensitive variables prevent values from entering state.", "Pin providers and modules and review their provenance.", "Run static, policy, dependency, and cloud-posture checks.", "Separate untrusted plan jobs from protected apply credentials."]},
+    "performance": {"introduction": "Fast predictable plans depend on sensible state boundaries and provider behavior.", "items": ["Split state by lifecycle and blast radius rather than individual resource.", "Avoid broad data-source queries and unnecessary cross-state reads.", "Allow safe graph parallelism but respect provider throttling.", "Cache providers in CI from the lock file.", "Measure plan and apply duration and investigate unexpected growth.", "Do not use targeted applies as a routine performance shortcut."]},
+    "deployment": {"introduction": "Promote reviewed configuration and saved-plan evidence through controlled environments.", "items": ["Run speculative plans for pull requests without apply credentials.", "Re-plan after merge against current protected state.", "Require approval for destroy, replacement, privilege, and network exposure changes.", "Serialize applies per state and retain deployment evidence.", "Run post-apply security and workload smoke checks.", "Prefer forward repair while retaining state-version and provider recovery procedures."]},
+    "troubleshooting": [
+      {"symptom": "State lock remains after a failed run.", "cause": "The client exited without releasing the backend lock.", "fix": "Confirm no apply is active, inspect lock ownership, then use force-unlock with the exact lock ID."},
+      {"symptom": "Plan wants to recreate an existing resource.", "cause": "Its address, identifier, immutable property, or provider interpretation changed.", "fix": "Inspect the replacement reason and use import or moved blocks only when ownership and identity are verified."},
+      {"symptom": "Manual changes keep disappearing.", "cause": "Out-of-band drift conflicts with configuration.", "fix": "Decide the authoritative desired state, update configuration or revert drift, and restrict manual writes."},
+      {"symptom": "A sensitive value appears in state.", "cause": "Sensitive affects display, not provider persistence.", "fix": "Rotate the value, restrict state, redesign the resource to reference a secret, and remove historical exposure safely."},
+      {"symptom": "Provider upgrade changes many resources.", "cause": "Schema, defaults, normalization, or behavior changed.", "fix": "Pin versions, read the upgrade guide, test in isolation, and upgrade in a dedicated reviewed change."},
+      {"symptom": "Apply differs from the reviewed proposal.", "cause": "A new plan was generated or state changed after review.", "fix": "Apply the reviewed saved plan promptly or regenerate and require a new review."}
+    ],
+    "productionChecklist": ["State boundary and ownership are explicit.", "Remote state is encrypted, locked, versioned, audited, and recoverable.", "Terraform, providers, and modules are pinned.", "Inputs are typed and validated; outputs exclude credentials.", "Plan, policy, security, and cost evidence gate apply.", "Apply identity is short-lived and least privilege.", "Import, move, drift, and deletion procedures are tested.", "Every apply is serialized, observable, attributable, and recoverable."]
   },
   {
     "slug": "secrets-management",
@@ -5138,7 +5212,11 @@
       {
         "title": "Deployment stacks",
         "description": "A deployment stack tracks all resources deployed as a unit and applies a deny-assignment to prevent out-of-band changes. Updating or deleting the stack reconciles or removes managed resources automatically."
-      }
+      },
+      {"title": "Scopes and symbolic dependencies", "description": "Target scope, existing resources, symbolic names, and module outputs express ownership and ordering without manually writing dependsOn arrays."},
+      {"title": "Type system and diagnostics", "description": "Resource schemas, decorators, compile-time validation, lint rules, and editor completion catch many deployment mistakes before Azure is contacted."},
+      {"title": "Registries and versioning", "description": "Private module registries and template specs distribute approved modules with immutable versions across teams and subscriptions."},
+      {"title": "What-if and deployment history", "description": "What-if previews control-plane changes while ARM deployment records provide operation status, correlation, and audit evidence."}
     ],
     "architecture": {
       "description": "Bicep source is compiled and deployed through a CI/CD pipeline, promoting one validated template with environment-specific parameters from dev through staging to production.",
@@ -5155,7 +5233,9 @@
       "Treat Bicep files as production code — review them in pull requests, lint with the Bicep linter, and enforce no-hardcoded-secrets and explicit API versions as CI checks.",
       "Use modules to encapsulate cohesive resource groups — a Container App module, a networking module — and compose them in a main.bicep rather than putting everything in one large file.",
       "Separate environment-specific values into Bicepparam files and keep template logic environment-neutral so the same compiled template is promoted from dev to prod without modification.",
-      "Run what-if deployments in CI before applying to staging or production so reviewers can see exactly which resource properties will change before approving the pipeline run."
+      "Run what-if deployments in CI before applying to staging or production so reviewers can see exactly which resource properties will change before approving the pipeline run.",
+      "Pin module versions and API versions, and update them through reviewed compatibility tests.",
+      "Use workload identity with least-privilege deployment roles and keep secrets out of source, outputs, and logs."
     ],
     "interviewQuestions": [
       {
@@ -5169,16 +5249,49 @@
       {
         "question": "How do you pass secrets into a Bicep deployment without hardcoding them?",
         "answer": "Reference secrets from Azure Key Vault using a Bicepparam file with a getSecret() call — this injects the secret value at deployment time from Key Vault without it appearing in source control, pipeline logs, or the compiled template. The deployment identity needs Key Vault Secrets User access on the vault."
-      }
+      },
+      {"question": "How does Bicep determine deployment order?", "answer": "Symbolic resource references and module outputs create implicit dependencies; use explicit dependsOn only when no data reference expresses the real ordering."},
+      {"question": "What is an existing resource in Bicep?", "answer": "The existing keyword references a resource managed elsewhere without redeploying it, allowing modules to read identifiers and properties at the correct scope."},
+      {"question": "How should reusable Bicep modules be distributed?", "answer": "Publish versioned modules to a private Bicep registry or template specs, document contracts, test compiled output, and upgrade consumers deliberately."},
+      {"question": "What can make what-if incomplete?", "answer": "Runtime values, provider behavior, policy, permissions, quota, extension resources, and unsupported change analysis can produce noise or unknown results, so what-if is evidence rather than a guarantee."}
     ],
     "note": "Bicep defines desired infrastructure state — it does not replace application configuration, secrets management, identity assignment, or monitoring setup, all of which need their own deliberate design.",
     "tip": "Start with the Azure Developer CLI and let azd init scaffold the initial Bicep structure for your project — it produces working modules for common patterns like Container Apps with managed identity and Key Vault that you can extend rather than writing from scratch.",
     "warning": "A what-if result showing no changes does not guarantee the deployment will succeed — resource provider API changes, quota limits, policy denials, and dependency ordering can still cause failures at apply time.",
-    "sampleId": "solution-architecture-portfolio",
-    "readingMinutes": 12,
-    "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on Bicep modules, parameter files, deployment stacks, and CI/CD promotion"
+    "sampleId": "bicep-container-app-platform",
+    "readingMinutes": 38,
+    "level": "Foundation to production",
+    "updated": "2026-08-14",
+    "latestNote": "Gold-standard guide with dedicated modular Container Apps sample",
+    "contentStatus": "complete",
+    "learningObjectives": ["Explain how Bicep compiles to ARM deployments and resource-provider APIs.", "Use scopes, symbolic references, existing resources, modules, parameters, and outputs.", "Create reusable typed modules and distribute them with version discipline.", "Protect identities, secrets, network boundaries, and deployment permissions.", "Preview, validate, deploy, observe, and troubleshoot Azure changes.", "Choose deployment stacks and ownership behavior deliberately."],
+    "prerequisites": ["Azure resource groups, identities, RBAC, networking, and resource-provider fundamentals.", "Basic declarative IaC and Git review experience.", "Azure CLI with Bicep support for optional compile and what-if exercises."],
+    "decisionGuide": {"use": ["Azure is the target platform and first-party type coverage is valuable.", "Teams need concise modules that compile directly to ARM templates.", "Deployment stacks, what-if, template specs, or Bicep registries fit the operating model."], "avoid": ["The same module must manage substantial non-Azure infrastructure.", "A higher-level platform already owns infrastructure and direct resource control would duplicate responsibility.", "The organization cannot operate Azure scope, policy, identity, and deployment ownership safely."]},
+    "implementationIntroduction": "The Bicep Container App Platform composes observability, environment, and workload modules with typed parameters, secure runtime input, managed identity, encrypted ingress, probes, scaling, tags, and local contract tests.",
+    "implementationSteps": [
+      {"title": "Choose scope and ownership", "description": "Select tenant, management group, subscription, resource group, or extension scope and decide whether a stack owns deletion."},
+      {"title": "Define typed parameters", "description": "Use descriptions, decorators, allowed values, secure inputs, and environment-neutral defaults."},
+      {"title": "Model symbolic resources", "description": "Use explicit API versions and symbolic references so dependencies and type checking emerge from real data flow."},
+      {"title": "Extract cohesive modules", "description": "Give modules narrow responsibilities, stable inputs, useful non-secret outputs, and versioned publication."},
+      {"title": "Inject identity and secrets", "description": "Use workload identity for deployment and managed identity plus Key Vault references for runtime access."},
+      {"title": "Compile and lint", "description": "Build Bicep to ARM JSON, treat diagnostics as errors, and run organization policy and security checks."},
+      {"title": "Preview and deploy", "description": "Review what-if, apply through protected environments, retain deployment operations, and run workload smoke checks."},
+      {"title": "Operate modules and stacks", "description": "Track API and module upgrades, drift, policy changes, resource ownership, removal behavior, and recovery."}
+    ],
+    "testing": {"introduction": "Validate authoring semantics, compiled contracts, Azure control-plane effects, and workload outcomes.", "items": ["Compile every entry point and fail on diagnostics.", "Lint for secrets, hardcoded locations, unsafe defaults, and stale API versions.", "Test module parameter and output contracts.", "Review what-if at the intended target scope.", "Deploy representative configurations to an isolated subscription.", "Verify policy, identity, network, observability, removal, and rollback behavior."]},
+    "security": {"introduction": "Bicep improves authoring but ARM scope, identity, policy, and secret behavior still define risk.", "items": ["Use OIDC workload identity with the narrowest deployment role and scope.", "Mark secret parameters secure but prefer Key Vault references over raw values.", "Keep secrets out of outputs, deployment names, tags, and logs.", "Use managed identity and data-plane roles for applications.", "Enforce policy, private networking, diagnostic settings, and approved module sources.", "Review role assignments and deny-assignment implications separately from resources." ]},
+    "performance": {"introduction": "Deployment speed and reliability improve when modules and dependency graphs remain deliberate.", "items": ["Use symbolic references to enable safe parallel deployment.", "Avoid one enormous template whose unrelated resources share a failure boundary.", "Keep module nesting and outputs focused.", "Use stable deployment names when history semantics require them.", "Measure slow resource providers and long-running operations.", "Avoid unnecessary list functions and cross-scope queries." ]},
+    "deployment": {"introduction": "Promote the same reviewed Bicep and module versions while parameters vary by environment.", "items": ["Compile and validate before cloud authentication is granted.", "Run what-if with the protected deployment identity.", "Require approval for deletes, replacements, role changes, public access, and SKU changes.", "Use deployment stacks when declarative removal ownership is required.", "Retain deployment operations and correlation IDs.", "Run post-deployment identity, health, policy, and connectivity tests." ]},
+    "troubleshooting": [
+      {"symptom": "Compilation reports a property is invalid.", "cause": "The chosen resource API version has a different schema.", "fix": "Inspect the resource reference, select a supported API version, and update properties deliberately."},
+      {"symptom": "A module deploys before its dependency.", "cause": "No symbolic data reference expresses the real relationship.", "fix": "Pass the dependency resource ID or output, or add dependsOn only when no data dependency exists."},
+      {"symptom": "What-if shows noisy changes every run.", "cause": "The provider normalizes defaults or returns runtime-only values.", "fix": "Inspect the actual API behavior, specify stable values, and document justified noise rather than ignoring all changes."},
+      {"symptom": "Deployment fails with authorization despite Contributor.", "cause": "Role assignments, policy, data actions, or cross-scope operations need different permissions.", "fix": "Identify the exact denied action and scope, then grant the narrowest required role to the workload identity."},
+      {"symptom": "A secure parameter appears in deployment history.", "cause": "It was copied into a non-secure output, tag, property, or log.", "fix": "Rotate it, remove the exposure path, and use Key Vault or managed identity references."},
+      {"symptom": "Removing a resource from Bicep does not delete it.", "cause": "Incremental deployment does not imply ownership-based deletion.", "fix": "Use a deployment stack with explicit action-on-unmanage behavior or perform a separately reviewed retirement."}
+    ],
+    "productionChecklist": ["Scope, ownership, and removal behavior are explicit.", "Parameters are typed, documented, validated, and secret-safe.", "Modules are cohesive, versioned, tested, and from approved registries.", "API versions and compile diagnostics are controlled.", "Deployment and runtime identities are least privilege.", "What-if, policy, security, and cost evidence gate deployment.", "Operations, correlation IDs, and post-deployment checks are retained.", "Stack deletion, module upgrade, and recovery paths are rehearsed."],
+    "resources": [{"label": "Bicep documentation", "url": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/"}, {"label": "Bicep modules", "url": "https://learn.microsoft.com/azure/azure-resource-manager/bicep/modules"}, {"label": "ARM what-if", "url": "https://learn.microsoft.com/azure/azure-resource-manager/templates/deploy-what-if"}]
   },
   {
     "slug": "health-checks",

@@ -589,5 +589,47 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/cicd-release-pipeline",
     "localPath": "samples/cicd-release-pipeline/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "terraform-azure-web-platform",
+    "topicSlug": "terraform",
+    "name": "Terraform Azure Web Platform",
+    "description": "A governed Azure App Service platform demonstrating provider constraints, validated inputs, tags, observability, managed identity, HTTPS, health checks, outputs, and executable Terraform contract tests.",
+    "technologies": ["Terraform", "AzureRM", "Azure App Service", ".NET 10"],
+    "tags": ["dedicated-sample", "remote-state", "plan-apply", "managed-identity"],
+    "runCommand": "dotnet run --project tools/TerraformContract -- infra",
+    "testCommand": "dotnet test TerraformAzureWebPlatform.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/terraform-azure-web-platform",
+    "localPath": "samples/terraform-azure-web-platform/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "bicep-container-app-platform",
+    "topicSlug": "infrastructure-as-code-bicep",
+    "name": "Bicep Container App Platform",
+    "description": "A modular Azure Container Apps deployment demonstrating typed parameters, secure inputs, observability, managed identity, ingress, probes, scaling, tags, and local Bicep contract tests.",
+    "technologies": ["Bicep", "Azure Container Apps", "ARM", ".NET 10"],
+    "tags": ["dedicated-sample", "modules", "what-if", "managed-identity"],
+    "runCommand": "dotnet run --project tools/BicepContract -- infra",
+    "testCommand": "dotnet test BicepContainerAppPlatform.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/bicep-container-app-platform",
+    "localPath": "samples/bicep-container-app-platform/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "arm-secure-storage",
+    "topicSlug": "azure-resource-manager",
+    "name": "ARM Secure Storage",
+    "description": "A native ARM JSON deployment for secure Azure Storage with validated inputs, deterministic names, governance tags, OAuth-first authorization, deny-by-default networking, encryption, recovery, lifecycle policy, and strict template tests.",
+    "technologies": ["Azure Resource Manager", "ARM Templates", "Azure Storage", ".NET 10"],
+    "tags": ["dedicated-sample", "native-template", "azure-governance", "secure-storage"],
+    "runCommand": "dotnet run --project tools/ArmTemplateInspector -- infra/azuredeploy.json",
+    "testCommand": "dotnet test ArmSecureStorage.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/arm-secure-storage",
+    "localPath": "samples/arm-secure-storage/README.md",
+    "liveDemoUrl": null
   }
 ]
