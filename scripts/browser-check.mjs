@@ -569,6 +569,29 @@ try {
   }
   await page.screenshot({ path: join(artifactDirectory, 'quality-engineering-batch-desktop-light-top.png'), fullPage: false });
 
+  const deliveryBatch = [
+    ['docker', 'Docker', 8, 6, 8, 7, 8, '/samples/docker-orders-api'],
+    ['kubernetes', 'Kubernetes', 8, 6, 8, 7, 8, '/samples/kubernetes-inventory-api'],
+    ['cicd-dotnet', 'CI/CD for .NET', 8, 6, 8, 7, 8, '/samples/cicd-release-pipeline']
+  ];
+  for (const [slug, heading, concepts, troubleshooting, checklist, faq, steps, samplePath] of deliveryBatch) {
+    await page.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await page.locator('h1').innerText()) === heading, `${heading} rendered the wrong heading`);
+    check(await page.locator('.topic-status-complete').count() === 1, `${heading} is not marked complete`);
+    check(await page.locator('.article-section').count() === 16, `${heading} does not render all content sections`);
+    check(await page.locator('.toc-link').count() === 16, `${heading} table of contents is incomplete`);
+    check(await page.locator('.concept-card').count() === concepts, `${heading} key concepts are incomplete`);
+    check(await page.locator('.step-list li').count() === steps, `${heading} walkthrough is incomplete`);
+    check(await page.locator('.troubleshooting-card').count() === troubleshooting, `${heading} troubleshooting is incomplete`);
+    check(await page.locator('.checklist li').count() === checklist, `${heading} checklist is incomplete`);
+    check(await page.locator('.faq-item').count() === faq, `${heading} interview FAQ is incomplete`);
+    check(await page.locator('#github-sample .sample-commands code').count() === 2, `${heading} sample commands are missing`);
+    check((await page.locator('#github-sample .github-link').getAttribute('href')).includes(samplePath), `${heading} sample link is wrong`);
+    const metrics = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width + 1, `${heading} has desktop horizontal overflow`);
+  }
+  await page.screenshot({ path: join(artifactDirectory, 'delivery-batch-desktop-light-top.png'), fullPage: false });
+
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
 
   await page.locator('.copy-button').click();
@@ -693,6 +716,17 @@ try {
     check(metrics.scrollWidth <= metrics.width + 1, `Mobile ${heading} horizontal overflow: ${metrics.scrollWidth}px`);
   }
   await mobilePage.screenshot({ path: join(artifactDirectory, 'quality-engineering-batch-mobile-dark-top.png'), fullPage: false });
+  for (const [slug, heading] of [
+    ['docker', 'Docker'],
+    ['kubernetes', 'Kubernetes'],
+    ['cicd-dotnet', 'CI/CD for .NET']
+  ]) {
+    await mobilePage.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await mobilePage.locator('h1').innerText()) === heading, `Mobile ${heading} topic did not render`);
+    const metrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width + 1, `Mobile ${heading} horizontal overflow: ${metrics.scrollWidth}px`);
+  }
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'delivery-batch-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();

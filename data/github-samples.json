@@ -547,5 +547,47 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/testcontainers-postgres-inventory",
     "localPath": "samples/testcontainers-postgres-inventory/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "docker-orders-api",
+    "topicSlug": "docker",
+    "name": "Docker Orders API",
+    "description": "A containerized .NET 10 API demonstrating a cache-efficient multi-stage build, non-root execution, health endpoints, runtime configuration, and hardened Compose settings.",
+    "technologies": ["ASP.NET Core 10", "Docker", "Docker Compose", "xUnit"],
+    "tags": ["dedicated-sample", "multi-stage", "non-root", "container-health"],
+    "runCommand": "dotnet run --project src/DockerOrdersApi",
+    "testCommand": "dotnet test DockerOrdersApi.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/docker-orders-api",
+    "localPath": "samples/docker-orders-api/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "kubernetes-inventory-api",
+    "topicSlug": "kubernetes",
+    "name": "Kubernetes Inventory API",
+    "description": "A .NET 10 service with safe Deployment, Service, disruption, security, resource, probe, and autoscaling manifests.",
+    "technologies": ["ASP.NET Core 10", "Kubernetes", "Containers", "xUnit"],
+    "tags": ["dedicated-sample", "probes", "safe-rollout", "autoscaling"],
+    "runCommand": "dotnet run --project src/KubernetesInventoryApi",
+    "testCommand": "dotnet test KubernetesInventoryApi.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/kubernetes-inventory-api",
+    "localPath": "samples/kubernetes-inventory-api/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "cicd-release-pipeline",
+    "topicSlug": "cicd-dotnet",
+    "name": "CI/CD Release Pipeline",
+    "description": "A .NET 10 release metadata tool and GitHub Actions workflow demonstrating deterministic verification, dependency auditing, immutable artifacts, protected promotion, and OIDC-ready permissions.",
+    "technologies": [".NET 10", "GitHub Actions", "CI/CD", "xUnit"],
+    "tags": ["dedicated-sample", "build-once", "artifact-promotion", "supply-chain"],
+    "runCommand": "dotnet run --project src/ReleaseManifest",
+    "testCommand": "dotnet test CicdReleasePipeline.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/cicd-release-pipeline",
+    "localPath": "samples/cicd-release-pipeline/README.md",
+    "liveDemoUrl": null
   }
 ]
