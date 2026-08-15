@@ -1,0 +1,57 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "callbackBaseUrl": { "type": "String" }
+    },
+    "triggers": {
+      "Receive_order": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": ["orderId", "total"],
+            "properties": {
+              "orderId": { "type": "string", "format": "uuid" },
+              "total": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Choose_decision": {
+        "type": "Compose",
+        "inputs": "@if(lessOrEquals(triggerBody()?['total'], 1000), 'approved', 'rejected')",
+        "runAfter": {}
+      },
+      "Notify_orders_api": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "@concat(parameters('callbackBaseUrl'), '/callbacks/approvals')",
+          "headers": { "Content-Type": "application/json" },
+          "body": {
+            "workflowRunId": "@workflow().run.name",
+            "orderId": "@triggerBody()?['orderId']",
+            "decision": "@outputs('Choose_decision')"
+          },
+          "retryPolicy": { "type": "exponential", "count": 4, "interval": "PT10S" }
+        },
+        "runAfter": { "Choose_decision": ["Succeeded"] }
+      },
+      "Return_result": {
+        "type": "Response",
+        "inputs": {
+          "statusCode": 202,
+          "body": { "runId": "@workflow().run.name", "decision": "@outputs('Choose_decision')" }
+        },
+        "runAfter": { "Notify_orders_api": ["Succeeded"] }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

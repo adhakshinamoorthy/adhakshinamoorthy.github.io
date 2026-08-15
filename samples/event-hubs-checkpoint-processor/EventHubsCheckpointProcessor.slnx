@@ -1,0 +1,1 @@
+<Solution><Project Path="src/EventHubsCheckpointProcessor/EventHubsCheckpointProcessor.csproj" /><Project Path="tests/EventHubsCheckpointProcessor.Tests/EventHubsCheckpointProcessor.Tests.csproj" /></Solution>

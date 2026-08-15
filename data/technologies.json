@@ -4520,28 +4520,271 @@
     "category": "Cloud Platforms",
     "color": "#0078d4",
     "shortDescription": "Publish, secure, transform, observe, and govern APIs through a managed gateway, control plane, developer experience, and policy model.",
-    "keywords": ["Azure API Management", "APIM", "API gateway", "policies", "rate limiting", "JWT validation", "developer portal", "API lifecycle"],
-    "overview": "Azure API Management is a managed platform for exposing and governing APIs across Azure, on-premises, hybrid, and multicloud environments.",
-    "detail": "API Management separates the gateway data plane from the management plane used to configure APIs, products, subscriptions, policies, analytics, and the developer portal. The gateway routes requests, validates credentials, enforces quotas and rate limits, transforms messages, caches selected responses, and emits telemetry. Architecture choices include service tier, regional deployment, network connectivity, gateway availability, self-hosted gateways, policy scope, backend resilience, secret management, and disaster recovery.",
-    "concepts": [
-      {"title": "Gateway data plane", "description": "The managed or self-hosted gateway proxies traffic, authenticates callers, applies policies, routes to backends, and emits runtime telemetry."},
-      {"title": "Management plane", "description": "APIs, operations, products, subscriptions, named values, versions, revisions, workspaces, and policies define the governed API lifecycle."},
-      {"title": "Policy pipeline", "description": "Inbound, backend, outbound, and on-error policies compose authentication, transformation, caching, quotas, routing, and failure behavior."},
-      {"title": "Reliability and topology", "description": "Tier capabilities, zones, regions, networking, capacity, backend health, deployment automation, and recovery targets shape production design."}
+    "keywords": [
+      "Azure API Management",
+      "APIM",
+      "API gateway",
+      "policies",
+      "rate limiting",
+      "JWT validation",
+      "developer portal",
+      "API lifecycle"
     ],
-    "architecture": {"description": "Consumers call an APIM gateway that applies identity and traffic policies, routes to protected backend APIs, and exports telemetry while the management plane controls configuration.", "nodes": ["API consumers", "APIM gateway + policy", "Backend APIs", "Telemetry + control plane"], "colors": ["#0078d4", "#5b5fc7", "#168c78", "#d18415"]},
-    "code": {"language": "xml", "label": "inbound-policy.xml", "introduction": "An inbound policy validates an Entra-issued JWT, limits calls per authenticated subject, and adds a correlation identifier before forwarding the request.", "code": "<policies>\n  <inbound>\n    <base />\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\">\n      <openid-config url=\"{{entra-openid-config}}\" />\n      <audiences><audience>{{orders-api-audience}}</audience></audiences>\n    </validate-jwt>\n    <rate-limit-by-key calls=\"120\" renewal-period=\"60\"\n      counter-key=\"@(context.Principal?.Identity?.Name ?? context.Request.IpAddress)\" />\n    <set-header name=\"x-correlation-id\" exists-action=\"skip\">\n      <value>@(context.RequestId.ToString())</value>\n    </set-header>\n  </inbound>\n  <backend><base /></backend>\n  <outbound><base /></outbound>\n  <on-error><base /></on-error>\n</policies>"},
-    "bestPractices": ["Select a tier and topology from required capacity, availability zones or regions, private connectivity, certificates, self-hosting, and recovery objectives.", "Keep policies small, scoped, version-controlled, tested, and deployed through infrastructure as code; use named values backed by Key Vault for secrets.", "Authenticate callers and backends, allowlist exposure, bound payloads and rates, and avoid treating subscription keys as user authorization.", "Monitor gateway capacity, latency, failures, policy errors, backend health, quotas, certificates, and regional behavior with actionable ownership."],
+    "overview": "Azure API Management is a managed platform for exposing and governing APIs across Azure, on-premises, hybrid, and multicloud environments.",
+    "detail": "Azure API Management (APIM) is a managed API gateway and governance platform whose runtime gateway is separate from its management plane and developer experience. A production design must cover API import and lifecycle, versions and revisions, products and subscriptions, caller identity, backend identity, policy scope and inheritance, request limits, transformations, caching, observability, networking, certificates, tier capabilities, zones or regions, capacity, recovery, and configuration delivery. APIM can enforce consistent edge policy, but the backend remains responsible for resource authorization, business validation, idempotency, and resilience. Classic, v2, Consumption, workspace, and self-hosted gateways do not have identical capabilities, so architects must validate the current feature matrix rather than assume policy or topology parity.",
+    "concepts": [
+      {
+        "title": "Gateway and management planes",
+        "description": "The gateway processes traffic; the management plane configures APIs, operations, backends, products, subscriptions, users, policies, revisions, versions, workspaces, and diagnostics."
+      },
+      {
+        "title": "Policy pipeline and scope",
+        "description": "Inbound, backend, outbound, and on-error sections execute at global, workspace, product, API, or operation scope with explicit base inheritance."
+      },
+      {
+        "title": "Identity at both hops",
+        "description": "Validate caller tokens at the gateway, authorize domain resources in the backend, and use managed identity or certificates from APIM to protected backends."
+      },
+      {
+        "title": "Products and subscriptions",
+        "description": "Products package APIs for audiences and can use subscriptions for access and metering; subscription keys are not a replacement for user identity."
+      },
+      {
+        "title": "Versions and revisions",
+        "description": "Versions represent breaking public contracts, while revisions support controlled nonbreaking configuration changes and staged release."
+      },
+      {
+        "title": "Traffic and transformation policy",
+        "description": "Quotas, rate limits, caching, routing, validation, and transformations protect dependencies but must preserve correct semantics and useful error contracts."
+      },
+      {
+        "title": "Gateway choices",
+        "description": "Classic, v2, Consumption, self-hosted, and workspace gateways differ in networking, scale, policy, cache, region, and operational responsibility."
+      },
+      {
+        "title": "Reliability and observability",
+        "description": "Tier, units, zones, regions, backend failover, DNS, certificates, capacity, telemetry sampling, and configuration recovery determine end-to-end availability."
+      }
+    ],
+    "architecture": {
+      "description": "Consumers call an APIM gateway that applies identity and traffic policies, routes to protected backend APIs, and exports telemetry while the management plane controls configuration.",
+      "nodes": [
+        "API consumers",
+        "APIM gateway + policy",
+        "Backend APIs",
+        "Telemetry + control plane"
+      ],
+      "colors": [
+        "#0078d4",
+        "#5b5fc7",
+        "#168c78",
+        "#d18415"
+      ]
+    },
+    "code": {
+      "language": "xml",
+      "label": "inbound-policy.xml",
+      "introduction": "An inbound policy validates an Entra-issued JWT, limits calls per authenticated subject, and adds a correlation identifier before forwarding the request.",
+      "code": "<policies>\n  <inbound>\n    <base />\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\">\n      <openid-config url=\"{{entra-openid-config}}\" />\n      <audiences><audience>{{orders-api-audience}}</audience></audiences>\n    </validate-jwt>\n    <rate-limit-by-key calls=\"120\" renewal-period=\"60\"\n      counter-key=\"@(context.Principal?.Identity?.Name ?? context.Request.IpAddress)\" />\n    <set-header name=\"x-correlation-id\" exists-action=\"skip\">\n      <value>@(context.RequestId.ToString())</value>\n    </set-header>\n  </inbound>\n  <backend><base /></backend>\n  <outbound><base /></outbound>\n  <on-error><base /></on-error>\n</policies>"
+    },
+    "bestPractices": [
+      "Choose tier and gateway type only after mapping required policies, networking, zones, regions, scale, developer portal, and recovery capabilities.",
+      "Keep policies small, scoped, source-controlled, reviewed, linted, tested, and promoted through immutable API revisions.",
+      "Validate issuer, audience, signature, expiry, and required claims at the gateway, then enforce resource authorization again in the backend.",
+      "Use APIM managed identity for Key Vault and backends; keep secrets in Key Vault-backed named values and never log them.",
+      "Apply rate limits, quotas, payload limits, timeouts, retry, and circuit behavior from measured backend capacity and idempotency.",
+      "Preserve correlation and distributed trace context while redacting sensitive headers and bodies from diagnostics.",
+      "Automate OpenAPI import, named values, backends, policies, products, diagnostics, and tests with infrastructure and configuration as code.",
+      "Monitor capacity, gateway and backend latency, 4xx and 5xx rates, policy errors, cache behavior, certificates, quotas, and regional health."
+    ],
     "interviewQuestions": [
-      {"question": "What is the difference between the APIM gateway and management plane?", "answer": "The gateway is the runtime data plane that processes API traffic and policies. The management plane configures APIs, products, subscriptions, policies, users, and operational settings."},
-      {"question": "Where should authentication and authorization happen with APIM?", "answer": "APIM can validate tokens and enforce coarse API policy, while backends should still enforce resource and domain authorization. The gateway must not become the only trust boundary."},
-      {"question": "How do you design APIM for high availability?", "answer": "Match service tier and deployment to zone and region targets, design backend and DNS failover, automate configuration, monitor capacity and certificates, and test gateway and dependency failure paths."}
+      {
+        "question": "Gateway versus management plane?",
+        "answer": "The gateway is the request data plane. The management plane defines APIs, products, subscriptions, policies, users, revisions, versions, diagnostics, and operational configuration."
+      },
+      {
+        "question": "Why must a backend authorize after APIM validates a JWT?",
+        "answer": "Gateway validation establishes an acceptable identity and coarse access, but only the backend understands resource ownership, tenant boundaries, and business permissions."
+      },
+      {
+        "question": "Version versus revision?",
+        "answer": "A version exposes a distinct contract, commonly for breaking changes. A revision stages a compatible implementation or policy change before making it current."
+      },
+      {
+        "question": "Rate limit versus quota?",
+        "answer": "A rate limit bounds calls in a short renewal window to protect capacity; a quota limits usage over a longer period for entitlement or cost control."
+      },
+      {
+        "question": "How do you make APIM highly available?",
+        "answer": "Select a supported production tier, distribute suitable capacity across zones or regions where supported, make backends and DNS resilient, automate configuration recovery, and test dependency failures."
+      },
+      {
+        "question": "When use a self-hosted gateway?",
+        "answer": "Use it when traffic must remain near on-premises or multicloud backends while management stays in Azure, accepting responsibility for its hosting, scale, connectivity, upgrades, and availability."
+      }
     ],
     "note": "API Management governs API exposure; it does not replace careful API contract design, backend authorization, service resilience, or lifecycle ownership.",
     "tip": "Treat every APIM policy as production code with source control, review, automated deployment, test calls, and observability.",
     "warning": "Tier capabilities and networking behavior differ materially; validate current limits and availability features before committing an architecture.",
-    "resources": [{"label": "APIM gateway overview", "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-gateways-overview"}, {"label": "APIM architecture best practices", "url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-api-management"}],
-    "sampleId": "ai-gatekeeper", "readingMinutes": 15, "level": "Advanced", "updated": "2026-08-06", "latestNote": "New guide on managed gateways, policies, security, and topology"
+    "resources": [
+      {
+        "label": "API Management gateway overview",
+        "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-gateways-overview"
+      },
+      {
+        "label": "API Management tier comparison",
+        "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-features"
+      },
+      {
+        "label": "API Management policy reference",
+        "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policies"
+      },
+      {
+        "label": "Reliability in API Management",
+        "url": "https://learn.microsoft.com/en-us/azure/reliability/reliability-api-management"
+      }
+    ],
+    "sampleId": "apim-governed-orders",
+    "readingMinutes": 25,
+    "level": "Advanced",
+    "updated": "2026-08-15",
+    "latestNote": "Gold-standard guide with a dedicated APIM policy, Bicep deployment, secured backend, and focused tests",
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Explain APIM planes, resources, gateway variants, and policy execution.",
+      "Design caller and backend identity without moving domain authorization to the gateway.",
+      "Manage contracts with versions, revisions, products, and subscriptions.",
+      "Build safe traffic, transformation, cache, and failure policies.",
+      "Choose tier, networking, zones, regions, and capacity from requirements.",
+      "Test, deploy, observe, recover, and govern APIM configuration as code."
+    ],
+    "prerequisites": [
+      "HTTP, REST/OpenAPI, OAuth 2.0, OpenID Connect, JWT, TLS, and DNS.",
+      "ASP.NET Core authentication, authorization, resilience, and observability.",
+      "Azure identity, RBAC, Key Vault, networking, Bicep, and deployment pipelines."
+    ],
+    "decisionGuide": {
+      "use": [
+        "Multiple APIs need consistent exposure, policy, analytics, onboarding, and lifecycle governance.",
+        "External or partner APIs need a managed gateway and developer experience.",
+        "Hybrid backends need controlled centralized configuration."
+      ],
+      "avoid": [
+        "A single private service only needs simple ingress routing.",
+        "Required gateway capability is absent from the selected tier or gateway.",
+        "The team expects APIM to replace backend authorization or service reliability."
+      ]
+    },
+    "implementationSteps": [
+      {
+        "title": "Inventory consumers and APIs",
+        "description": "Record contracts, identities, traffic, sensitivity, owners, SLOs, regions, and dependencies."
+      },
+      {
+        "title": "Choose topology and tier",
+        "description": "Validate gateway features, capacity, networking, zones, regions, portal, and recovery requirements."
+      },
+      {
+        "title": "Define API lifecycle",
+        "description": "Import OpenAPI, create stable operation IDs, products, subscriptions, versions, revisions, and ownership."
+      },
+      {
+        "title": "Secure both hops",
+        "description": "Validate caller tokens, configure backend managed identity, restrict networking, and retain backend authorization."
+      },
+      {
+        "title": "Compose policies",
+        "description": "Add correlation, validation, limits, routing, transforms, caching, and safe errors in deliberate scopes."
+      },
+      {
+        "title": "Automate and test",
+        "description": "Deploy with Bicep or Terraform, test policy branches and backends, and promote a revision."
+      },
+      {
+        "title": "Operate and recover",
+        "description": "Load test, alert on capacity and failures, rotate certificates, export configuration, and rehearse recovery."
+      }
+    ],
+    "testing": {
+      "introduction": "Test policies and backends independently, then prove their combined behavior on a deployed gateway.",
+      "items": [
+        "Unit test backend authorization and business rules.",
+        "Validate policy XML, expressions, named values, inheritance, and forbidden secrets in CI.",
+        "Run gateway tests for missing, invalid, expired, wrong-audience, wrong-scope, and valid tokens.",
+        "Verify rate, quota, cache, transformation, timeout, retry, and on-error branches.",
+        "Load test gateway capacity and backend saturation with representative payloads.",
+        "Inject backend, DNS, certificate, regional, and telemetry failures and rehearse recovery."
+      ]
+    },
+    "security": {
+      "introduction": "Treat APIM as one trust boundary in a defense-in-depth path.",
+      "items": [
+        "Disable anonymous exposure unless deliberate.",
+        "Validate tokens strictly and authorize resources in the backend.",
+        "Use managed identity and least-privilege roles for backends and Key Vault.",
+        "Restrict inbound and outbound network paths and validate certificates.",
+        "Redact credentials, tokens, PII, and bodies from logs and traces.",
+        "Protect management access with least privilege, change review, and audit."
+      ]
+    },
+    "performance": {
+      "introduction": "Measure gateway and backend together because policy cost and dependency capacity determine useful throughput.",
+      "items": [
+        "Track capacity, request rate, percentiles, policy duration, backend duration, errors, and throttles.",
+        "Use caching only for safe responses with correct vary keys and invalidation.",
+        "Bound body transforms, validation size, retries, and timeouts.",
+        "Scale before sustained saturation and retest after policy changes.",
+        "Avoid expensive policy expressions and repeated remote calls.",
+        "Model Consumption cost or provisioned units against realistic peaks."
+      ]
+    },
+    "deployment": {
+      "introduction": "Promote declarative configuration and immutable revisions through environments.",
+      "items": [
+        "Pin API versions and infrastructure API versions.",
+        "Keep environment values separate from reusable API and policy definitions.",
+        "Use federated deployment identity and narrowly scoped management permissions.",
+        "Run policy and contract smoke tests before making a revision current.",
+        "Roll back by switching revision or forward-fixing compatible configuration.",
+        "Retarget DNS and backends only through tested recovery procedures."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Requests return 401 or 403 unexpectedly",
+        "cause": "Issuer, audience, claim, token location, subscription, or backend permission differs.",
+        "fix": "Trace one safe request, inspect policy scope and JWT metadata, and separate gateway rejection from backend authorization."
+      },
+      {
+        "symptom": "Latency rises at the gateway",
+        "cause": "Capacity saturation, expensive policy work, remote validation, retries, or a slow backend.",
+        "fix": "Split gateway and backend duration, inspect capacity and policy traces, remove retry amplification, and load test the bottleneck."
+      },
+      {
+        "symptom": "Policy works at one scope but not another",
+        "cause": "Base inheritance is missing or a broader policy overrides behavior.",
+        "fix": "Inspect the effective policy, add deliberate base elements, and test global through operation scopes."
+      },
+      {
+        "symptom": "Private backend is unreachable",
+        "cause": "Tier capability, VNet integration, DNS, route, firewall, identity, or TLS trust is incomplete.",
+        "fix": "Verify the selected tier path end to end from gateway subnet and identity, including name resolution and certificate chain."
+      },
+      {
+        "symptom": "Configuration drift appears",
+        "cause": "Portal edits bypass the declarative delivery path.",
+        "fix": "Restrict manual changes, export and compare configuration, restore source control as authority, and redeploy."
+      }
+    ],
+    "productionChecklist": [
+      "Tier and gateway capabilities match policy, network, availability, region, and recovery needs.",
+      "Caller and backend identities use strict validation, least privilege, and no embedded secrets.",
+      "Backends retain domain authorization, validation, idempotency, and resilience.",
+      "Policies are scoped, inherited, versioned, tested, bounded, and observable.",
+      "Versions, revisions, products, subscriptions, owners, and deprecation are governed.",
+      "Capacity, latency, errors, certificates, quotas, and regional health have alerts and runbooks.",
+      "Infrastructure, configuration, smoke tests, rollback, and disaster recovery are rehearsed."
+    ]
   },
   {
     "slug": "azure-functions-serverless",
@@ -4833,7 +5076,7 @@
     "symbol": "ALA",
     "category": "Cloud Platforms",
     "color": "#5c2d91",
-    "shortDescription": "Automate enterprise workflows and system integrations using Azure Logic Apps — connecting hundreds of services with triggers, actions, and conditional logic without writing infrastructure code.",
+    "shortDescription": "Build secure, observable enterprise integrations with triggers, actions, connectors, workflow state, retries, and source-controlled delivery.",
     "keywords": [
       "Azure Logic Apps",
       "workflow automation",
@@ -4848,23 +5091,39 @@
       "enterprise integration"
     ],
     "overview": "Azure Logic Apps is a cloud platform for building and running automated workflows that integrate applications, data, services, and systems across an enterprise with minimal code.",
-    "detail": "Logic Apps uses a visual designer backed by a JSON workflow definition to connect triggers—such as a Service Bus message, HTTP request, schedule, or arriving file—to actions from a large catalog of built-in and managed connectors. A Standard logic app runs in the single-tenant Azure Logic Apps runtime, can host multiple stateful or stateless workflows, and supports local development, private networking, and dedicated plan-based billing. Consumption is multitenant, hosts one stateful workflow per app, and bills per execution. A separate hybrid option can host the Standard runtime on your infrastructure through an Azure Container Apps extension. Logic Apps fits scenarios where integration workflow and connector orchestration outweigh custom computation.",
+    "detail": "Azure Logic Apps is a managed workflow and enterprise integration platform. A workflow starts from a trigger and coordinates built-in operations, managed connectors, control flow, transformations, HTTP calls, messaging, B2B artifacts, and custom code. Consumption and Standard have different hosting, billing, networking, deployment, and workflow capabilities; Standard supports multiple stateful or stateless workflows in a single-tenant runtime. Production design must make delivery semantics, retries, run-after behavior, idempotency, timeouts, concurrency, secrets, managed identity, connector limits, run-history sensitivity, observability, resubmission, disaster recovery, and cost explicit. Logic Apps is strongest when orchestration and connectors dominate; complex domain rules still belong in testable application code.",
     "concepts": [
       {
-        "title": "Triggers and connectors",
-        "description": "A trigger starts a workflow — on a schedule, on a message arrival, on an HTTP call, or on a change in an external system. Connectors provide pre-built authenticated integrations to hundreds of services without managing credentials or SDKs."
+        "title": "Triggers and actions",
+        "description": "A trigger creates a workflow run; actions execute connectors, data operations, conditions, loops, scopes, functions, or HTTP calls."
       },
       {
-        "title": "Stateful vs stateless workflows",
-        "description": "Stateful workflows persist run history and intermediate state to storage, enabling long-running orchestrations, human approvals, and retry inspection. Stateless workflows keep state in memory only, offering lower latency for short-lived, high-frequency integrations."
+        "title": "Built-in and managed connectors",
+        "description": "Built-in connectors run with the runtime, while managed connectors use Azure-hosted API connections with distinct authentication, limits, and billing."
       },
       {
-        "title": "Standard vs Consumption tier",
-        "description": "Consumption Logic Apps run in the multitenant service and bill per trigger and action execution. Standard Logic Apps use the single-tenant runtime and a plan-based model, supporting private networking, local development, and multiple stateful or stateless workflows in one app."
+        "title": "Stateful and stateless",
+        "description": "Stateful workflows persist execution state and history for durability; stateless Standard workflows favor short low-latency executions with important capability limits."
+      },
+      {
+        "title": "Consumption and Standard",
+        "description": "Consumption is multitenant and execution-metered; Standard is single-tenant, plan-based, hosts multiple workflows, and supports local development and richer networking."
+      },
+      {
+        "title": "Control flow and scopes",
+        "description": "Conditions, switches, loops, parallel branches, scopes, run-after status, terminate actions, and tracked properties express orchestration and error paths."
+      },
+      {
+        "title": "Delivery and idempotency",
+        "description": "Triggers and actions can retry or replay, so external side effects require stable business keys, idempotent APIs, and explicit resubmission rules."
       },
       {
         "title": "Integration accounts and B2B",
-        "description": "An Integration Account stores EDI schemas, maps, trading partner agreements, and certificates, enabling Logic Apps to process AS2, EDIFACT, and X12 messages for B2B integrations — a capability that would require significant custom code to replicate."
+        "description": "Schemas, maps, partners, agreements, certificates, and EDI protocols support governed enterprise document exchange."
+      },
+      {
+        "title": "Operations and governance",
+        "description": "Run history, diagnostics, connector throttles, workflow versions, parameters, identities, private networking, cost, and recovery need ownership."
       }
     ],
     "architecture": {
@@ -4889,42 +5148,202 @@
       "code": "// Calling a Logic Apps workflow from .NET using HTTP trigger\nusing System.Net.Http.Json;\n\npublic sealed class OrderWorkflowClient(HttpClient http)\n{\n    public async Task TriggerOrderApprovalAsync(\n        Guid orderId, decimal total, CancellationToken ct)\n    {\n        // Logic Apps exposes an HTTP trigger URL with a SAS key\n        var response = await http.PostAsJsonAsync(\n            string.Empty, // Base URL set in HttpClient config\n            new\n            {\n                orderId = orderId.ToString(),\n                total,\n                requestedAt = DateTime.UtcNow\n            },\n            ct);\n\n        response.EnsureSuccessStatusCode();\n    }\n}\n\n// Registration with typed client\nbuilder.Services.AddHttpClient<OrderWorkflowClient>(client =>\n{\n    client.BaseAddress = new Uri(\n        builder.Configuration[\"LogicApps:OrderApprovalUrl\"]!);\n});\n\n// Equivalent workflow definition (abridged JSON)\n// {\n//   \"definition\": {\n//     \"triggers\": {\n//       \"manual\": { \"type\": \"Request\", \"kind\": \"Http\" }\n//     },\n//     \"actions\": {\n//       \"Send_approval_email\": {\n//         \"type\": \"ApiConnection\",\n//         \"inputs\": { \"host\": { \"connection\": { \"name\": \"office365\" } } }\n//       },\n//       \"Check_approval\": {\n//         \"type\": \"If\",\n//         \"expression\": { \"equals\": [\"@body('Send_approval_email')\", \"Approve\"] },\n//         \"actions\": { \"Notify_orders_service\": { \"type\": \"Http\" } }\n//       }\n//     }\n//   }\n// }"
     },
     "bestPractices": [
-      "Use Logic Apps for integration orchestration and connector-heavy workflows; use Azure Functions or .NET Workers for compute-heavy, latency-sensitive, or complex business logic that needs unit testing and version control.",
-      "Store sensitive workflow inputs and connector credentials as Logic Apps parameters backed by Key Vault references — never hardcode connection strings or API keys in the workflow definition.",
-      "Design long-running approval workflows as stateful workflows with explicit timeout and cancellation branches so workflows do not run indefinitely when an approver is unavailable.",
-      "Version workflow definitions in source control and deploy via CI/CD using the Azure CLI or Bicep — treat the JSON definition as infrastructure code rather than a designer-only artefact."
+      "Choose Logic Apps when connector orchestration and workflow visibility outweigh custom computation.",
+      "Choose Consumption versus Standard from hosting, networking, latency, volume, workflow type, deployment, and cost evidence.",
+      "Use managed identity for supported connectors and protect unavoidable connection credentials and parameters.",
+      "Design every retried side effect to be idempotent and carry stable workflow, correlation, and business identifiers.",
+      "Group failure-prone actions in scopes and configure explicit run-after, retry, timeout, compensation, and terminate behavior.",
+      "Keep workflow definitions, connections metadata, schemas, maps, and infrastructure in source control and CI/CD.",
+      "Minimize sensitive data in trigger inputs, outputs, run history, tracked properties, and diagnostics.",
+      "Monitor failures, throttles, duration, backlog, action latency, abandoned runs, connector health, and cost."
     ],
     "interviewQuestions": [
       {
-        "question": "When would you choose Logic Apps over Azure Functions for an integration scenario?",
-        "answer": "Logic Apps is the right choice when the integration is connector-heavy — Office 365, Salesforce, SAP, EDI — and the orchestration logic is conditional branching, looping, and sequencing rather than complex computation. Functions are better when the logic requires unit testing, custom algorithms, precise latency control, or dependencies not available as connectors."
+        "question": "When choose Logic Apps over Functions?",
+        "answer": "Choose Logic Apps for connector-heavy visible orchestration and enterprise integration; choose Functions for compute-heavy custom logic, fine-grained testing, or runtime control."
       },
       {
-        "question": "What is the difference between Standard and Consumption Logic Apps?",
-        "answer": "Consumption Logic Apps are multitenant, pay-per-execution resources that host one stateful workflow per app. Standard Logic Apps use the single-tenant runtime and a plan-based model, host multiple stateful or stateless workflows, support local development and private networking, and can also use a separate hybrid hosting option backed by an Azure Container Apps extension."
+        "question": "Standard versus Consumption?",
+        "answer": "Consumption is multitenant and metered per execution. Standard uses a single-tenant plan, supports multiple workflows, stateful or stateless execution, local development, and richer networking."
       },
       {
-        "question": "How do you handle errors and retries in a Logic Apps workflow?",
-        "answer": "Each action in a Logic Apps workflow can be configured with a retry policy — fixed or exponential backoff with a configurable count and interval. Run-after conditions on subsequent actions determine whether they execute on success, failure, timeout, or skipped status of the preceding action, enabling branching error-handling logic without custom exception handling code."
+        "question": "Stateful versus stateless?",
+        "answer": "Stateful persists run state and history for durable long-running work. Stateless keeps execution state in memory for short lower-latency flows and has different connector and action constraints."
+      },
+      {
+        "question": "How are failures modeled?",
+        "answer": "Actions expose Succeeded, Failed, Skipped, and TimedOut status. Run-after conditions, scopes, retry policies, compensation actions, and Terminate define the failure path."
+      },
+      {
+        "question": "How do you prevent duplicate side effects?",
+        "answer": "Pass a stable business or workflow-run key to an idempotent target, record completion atomically, and define safe retry and resubmission behavior."
+      },
+      {
+        "question": "How do you secure connector access?",
+        "answer": "Prefer managed identity where supported, grant least-privilege roles, protect API connections and parameters, restrict networks, and suppress sensitive run data."
       }
     ],
     "note": "Logic Apps excels at enterprise integration patterns — it is not a general application platform. Workflows with significant business logic, custom data transformations, or testing requirements are better served by .NET code.",
     "tip": "Use the Standard tier with local development tooling for any workflow that will be maintained long-term — it enables debugging in VS Code, source-controlled workflow definitions, and deployment through standard Azure pipelines.",
     "warning": "Consumption Logic Apps can accumulate significant costs under high-volume scenarios where thousands of actions execute per minute — model expected execution counts before choosing the consumption tier for frequent event-driven workflows.",
-    "sampleId": "solution-architecture-portfolio",
-    "readingMinutes": 11,
+    "sampleId": "logic-apps-order-approval",
+    "readingMinutes": 24,
     "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on triggers, connectors, stateful workflows, Standard vs Consumption, and B2B integration",
+    "updated": "2026-08-15",
+    "latestNote": "Gold-standard guide with a source-controlled workflow, idempotent callback API, Bicep, and focused tests",
     "resources": [
       {
         "label": "Azure Logic Apps overview",
         "url": "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview"
       },
       {
-        "label": "Logic Apps workflow designer",
-        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/designer-overview"
+        "label": "Single-tenant versus multitenant and integration service environment",
+        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/single-tenant-overview-compare"
+      },
+      {
+        "label": "Secure access and data in workflows",
+        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-securing-a-logic-app"
+      },
+      {
+        "label": "Authenticate connections with managed identities",
+        "url": "https://learn.microsoft.com/en-us/azure/logic-apps/authenticate-with-managed-identity"
       }
+    ],
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Explain triggers, actions, connectors, control flow, and workflow expressions.",
+      "Compare Consumption, Standard, stateful, stateless, and hybrid choices.",
+      "Design retry-safe integrations with idempotency, timeouts, scopes, and compensation.",
+      "Secure managed connectors, HTTP endpoints, identities, networking, and run history.",
+      "Version and deploy workflow artifacts with infrastructure as code.",
+      "Monitor throttling, latency, failures, backlog, recovery, and cost."
+    ],
+    "prerequisites": [
+      "HTTP, JSON, asynchronous workflows, queues, APIs, and eventual consistency.",
+      "OAuth, managed identity, Azure RBAC, Key Vault, private networking, and DNS.",
+      "Source control, Bicep, deployment pipelines, and operational monitoring."
+    ],
+    "decisionGuide": {
+      "use": [
+        "A workflow primarily coordinates supported systems and connectors.",
+        "Long-running integration needs visible state, retries, approvals, or B2B processing.",
+        "Operations teams benefit from run-level inspection and controlled resubmission."
+      ],
+      "avoid": [
+        "The workload is primarily complex computation or domain logic.",
+        "Required latency, throughput, connector limits, or cost do not fit.",
+        "A simple direct API or queue consumer has no meaningful orchestration."
+      ]
+    },
+    "implementationSteps": [
+      {
+        "title": "Map the workflow contract",
+        "description": "Define trigger, inputs, outputs, correlation, owners, SLOs, data classification, and completion semantics."
+      },
+      {
+        "title": "Choose hosting and state",
+        "description": "Select Consumption or Standard and stateful or stateless behavior from networking, duration, volume, latency, and cost."
+      },
+      {
+        "title": "Design connector identity",
+        "description": "Prefer managed identity, grant least privilege, configure networks, and isolate environment connection metadata."
+      },
+      {
+        "title": "Model the happy and failure paths",
+        "description": "Use scopes, run-after, retry, timeout, termination, compensation, and idempotent targets."
+      },
+      {
+        "title": "Parameterize and source control",
+        "description": "Version workflow JSON, connections metadata, schemas, maps, settings, and Bicep without secrets."
+      },
+      {
+        "title": "Test realistic behavior",
+        "description": "Cover malformed input, connector throttling, retries, duplicates, timeout, cancellation, and replay."
+      },
+      {
+        "title": "Deploy and operate",
+        "description": "Promote immutable artifacts, smoke test, alert, control resubmission, and rehearse dependency and regional recovery."
+      }
+    ],
+    "testing": {
+      "introduction": "Test definitions, custom code, connectors, and deployed orchestration at the correct boundaries.",
+      "items": [
+        "Validate workflow JSON, expressions, parameter references, schemas, and forbidden secrets in CI.",
+        "Unit test target APIs and inline or custom code independently.",
+        "Use isolated resources to test real connector authentication, throttling, pagination, and payload behavior.",
+        "Force Failed, TimedOut, Skipped, and throttled actions to verify scopes and run-after paths.",
+        "Replay the same trigger and resubmit a run to prove idempotent side effects.",
+        "Load test concurrency, action count, backlog, duration, connector limits, and cost."
+      ]
+    },
+    "security": {
+      "introduction": "Protect every trigger, connector, identity, parameter, network path, and recorded payload.",
+      "items": [
+        "Authenticate request triggers with Entra ID or a suitable gateway rather than relying only on secret URLs.",
+        "Use managed identity and least-privilege roles for supported Azure connectors.",
+        "Store secrets outside definitions and protect connection resources and deployment parameters.",
+        "Use private endpoints or VNet integration where the selected hosting model supports them.",
+        "Enable secure inputs and outputs and avoid PII or secrets in run history and tracked properties.",
+        "Restrict workflow editing, resubmission, and run-history access with RBAC and audit."
+      ]
+    },
+    "performance": {
+      "introduction": "Workflow throughput is constrained by runtime capacity, connector limits, action design, and downstream systems.",
+      "items": [
+        "Measure trigger latency, run duration, action latency, throttles, retries, backlog, and cost.",
+        "Use stateless workflows only when their execution and connector constraints fit.",
+        "Control loop concurrency and avoid unbounded parallel calls to a limited dependency.",
+        "Batch or chunk data deliberately and avoid large repeated transformations.",
+        "Use asynchronous messaging for long dependency waits instead of holding HTTP calls.",
+        "Model managed connector metering even on Standard plans."
+      ]
+    },
+    "deployment": {
+      "introduction": "Treat workflow definitions and connection metadata as application artifacts.",
+      "items": [
+        "Separate reusable definitions from environment parameters and connection resources.",
+        "Deploy identities, networking, connections, workflows, diagnostics, and alerts with code.",
+        "Use federated pipeline identity and least-privilege deployment roles.",
+        "Validate definitions and run smoke workflows before promotion.",
+        "Keep compatible target APIs during rollout and preserve idempotency across versions.",
+        "Document forward repair, resubmission, rollback, and regional recovery."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Action is skipped unexpectedly",
+        "cause": "Its run-after condition does not include the prior action status.",
+        "fix": "Inspect run history and configure explicit Succeeded, Failed, TimedOut, or Skipped dependencies."
+      },
+      {
+        "symptom": "Workflow repeats a side effect",
+        "cause": "A trigger, action retry, timeout, or resubmission replayed non-idempotent work.",
+        "fix": "Add a stable key and atomic idempotency record at the target before enabling replay."
+      },
+      {
+        "symptom": "Connector returns throttling errors",
+        "cause": "Loop concurrency or run volume exceeds connector or target limits.",
+        "fix": "Inspect retry headers and connector metrics, reduce concurrency, batch safely, and request capacity only after measurement."
+      },
+      {
+        "symptom": "Works in designer but deployment fails",
+        "cause": "Connection references, parameters, app settings, identity, or artifact layout differ.",
+        "fix": "Validate source-controlled definitions and environment mappings and deploy all dependencies in order."
+      },
+      {
+        "symptom": "Run history exposes sensitive data",
+        "cause": "Inputs, outputs, tracked properties, or diagnostics record payloads.",
+        "fix": "Enable secure inputs and outputs, minimize sensitive fields, restrict RBAC, and apply retention controls."
+      }
+    ],
+    "productionChecklist": [
+      "Hosting plan and workflow state match networking, latency, volume, duration, and cost.",
+      "Triggers, connectors, identities, secrets, and networks use deliberate least-privilege controls.",
+      "Retries, timeouts, run-after, compensation, idempotency, and resubmission are designed together.",
+      "Workflow, connection metadata, schemas, maps, parameters, and infrastructure are versioned.",
+      "Connector limits, concurrency, payload sizes, action count, and cost are load tested.",
+      "Failures, throttles, duration, backlog, abandoned runs, and sensitive telemetry have alerts and owners.",
+      "Deployment, rollback, replay, dependency failure, and regional recovery are rehearsed."
     ]
   },
   {
@@ -4933,7 +5352,7 @@
     "symbol": "AEH",
     "category": "Cloud Platforms",
     "color": "#00a4ef",
-    "shortDescription": "Ingest millions of events per second into Azure using Event Hubs — a fully managed, Kafka-compatible streaming platform with partitioned consumers, capture, and schema registry.",
+    "shortDescription": "Design high-throughput Azure event streams with partitions, consumer groups, checkpoints, replay, Capture, identity, and operational safeguards.",
     "keywords": [
       "Azure Event Hubs",
       "event streaming",
@@ -4947,23 +5366,39 @@
       "AMQP"
     ],
     "overview": "Azure Event Hubs is a fully managed big-data streaming platform that can receive and process millions of events per second with low latency, offering Kafka protocol compatibility and deep Azure ecosystem integration.",
-    "detail": "Event Hubs acts as the front door for event pipelines — telemetry ingestion, clickstream data, IoT device events, and application logs flow in through producers and are processed by consumers reading partitioned streams at their own pace. The EventProcessorClient in the Azure SDK for .NET handles partition ownership, checkpointing to Azure Blob Storage, and load-balanced consumption across multiple instances. Event Hubs is Kafka protocol-compatible, so existing Confluent.Kafka clients work by changing only the bootstrap server. Event Hubs Capture writes the stream to Azure Data Lake or Blob Storage in Avro format for batch analytics without additional pipeline code.",
+    "detail": "Azure Event Hubs is a managed append-only event streaming service for telemetry, logs, clickstreams, IoT signals, and other high-volume ordered streams. Producers publish batches to a hub, optionally selecting a partition key so related events retain order within one partition. Independent consumer groups read the retained log at their own pace. EventProcessorClient coordinates partition ownership across .NET consumer instances and persists checkpoints, commonly in Blob Storage, but checkpointing is not an atomic transaction with business side effects. Production designs therefore require idempotency, poison-event handling, bounded concurrency, stable partition keys, retention and Capture strategy, schema evolution, managed identity, private networking, throughput capacity, lag monitoring, replay runbooks, and downstream backpressure. Event Hubs also exposes Kafka protocol compatibility, but it remains an Azure service with its own tier and feature model.",
     "concepts": [
       {
-        "title": "Partitions and throughput units",
-        "description": "Events are distributed across partitions for parallel processing. Throughput units — or processing units in Premium — control ingress and egress capacity. Partition count is fixed at creation and determines maximum consumer parallelism."
+        "title": "Namespace, hub, and partitions",
+        "description": "A namespace contains event hubs; each hub is an ordered set of fixed partition logs that provide the unit of parallel consumption."
       },
       {
-        "title": "EventProcessorClient and checkpointing",
-        "description": "EventProcessorClient distributes partition ownership across multiple instances, processes events in batches, and persists checkpoints to Azure Blob Storage so processing resumes from the last committed offset after a restart."
+        "title": "Partition keys and ordering",
+        "description": "A stable key routes related events to one partition and preserves their order there; global ordering is not provided across partitions."
       },
       {
-        "title": "Kafka compatibility",
-        "description": "Event Hubs exposes a Kafka endpoint on port 9093. Confluent.Kafka and MassTransit Kafka transport clients connect by replacing the bootstrap server with the Event Hubs namespace FQDN and using a connection string as the SASL password."
+        "title": "Producers and batching",
+        "description": "Producers reuse clients and send bounded batches; routing choice, event size, retry, and idempotent semantics affect throughput and hot partitions."
       },
       {
-        "title": "Event Hubs Capture",
-        "description": "Capture automatically writes the event stream to Azure Blob Storage or Data Lake in Avro format on a time or size interval — enabling batch analytics, archiving, and event replay without any pipeline code."
+        "title": "Consumer groups",
+        "description": "Each logical application uses its own independent view of the stream, partition ownership, position, and checkpoint namespace."
+      },
+      {
+        "title": "EventProcessorClient",
+        "description": "The .NET processor cooperates with peer instances to claim partitions, rebalance ownership, receive events, and persist progress."
+      },
+      {
+        "title": "Checkpoints and replay",
+        "description": "A checkpoint records the last completed position, reducing recovery replay but never making external side effects exactly once."
+      },
+      {
+        "title": "Retention, Capture, and schema",
+        "description": "Time-based retention supports short replay; Capture archives events for longer recovery and analytics while schemas evolve compatibly."
+      },
+      {
+        "title": "Capacity and operations",
+        "description": "Throughput or processing units, partitions, quotas, throttling, consumer lag, network paths, identity, and disaster recovery define production limits."
       }
     ],
     "architecture": {
@@ -4988,46 +5423,207 @@
       "code": "using Azure.Messaging.EventHubs;\nusing Azure.Messaging.EventHubs.Processor;\nusing Azure.Storage.Blobs;\n\nvar storageClient = new BlobContainerClient(\n    config[\"Storage:ConnectionString\"],\n    \"event-checkpoints\");\n\nvar processor = new EventProcessorClient(\n    storageClient,\n    \"orders-consumer-group\",\n    config[\"EventHubs:ConnectionString\"],\n    \"order-events\");\n\nprocessor.ProcessEventAsync += async args =>\n{\n    try\n    {\n        var body = args.Data.Body.ToArray();\n        var orderEvent = JsonSerializer.Deserialize<OrderPlaced>(body);\n\n        if (orderEvent is not null)\n        {\n            logger.LogInformation(\n                \"Processing order {OrderId} from partition {Partition}\",\n                orderEvent.OrderId,\n                args.Partition.PartitionId);\n\n            await orderService.ProcessAsync(orderEvent, args.CancellationToken);\n        }\n\n        // Simple example: checkpoint after success. At scale, checkpoint less often.\n        await args.UpdateCheckpointAsync(args.CancellationToken);\n    }\n    catch (Exception ex)\n    {\n        logger.LogError(ex,\n            \"Failed to process event from partition {Partition}\",\n            args.Partition.PartitionId);\n        // Do NOT checkpoint on failure — event will be reprocessed\n    }\n};\n\nprocessor.ProcessErrorAsync += args =>\n{\n    logger.LogError(args.Exception,\n        \"Event Hubs processor error on partition {Partition}\",\n        args.PartitionId);\n    return Task.CompletedTask;\n};\n\nawait processor.StartProcessingAsync();\nawait Task.Delay(Timeout.Infinite); // Keep alive\nawait processor.StopProcessingAsync();"
     },
     "bestPractices": [
-      "Checkpoint only after successful processing, and choose a bounded checkpoint cadence—checkpointing every event increases storage operations, while checkpointing too rarely increases replay after failure.",
-      "Size partition count to match expected peak consumer instances — you cannot increase parallelism beyond the partition count regardless of how many processor instances you run.",
-      "Enable Event Hubs Capture from the start for production streams — it provides a zero-code archiving and replay capability that is very difficult to add retroactively once the retention window has passed.",
-      "Use managed identity for both producers and the EventProcessorClient in production — connection strings in configuration are a rotation burden and a security risk; managed identity eliminates both."
+      "Choose partition count from long-term peak parallelism and throughput because it is a durable architectural constraint.",
+      "Use high-cardinality stable partition keys only when per-key order matters, and monitor for hot partitions.",
+      "Reuse producer clients, build bounded batches, handle partial batch sizing, and propagate event IDs, schema versions, and correlation.",
+      "Give every logical application its own consumer group and checkpoint store prefix.",
+      "Checkpoint only after durable successful side effects at a measured cadence, and make the sink idempotent for replay.",
+      "Bound processor concurrency, prefetch, and batches to downstream capacity; quarantine poison events without blocking a partition forever.",
+      "Use managed identity, least-privilege data roles, TLS, private networking where required, and disable local authentication when feasible.",
+      "Monitor ingress, egress, throttling, partition skew, consumer lag and event age, checkpoint health, errors, retention risk, and Capture."
     ],
     "interviewQuestions": [
       {
-        "question": "What is the role of checkpointing in Event Hubs processing?",
-        "answer": "Checkpointing persists the offset of the last successfully processed event for each partition to Azure Blob Storage. When a processor instance restarts or another instance takes over a partition, it reads the checkpoint and resumes from where processing left off rather than from the beginning of the stream or the latest event."
+        "question": "Event Hubs versus Service Bus?",
+        "answer": "Event Hubs is a retained partitioned stream for high-throughput telemetry and independent readers. Service Bus is a broker for commands and workflows with queues, topics, locks, dead lettering, sessions, and transactions."
       },
       {
-        "question": "When would you choose Event Hubs over Azure Service Bus?",
-        "answer": "Event Hubs is designed for high-throughput event streaming — telemetry, logs, IoT, clickstreams — where multiple consumers read the same stream independently and ordering within a partition matters. Service Bus is designed for reliable message queuing and task distribution with dead-lettering, sessions, deferral, and transactional sends. Use Event Hubs for streaming analytics pipelines; use Service Bus for business process messaging and command distribution."
+        "question": "What ordering does Event Hubs guarantee?",
+        "answer": "Events have a defined sequence within one partition. There is no total order across partitions, so related ordered events must share a partition key."
       },
       {
-        "question": "How does Event Hubs Kafka compatibility work and what are its limits?",
-        "answer": "Event Hubs exposes the Kafka protocol over TLS on port 9093, using SASL_SSL with Microsoft Entra OAuth or SAS authentication. Kafka topics map to event hubs, while partitions and offsets map directly. Event Hubs remains a managed service that scales through throughput or processing units; some Kafka capabilities, including transactions and Kafka Streams, are tier-dependent previews in Premium and Dedicated."
+        "question": "What does EventProcessorClient do?",
+        "answer": "It coordinates partition ownership and load balancing across consumer instances, receives events, and uses a checkpoint store to resume progress."
+      },
+      {
+        "question": "Why is checkpointing not exactly once?",
+        "answer": "The business side effect and checkpoint are separate operations. A crash after the side effect but before the checkpoint causes replay."
+      },
+      {
+        "question": "Why use separate consumer groups?",
+        "answer": "Each logical consumer needs independent partition ownership and progress; sharing a group makes instances cooperate and split events rather than each receive the stream."
+      },
+      {
+        "question": "How does Kafka compatibility affect design?",
+        "answer": "Kafka clients can use the Event Hubs Kafka endpoint, but supported features, authentication, capacity, retention, and operational controls remain those of the chosen Event Hubs tier."
       }
     ],
     "note": "Event Hubs retention is time-based, not consumption-based — events are deleted after the configured retention period regardless of whether they were consumed. Design consumer catch-up strategies and use Capture for long-term archiving.",
     "tip": "Use the Kafka-compatible endpoint when migrating existing Kafka producers from a self-managed cluster to Event Hubs — change only the bootstrap server and credential configuration, validate, then decommission the cluster.",
     "warning": "Event Hubs provides at-least-once delivery. A failure after a side effect but before the next checkpoint can replay events, so handlers and downstream writes must be idempotent even though partition ownership is coordinated between processor instances.",
-    "sampleId": "ride-sharing-cqrs",
-    "readingMinutes": 12,
+    "sampleId": "event-hubs-checkpoint-processor",
+    "readingMinutes": 25,
     "level": "Intermediate",
-    "updated": "2026-08-07",
-    "latestNote": "New guide on partitions, EventProcessorClient, checkpointing, Kafka compatibility, and Capture",
+    "updated": "2026-08-15",
+    "latestNote": "Gold-standard guide with a dedicated partition, checkpoint, replay, idempotency, Bicep, and test sample",
     "resources": [
       {
         "label": "Azure Event Hubs overview",
         "url": "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about"
       },
       {
-        "label": "EventProcessorClient load balancing and checkpoints",
+        "label": "Partition load balancing and checkpoints",
         "url": "https://learn.microsoft.com/en-us/azure/event-hubs/event-processor-balance-partition-load"
       },
       {
-        "label": "Event Hubs for Apache Kafka",
-        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/azure-event-hubs-apache-kafka-overview"
+        "label": "Event Hubs authentication with Microsoft Entra ID",
+        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/authenticate-application"
+      },
+      {
+        "label": "Event Hubs Capture",
+        "url": "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview"
       }
+    ],
+    "contentStatus": "complete",
+    "learningObjectives": [
+      "Explain namespaces, hubs, partitions, keys, sequence, offsets, retention, and consumer groups.",
+      "Design producer batching, schemas, routing, and client reuse.",
+      "Operate EventProcessorClient ownership, checkpoints, replay, and idempotent side effects.",
+      "Choose capacity, partitions, concurrency, Capture, and downstream backpressure.",
+      "Secure producers, consumers, storage, networks, and deployment identities.",
+      "Test lag, throttling, poison events, rebalances, retention loss, and disaster recovery."
+    ],
+    "prerequisites": [
+      "Event streaming, async workers, serialization, eventual consistency, and idempotency.",
+      "Azure identity, RBAC, Blob Storage, networking, monitoring, and Bicep.",
+      "Capacity planning, load testing, schema evolution, and recovery procedures."
+    ],
+    "decisionGuide": {
+      "use": [
+        "High-volume append-only events need replay and independent consumers.",
+        "Per-key ordering and partitioned scale fit the domain.",
+        "Stream analytics or Capture-based data pipelines are required."
+      ],
+      "avoid": [
+        "Commands need queue locks, dead lettering, sessions, or transactional broker features.",
+        "Strict global ordering is required at high parallelism.",
+        "The workload is simple request-response or low-volume task dispatch."
+      ]
+    },
+    "implementationSteps": [
+      {
+        "title": "Define stream contracts",
+        "description": "Document event IDs, keys, schemas, owners, volume, ordering, retention, sensitivity, and consumers."
+      },
+      {
+        "title": "Choose tier and partitions",
+        "description": "Model event size, ingress, egress, parallelism, retention, Capture, availability, and growth."
+      },
+      {
+        "title": "Build producers",
+        "description": "Reuse clients, batch safely, apply stable keys only when needed, and emit versioned metadata."
+      },
+      {
+        "title": "Build consumer isolation",
+        "description": "Assign one consumer group and checkpoint scope per application and use EventProcessorClient for coordination."
+      },
+      {
+        "title": "Make effects replay-safe",
+        "description": "Validate events, deduplicate atomically, bound retries, quarantine poison records, then checkpoint."
+      },
+      {
+        "title": "Secure and deploy",
+        "description": "Provision identity, RBAC, networking, hub, consumer groups, checkpoint storage, Capture, diagnostics, and alerts with code."
+      },
+      {
+        "title": "Load and recovery test",
+        "description": "Measure skew and lag, kill processors during work, rebalance instances, replay from archive, and test retention-window failure."
+      }
+    ],
+    "testing": {
+      "introduction": "Prove application logic locally and authoritative platform behavior in an isolated Event Hubs environment.",
+      "items": [
+        "Unit test schemas, partition-key selection, idempotency, retry classification, poison routing, and checkpoint decisions.",
+        "Integration test serialized events, producer batches, EventProcessorClient, and Blob checkpoint access.",
+        "Run multiple processor instances and verify ownership balancing during scale and crashes.",
+        "Crash after a durable side effect but before checkpointing to prove replay safety.",
+        "Load test event size, batching, key skew, ingress, egress, lag, throttling, and downstream saturation.",
+        "Replay from a chosen offset or Capture archive and rehearse retention-loss recovery."
+      ]
+    },
+    "security": {
+      "introduction": "Secure the namespace, hub, checkpoint storage, Capture destination, network, identities, and event data.",
+      "items": [
+        "Use managed identity and least-privilege Event Hubs Data Sender or Receiver roles.",
+        "Use separate identities and scopes for producers, each consumer, Capture, and deployment.",
+        "Disable local authentication where all clients support Entra ID and rotate unavoidable SAS credentials.",
+        "Use TLS and private endpoints with complete DNS and egress design when required.",
+        "Do not place secrets or unnecessary PII in event bodies, properties, logs, or partition keys.",
+        "Protect checkpoint and archive storage from public access and destructive permissions."
+      ]
+    },
+    "performance": {
+      "introduction": "Throughput depends on event size, batch efficiency, partition distribution, capacity units, consumers, and downstream work.",
+      "items": [
+        "Batch producer sends within service limits and reuse long-lived clients.",
+        "Track per-partition ingress and lag to detect hot keys masked by namespace totals.",
+        "Tune processor batch, prefetch, and concurrency from downstream capacity.",
+        "Scale consumers only up to useful partition parallelism within a consumer group.",
+        "Checkpoint at a cadence that balances storage operations and acceptable replay.",
+        "Autoscale or increase capacity before sustained throttling, then verify end-to-end useful throughput."
+      ]
+    },
+    "deployment": {
+      "introduction": "Provision the complete streaming path and promote consumers with schema and replay compatibility.",
+      "items": [
+        "Deploy namespace, hub, partitions, retention, consumer groups, storage, Capture, identity, RBAC, network, diagnostics, and alerts with code.",
+        "Keep local authentication disabled when identity migration is complete.",
+        "Deploy producers before consumers only when schema compatibility permits.",
+        "Use separate consumer groups for blue-green validation without stealing partitions.",
+        "Smoke publish and consume a uniquely identified event and verify checkpoint and telemetry.",
+        "Rollback or replay only with idempotency and schema compatibility proven."
+      ]
+    },
+    "troubleshooting": [
+      {
+        "symptom": "Consumer instances run but lag grows",
+        "cause": "Hot partitions, insufficient units, downstream saturation, throttling, or excessive per-event work limits useful throughput.",
+        "fix": "Graph per-partition age, rate, ownership, throttles, duration, and dependency capacity; tune or repartition future keys deliberately."
+      },
+      {
+        "symptom": "Events repeat after restart",
+        "cause": "The last side effects occurred after the saved checkpoint or processing crashed before checkpointing.",
+        "fix": "Treat replay as normal, make effects idempotent, and choose checkpoint cadence from recovery objectives."
+      },
+      {
+        "symptom": "Some consumer instances stay idle",
+        "cause": "A consumer group cannot usefully assign more active processors than partitions.",
+        "fix": "Compare partition and instance counts and scale only to useful parallelism."
+      },
+      {
+        "symptom": "Processor repeatedly loses ownership",
+        "cause": "Checkpoint storage latency, inconsistent configuration, duplicate processor identifiers, or aggressive load balancing destabilizes leases.",
+        "fix": "Verify shared checkpoint scope, storage health, processor settings, time synchronization, and version consistency."
+      },
+      {
+        "symptom": "Authentication succeeds locally but fails in Azure",
+        "cause": "Credential source, token audience, RBAC data role scope, DNS, firewall, or private endpoint configuration differs.",
+        "fix": "Inspect the deployed identity, role propagation and scope, fully qualified namespace, token audience, and network path."
+      },
+      {
+        "symptom": "Replay cannot reach old events",
+        "cause": "The retention window expired and no suitable Capture archive exists.",
+        "fix": "Set retention from outage objectives, enable and monitor Capture, and rehearse archive replay before an incident."
+      }
+    ],
+    "productionChecklist": [
+      "Event contracts, keys, schemas, ordering, volume, retention, sensitivity, and owners are documented.",
+      "Tier, capacity, partitions, consumer groups, and Capture match long-term requirements.",
+      "Producers reuse clients, batch safely, and emit event ID, schema version, and correlation.",
+      "Consumers are idempotent, bounded, cancellation-aware, poison-safe, and checkpoint after durable success.",
+      "Managed identities, least-privilege roles, TLS, storage controls, and network paths are verified.",
+      "Per-partition skew, lag, age, throttling, errors, checkpoint health, retention risk, and Capture are monitored.",
+      "Scale, crash, rebalance, replay, schema rollback, retention loss, and regional recovery are rehearsed."
     ]
   },
   {

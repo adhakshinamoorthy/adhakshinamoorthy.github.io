@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/ApimGovernedOrders/ApimGovernedOrders.csproj" />
+  <Project Path="tests/ApimGovernedOrders.Tests/ApimGovernedOrders.Tests.csproj" />
+</Solution>

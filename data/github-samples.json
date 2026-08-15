@@ -703,5 +703,77 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/functions-isolated-order-processor",
     "localPath": "samples/functions-isolated-order-processor/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "apim-governed-orders",
+    "topicSlug": "azure-api-management",
+    "name": "APIM Governed Orders",
+    "description": "A .NET 10 orders API with APIM Bicep and a source-controlled policy for Entra JWT validation, rate limiting, correlation, bounded forwarding, and safe errors.",
+    "technologies": [
+      ".NET 10",
+      "Azure API Management",
+      "Bicep",
+      "Policy XML"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "api-gateway",
+      "managed-identity",
+      "policy-as-code"
+    ],
+    "runCommand": "dotnet run --project src/ApimGovernedOrders",
+    "testCommand": "dotnet test ApimGovernedOrders.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/apim-governed-orders",
+    "localPath": "samples/apim-governed-orders/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "logic-apps-order-approval",
+    "topicSlug": "azure-logic-apps",
+    "name": "Logic Apps Order Approval",
+    "description": "A source-controlled Logic Apps workflow, Bicep deployment, and .NET 10 idempotent callback API with retry-safe workflow run handling.",
+    "technologies": [
+      ".NET 10",
+      "Azure Logic Apps",
+      "Workflow Definition Language",
+      "Bicep"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "workflow",
+      "idempotency",
+      "managed-identity"
+    ],
+    "runCommand": "dotnet run --project src/LogicAppsOrderApproval",
+    "testCommand": "dotnet test LogicAppsOrderApproval.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/logic-apps-order-approval",
+    "localPath": "samples/logic-apps-order-approval/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "event-hubs-checkpoint-processor",
+    "topicSlug": "azure-event-hubs",
+    "name": "Event Hubs Checkpoint Processor",
+    "description": "A .NET 10 local stream processor demonstrating stable partition keys, ordered sequences, checkpoints, bounded processing, replay-safe idempotency, and Event Hubs Bicep.",
+    "technologies": [
+      ".NET 10",
+      "Azure Event Hubs",
+      "Azure Storage",
+      "Bicep"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "event-streaming",
+      "checkpointing",
+      "idempotency"
+    ],
+    "runCommand": "dotnet run --project src/EventHubsCheckpointProcessor",
+    "testCommand": "dotnet test EventHubsCheckpointProcessor.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/event-hubs-checkpoint-processor",
+    "localPath": "samples/event-hubs-checkpoint-processor/README.md",
+    "liveDemoUrl": null
   }
 ]

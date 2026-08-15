@@ -10,7 +10,8 @@ Every batch must preserve the portal completion contract: a full guide, a unique
 - Complete through Batch 10 on `main`: Resilience & Rate Limiting, Health Checks, Observability & OpenTelemetry, Testing, Architecture Testing, Testcontainers for .NET
 - Batch 11 ready for review: Docker, Kubernetes, CI/CD for .NET
 - Batch 12 ready for review: Terraform, Infrastructure as Code (Bicep), Azure Resource Manager
-- Batch 13 complete locally: Azure for .NET, Azure Container Apps, Azure Functions & Serverless
+- Batch 13 ready for review: Azure for .NET, Azure Container Apps, Azure Functions & Serverless
+- Batch 14 complete locally: Azure API Management, Azure Logic Apps, Azure Event Hubs
 
 ## Planned batches
 

@@ -518,8 +518,8 @@ try {
   const reviewedBatch = [
     ['azure-resource-manager', 'Azure Resource Manager', 2],
     ['apache-kafka', 'Apache Kafka', 2],
-    ['azure-logic-apps', 'Azure Logic Apps', 2],
-    ['azure-event-hubs', 'Azure Event Hubs', 3],
+    ['azure-logic-apps', 'Azure Logic Apps', 4],
+    ['azure-event-hubs', 'Azure Event Hubs', 4],
     ['rabbitmq', 'RabbitMQ', 3]
   ];
   for (const [topicSlug, expectedHeading, expectedResources] of reviewedBatch) {
@@ -638,6 +638,29 @@ try {
     check(metrics.scrollWidth <= metrics.width, `${heading} overflows the desktop viewport`);
   }
   await page.screenshot({ path: join(artifactDirectory, 'azure-application-platform-batch-desktop-light-top.png'), fullPage: false });
+  const azureIntegrationBatch = [
+    ['azure-api-management', 'Azure API Management', 8, 5, 7, 6, 7, '/samples/apim-governed-orders'],
+    ['azure-logic-apps', 'Azure Logic Apps', 8, 5, 7, 6, 7, '/samples/logic-apps-order-approval'],
+    ['azure-event-hubs', 'Azure Event Hubs', 8, 6, 7, 6, 7, '/samples/event-hubs-checkpoint-processor']
+  ];
+  for (const [slug, heading, concepts, troubleshooting, checklist, faq, steps, samplePath] of azureIntegrationBatch) {
+    await page.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await page.locator('h1').innerText()) === heading, `${heading} rendered the wrong heading`);
+    check(await page.locator('.topic-status-complete').count() === 1, `${heading} is not marked complete`);
+    check(await page.locator('.article-section').count() === 16, `${heading} does not render all content sections`);
+    check(await page.locator('.toc-link').count() === 16, `${heading} table of contents is incomplete`);
+    check(await page.locator('.concept-card').count() === concepts, `${heading} key concepts are incomplete`);
+    check(await page.locator('.step-list li').count() === steps, `${heading} walkthrough is incomplete`);
+    check(await page.locator('.troubleshooting-card').count() === troubleshooting, `${heading} troubleshooting is incomplete`);
+    check(await page.locator('.checklist li').count() === checklist, `${heading} checklist is incomplete`);
+    check(await page.locator('.faq-item').count() === faq, `${heading} interview FAQ is incomplete`);
+    check(await page.locator('#github-sample .sample-commands code').count() === 2, `${heading} sample commands are missing`);
+    check((await page.locator('#github-sample .github-link').getAttribute('href')).includes(samplePath), `${heading} sample link is wrong`);
+    check(await page.locator('.official-resource-links a').count() >= 4, `${heading} official resources are incomplete`);
+    const metrics = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width, `${heading} overflows the desktop viewport`);
+  }
+  await page.screenshot({ path: join(artifactDirectory, 'azure-integration-batch-desktop-light-top.png'), fullPage: false });
   await page.screenshot({ path: join(artifactDirectory, 'infrastructure-as-code-batch-desktop-light-top.png'), fullPage: false });
 
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
@@ -786,6 +809,17 @@ try {
     check(metrics.scrollWidth <= metrics.width + 1, `Mobile ${heading} horizontal overflow: ${metrics.scrollWidth}px`);
   }
   await mobilePage.screenshot({ path: join(artifactDirectory, 'infrastructure-as-code-batch-mobile-dark-top.png'), fullPage: false });
+  for (const [slug, heading] of [
+    ['azure-api-management', 'Azure API Management'],
+    ['azure-logic-apps', 'Azure Logic Apps'],
+    ['azure-event-hubs', 'Azure Event Hubs']
+  ]) {
+    await mobilePage.goto(`${baseUrl}/technologies/${slug}.html`, { waitUntil: 'networkidle' });
+    check((await mobilePage.locator('h1').innerText()) === heading, `Mobile ${heading} topic did not render`);
+    const metrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(metrics.scrollWidth <= metrics.width + 1, `Mobile ${heading} horizontal overflow: ${metrics.scrollWidth}px`);
+  }
+  await mobilePage.screenshot({ path: join(artifactDirectory, 'azure-integration-batch-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await mobilePage.screenshot({ path: join(artifactDirectory, 'home-mobile-dark.png'), fullPage: false });
   await mobile.close();
