@@ -1,0 +1,12 @@
+{
+  "name": "IncrementalOrders",
+  "properties": {
+    "parameters": { "oldWatermark": { "type": "Int" }, "newWatermark": { "type": "Int" } },
+    "activities": [{
+      "name": "CopyChangedOrders",
+      "type": "Copy",
+      "policy": { "timeout": "0.01:00:00", "retry": 3, "retryIntervalInSeconds": 30 },
+      "typeProperties": { "source": { "type": "AzureSqlSource", "sqlReaderQuery": "SELECT * FROM Orders WHERE Watermark > @{pipeline().parameters.oldWatermark} AND Watermark <= @{pipeline().parameters.newWatermark}" }, "sink": { "type": "ParquetSink" } }
+    }]
+  }
+}

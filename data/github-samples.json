@@ -775,5 +775,47 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/event-hubs-checkpoint-processor",
     "localPath": "samples/event-hubs-checkpoint-processor/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "adf-incremental-orders",
+    "topicSlug": "azure-data-factory-etl",
+    "name": "ADF Incremental Orders",
+    "description": "A .NET 10 restartable watermark pipeline with idempotent upserts, validation-gated progress, source-controlled ADF JSON, and managed-identity Bicep.",
+    "technologies": [".NET 10", "Azure Data Factory", "ETL", "Bicep"],
+    "tags": ["dedicated-sample", "incremental-load", "watermark", "idempotency"],
+    "runCommand": "dotnet run --project src/AdfIncrementalOrders",
+    "testCommand": "dotnet test AdfIncrementalOrders.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/adf-incremental-orders",
+    "localPath": "samples/adf-incremental-orders/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "key-vault-rotation-api",
+    "topicSlug": "azure-key-vault",
+    "name": "Key Vault Rotation API",
+    "description": "A .NET 10 versioned-secret lifecycle model with deliberate activation, bounded caching, redacted metadata, and recovery-protected Azure RBAC Bicep.",
+    "technologies": [".NET 10", "Azure Key Vault", "Managed Identity", "Bicep"],
+    "tags": ["dedicated-sample", "secret-rotation", "versioning", "least-privilege"],
+    "runCommand": "dotnet run --project src/KeyVaultRotationApi",
+    "testCommand": "dotnet test KeyVaultRotationApi.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/key-vault-rotation-api",
+    "localPath": "samples/key-vault-rotation-api/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "feature-flags-checkout",
+    "topicSlug": "feature-flags",
+    "name": "Feature Flags Checkout",
+    "description": "A .NET 10 checkout API with a global kill switch, deterministic percentage rollout, targeted groups, ownership, review dates, and App Configuration Bicep.",
+    "technologies": [".NET 10", "Feature Flags", "Azure App Configuration", "Bicep"],
+    "tags": ["dedicated-sample", "progressive-delivery", "targeting", "kill-switch"],
+    "runCommand": "dotnet run --project src/FeatureFlagsCheckout",
+    "testCommand": "dotnet test FeatureFlagsCheckout.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/feature-flags-checkout",
+    "localPath": "samples/feature-flags-checkout/README.md",
+    "liveDemoUrl": null
   }
 ]
