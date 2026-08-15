@@ -14,6 +14,19 @@ Every batch must preserve the portal completion contract: a full guide, a unique
 - Batch 14 complete locally: Azure API Management, Azure Logic Apps, Azure Event Hubs
 - Batch 15 complete locally: Azure Data Factory & ETL, Azure Key Vault & Secrets, Feature Flags
 - Batch 16 complete locally: Microservices, .NET Aspire, Orleans
+- Batch 17 complete locally: Semantic Kernel, Microsoft.Extensions.AI, Model Context Protocol
+- Batch 18 complete locally: ML.NET, .NET MAUI, Backend for Frontend
+- Batch 19 complete locally: Solution Architecture Fundamentals, Architecture Decision Records, Legacy Modernization
+- Batch 20 complete locally: Internal Developer Platforms, Cloud Adoption Framework, AWS for .NET
+- Batch 21 complete locally: Azure Well-Architected Framework, WAF: Reliability, WAF: Security
+- Batch 22 complete locally: WAF: Cost Optimization, WAF: Operational Excellence, WAF: Performance Efficiency
+- Batch 23 complete locally: YARP — Reverse Proxy, Structured Logging, Interview Questions
+
+## Current consolidation
+
+- Batches 17-23 are combined on `codex/remaining-batches` as one consolidated publication set.
+- The content model, dedicated sample inventory, generated topic pages, sitemap, and structural portal verification are complete.
+- Full sample builds, self-checks, dependency audits, browser checks, and live smoke tests remain deferred from this content-first batch delivery.
 
 ## Planned batches
 

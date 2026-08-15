@@ -859,5 +859,446 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/orleans-shopping-cart",
     "localPath": "samples/orleans-shopping-cart/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "semantic-kernel-order-agent",
+    "topicSlug": "semantic-kernel",
+    "name": "Semantic Kernel Order Agent",
+    "description": "A credential-free .NET 10 plugin orchestrator that separates retrieval from side effects, validates tool arguments, requires approval, and records idempotent operation IDs.",
+    "technologies": [
+      ".NET 10",
+      "Semantic Kernel Order Agent"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-17",
+      "semantic-kernel"
+    ],
+    "runCommand": "dotnet run --project src/SemanticKernelOrderAgent",
+    "testCommand": "dotnet run --project src/SemanticKernelOrderAgent -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/semantic-kernel-order-agent",
+    "localPath": "samples/semantic-kernel-order-agent/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "extensions-ai-chat-pipeline",
+    "topicSlug": "microsoft-extensions-ai",
+    "name": "Extensions AI Chat Pipeline",
+    "description": "A .NET 10 provider-neutral chat client pipeline demonstrating delegating middleware, deterministic caching, timing, and a swappable local provider.",
+    "technologies": [
+      ".NET 10",
+      "Extensions AI Chat Pipeline"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-17",
+      "microsoft-extensions-ai"
+    ],
+    "runCommand": "dotnet run --project src/ExtensionsAiChatPipeline",
+    "testCommand": "dotnet run --project src/ExtensionsAiChatPipeline -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/extensions-ai-chat-pipeline",
+    "localPath": "samples/extensions-ai-chat-pipeline/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "mcp-inventory-tools",
+    "topicSlug": "model-context-protocol",
+    "name": "MCP Inventory Tools",
+    "description": "A .NET 10 line-oriented JSON-RPC MCP teaching server that implements initialize, tools/list, and a schema-validated inventory tool without external services.",
+    "technologies": [
+      ".NET 10",
+      "MCP Inventory Tools"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-17",
+      "model-context-protocol"
+    ],
+    "runCommand": "dotnet run --project src/McpInventoryTools",
+    "testCommand": "dotnet run --project src/McpInventoryTools -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/mcp-inventory-tools",
+    "localPath": "samples/mcp-inventory-tools/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "mlnet-churn-evaluation",
+    "topicSlug": "mlnet",
+    "name": "ML.NET Churn Evaluation",
+    "description": "A .NET 10 churn-scoring lab with deterministic features, probability thresholding, confusion-matrix metrics, and a drift comparison.",
+    "technologies": [
+      ".NET 10",
+      "ML.NET Churn Evaluation"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-18",
+      "mlnet"
+    ],
+    "runCommand": "dotnet run --project src/MlnetChurnEvaluation",
+    "testCommand": "dotnet run --project src/MlnetChurnEvaluation -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/mlnet-churn-evaluation",
+    "localPath": "samples/mlnet-churn-evaluation/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "maui-offline-order-sync",
+    "topicSlug": "dotnet-maui",
+    "name": ".NET MAUI Offline Order Sync",
+    "description": "A .NET 10 offline-order domain core suitable for a MAUI app, with a durable-style outbox, idempotent synchronization, retry state, and conflict visibility.",
+    "technologies": [
+      ".NET 10",
+      ".NET MAUI Offline Order Sync"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-18",
+      "dotnet-maui"
+    ],
+    "runCommand": "dotnet run --project src/MauiOfflineOrderSync",
+    "testCommand": "dotnet run --project src/MauiOfflineOrderSync -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/maui-offline-order-sync",
+    "localPath": "samples/maui-offline-order-sync/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "bff-dashboard-composition",
+    "topicSlug": "backend-for-frontend",
+    "name": "BFF Dashboard Composition",
+    "description": "A .NET 10 dashboard composer with parallel bounded calls, user-scoped caching, partial-failure reporting, and a presentation-specific response.",
+    "technologies": [
+      ".NET 10",
+      "BFF Dashboard Composition"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-18",
+      "backend-for-frontend"
+    ],
+    "runCommand": "dotnet run --project src/BffDashboardComposition",
+    "testCommand": "dotnet run --project src/BffDashboardComposition -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/bff-dashboard-composition",
+    "localPath": "samples/bff-dashboard-composition/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "architecture-quality-attributes",
+    "topicSlug": "solution-architecture-fundamentals",
+    "name": "Architecture Quality Attribute Workshop",
+    "description": "A .NET 10 workshop model that validates quality-attribute scenarios, ranks architectural risk, and maps measurable responses to candidate tactics.",
+    "technologies": [
+      ".NET 10",
+      "Architecture Quality Attribute Workshop"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-19",
+      "solution-architecture-fundamentals"
+    ],
+    "runCommand": "dotnet run --project src/ArchitectureQualityAttributes",
+    "testCommand": "dotnet run --project src/ArchitectureQualityAttributes -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/architecture-quality-attributes",
+    "localPath": "samples/architecture-quality-attributes/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "adr-decision-lifecycle",
+    "topicSlug": "architecture-decision-records",
+    "name": "ADR Decision Lifecycle",
+    "description": "A .NET 10 ADR catalog validator that detects missing owners, invalid status transitions, and accepted decisions whose superseding record is absent.",
+    "technologies": [
+      ".NET 10",
+      "ADR Decision Lifecycle"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-19",
+      "architecture-decision-records"
+    ],
+    "runCommand": "dotnet run --project src/AdrDecisionLifecycle",
+    "testCommand": "dotnet run --project src/AdrDecisionLifecycle -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/adr-decision-lifecycle",
+    "localPath": "samples/adr-decision-lifecycle/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "legacy-strangler-router",
+    "topicSlug": "legacy-modernization",
+    "name": "Legacy Strangler Router",
+    "description": "A .NET 10 cohort router that moves deterministic traffic from a legacy implementation to a modern slice, compares outcomes, and supports immediate rollback.",
+    "technologies": [
+      ".NET 10",
+      "Legacy Strangler Router"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-19",
+      "legacy-modernization"
+    ],
+    "runCommand": "dotnet run --project src/LegacyStranglerRouter",
+    "testCommand": "dotnet run --project src/LegacyStranglerRouter -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/legacy-strangler-router",
+    "localPath": "samples/legacy-strangler-router/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "platform-service-catalog",
+    "topicSlug": "internal-developer-platforms",
+    "name": "Platform Service Catalog",
+    "description": "A .NET 10 service-catalog validator that checks ownership, tier, repository, runtime, health, telemetry, and runbook metadata before onboarding.",
+    "technologies": [
+      ".NET 10",
+      "Platform Service Catalog"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-20",
+      "internal-developer-platforms"
+    ],
+    "runCommand": "dotnet run --project src/PlatformServiceCatalog",
+    "testCommand": "dotnet run --project src/PlatformServiceCatalog -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/platform-service-catalog",
+    "localPath": "samples/platform-service-catalog/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "caf-landing-zone-readiness",
+    "topicSlug": "cloud-adoption-framework",
+    "name": "CAF Landing Zone Readiness",
+    "description": "A .NET 10 landing-zone readiness assessment that scores identity, organization, network, policy, operations, security, cost, and recovery gates.",
+    "technologies": [
+      ".NET 10",
+      "CAF Landing Zone Readiness"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-20",
+      "cloud-adoption-framework"
+    ],
+    "runCommand": "dotnet run --project src/CafLandingZoneReadiness",
+    "testCommand": "dotnet run --project src/CafLandingZoneReadiness -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/caf-landing-zone-readiness",
+    "localPath": "samples/caf-landing-zone-readiness/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "aws-dotnet-retry-client",
+    "topicSlug": "aws-for-dotnet",
+    "name": "AWS .NET Retry Client",
+    "description": "A .NET 10 AWS-style client policy lab that classifies throttling and server faults, applies capped jittered backoff, and refuses unsafe retries.",
+    "technologies": [
+      ".NET 10",
+      "AWS .NET Retry Client"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-20",
+      "aws-for-dotnet"
+    ],
+    "runCommand": "dotnet run --project src/AwsDotnetRetryClient",
+    "testCommand": "dotnet run --project src/AwsDotnetRetryClient -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/aws-dotnet-retry-client",
+    "localPath": "samples/aws-dotnet-retry-client/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "azure-waf-assessment",
+    "topicSlug": "azure-well-architected",
+    "name": "Azure Well-Architected Assessment",
+    "description": "A .NET 10 five-pillar workload assessment that weights findings by critical flow, impact, likelihood, evidence, owner, and remediation status.",
+    "technologies": [
+      ".NET 10",
+      "Azure Well-Architected Assessment"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-21",
+      "azure-well-architected"
+    ],
+    "runCommand": "dotnet run --project src/AzureWafAssessment",
+    "testCommand": "dotnet run --project src/AzureWafAssessment -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/azure-waf-assessment",
+    "localPath": "samples/azure-waf-assessment/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "waf-reliability-budget",
+    "topicSlug": "azure-waf-reliability",
+    "name": "WAF Reliability Budget",
+    "description": "A .NET 10 SLO calculator that derives monthly error budget, measures consumption, and raises fast- and slow-burn alerts.",
+    "technologies": [
+      ".NET 10",
+      "WAF Reliability Budget"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-21",
+      "azure-waf-reliability"
+    ],
+    "runCommand": "dotnet run --project src/WafReliabilityBudget",
+    "testCommand": "dotnet run --project src/WafReliabilityBudget -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/waf-reliability-budget",
+    "localPath": "samples/waf-reliability-budget/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "waf-security-threat-review",
+    "topicSlug": "azure-waf-security",
+    "name": "WAF Security Threat Review",
+    "description": "A .NET 10 threat-review model that maps assets, actors, trust crossings, preventive controls, detection, owner, and residual risk.",
+    "technologies": [
+      ".NET 10",
+      "WAF Security Threat Review"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-21",
+      "azure-waf-security"
+    ],
+    "runCommand": "dotnet run --project src/WafSecurityThreatReview",
+    "testCommand": "dotnet run --project src/WafSecurityThreatReview -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/waf-security-threat-review",
+    "localPath": "samples/waf-security-threat-review/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "waf-cost-unit-economics",
+    "topicSlug": "azure-waf-cost-optimization",
+    "name": "WAF Cost Unit Economics",
+    "description": "A .NET 10 unit-economics calculator that allocates shared Azure cost, calculates cost per order, detects idle spend, and flags budget variance.",
+    "technologies": [
+      ".NET 10",
+      "WAF Cost Unit Economics"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-22",
+      "azure-waf-cost-optimization"
+    ],
+    "runCommand": "dotnet run --project src/WafCostUnitEconomics",
+    "testCommand": "dotnet run --project src/WafCostUnitEconomics -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/waf-cost-unit-economics",
+    "localPath": "samples/waf-cost-unit-economics/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "waf-operations-release-readiness",
+    "topicSlug": "azure-waf-operational-excellence",
+    "name": "WAF Operations Release Readiness",
+    "description": "A .NET 10 release-readiness gate that verifies ownership, SLOs, dashboards, alerts, runbooks, rollback, capacity, security, and recovery evidence.",
+    "technologies": [
+      ".NET 10",
+      "WAF Operations Release Readiness"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-22",
+      "azure-waf-operational-excellence"
+    ],
+    "runCommand": "dotnet run --project src/WafOperationsReleaseReadiness",
+    "testCommand": "dotnet run --project src/WafOperationsReleaseReadiness -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/waf-operations-release-readiness",
+    "localPath": "samples/waf-operations-release-readiness/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "waf-performance-capacity",
+    "topicSlug": "azure-waf-performance-efficiency",
+    "name": "WAF Performance Capacity",
+    "description": "A .NET 10 capacity planner using Little’s Law, headroom, autoscale lead time, and per-instance throughput to estimate safe instance count.",
+    "technologies": [
+      ".NET 10",
+      "WAF Performance Capacity"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-22",
+      "azure-waf-performance-efficiency"
+    ],
+    "runCommand": "dotnet run --project src/WafPerformanceCapacity",
+    "testCommand": "dotnet run --project src/WafPerformanceCapacity -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/waf-performance-capacity",
+    "localPath": "samples/waf-performance-capacity/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "yarp-route-policy-lab",
+    "topicSlug": "yarp-reverse-proxy",
+    "name": "YARP Route Policy Lab",
+    "description": "A .NET 10 YARP policy model that performs ordered route matching, strips spoofable headers, selects healthy destinations, and rejects unsafe retries.",
+    "technologies": [
+      ".NET 10",
+      "YARP Route Policy Lab"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-23",
+      "yarp-reverse-proxy"
+    ],
+    "runCommand": "dotnet run --project src/YarpRoutePolicyLab",
+    "testCommand": "dotnet run --project src/YarpRoutePolicyLab -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/yarp-route-policy-lab",
+    "localPath": "samples/yarp-route-policy-lab/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "structured-logging-correlation",
+    "topicSlug": "structured-logging",
+    "name": "Structured Logging Correlation",
+    "description": "A .NET 10 JSON log emitter with stable event names, trace correlation, typed properties, exception classification, and allowlist-based redaction.",
+    "technologies": [
+      ".NET 10",
+      "Structured Logging Correlation"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-23",
+      "structured-logging"
+    ],
+    "runCommand": "dotnet run --project src/StructuredLoggingCorrelation",
+    "testCommand": "dotnet run --project src/StructuredLoggingCorrelation -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/structured-logging-correlation",
+    "localPath": "samples/structured-logging-correlation/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "dotnet-interview-practice",
+    "topicSlug": "interview-questions",
+    "name": ".NET Interview Practice",
+    "description": "A .NET 10 interview-practice engine that schedules prompts, scores answers against a transparent architecture rubric, and prioritizes weak competencies.",
+    "technologies": [
+      ".NET 10",
+      ".NET Interview Practice"
+    ],
+    "tags": [
+      "dedicated-sample",
+      "batch-23",
+      "interview-questions"
+    ],
+    "runCommand": "dotnet run --project src/DotnetInterviewPractice",
+    "testCommand": "dotnet run --project src/DotnetInterviewPractice -- --self-test",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/dotnet-interview-practice",
+    "localPath": "samples/dotnet-interview-practice/README.md",
+    "liveDemoUrl": null
   }
 ]
