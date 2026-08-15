@@ -13,6 +13,7 @@ Every batch must preserve the portal completion contract: a full guide, a unique
 - Batch 13 ready for review: Azure for .NET, Azure Container Apps, Azure Functions & Serverless
 - Batch 14 complete locally: Azure API Management, Azure Logic Apps, Azure Event Hubs
 - Batch 15 complete locally: Azure Data Factory & ETL, Azure Key Vault & Secrets, Feature Flags
+- Batch 16 complete locally: Microservices, .NET Aspire, Orleans
 
 ## Planned batches
 

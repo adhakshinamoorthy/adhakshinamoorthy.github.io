@@ -817,5 +817,47 @@
     "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/feature-flags-checkout",
     "localPath": "samples/feature-flags-checkout/README.md",
     "liveDemoUrl": null
+  },
+  {
+    "id": "microservices-order-flow",
+    "topicSlug": "microservices",
+    "name": "Microservices Order Flow",
+    "description": "A .NET 10 order API demonstrating service-owned state, transactional-outbox intent, idempotent inventory consumption, bounded contracts, health, and Service Bus infrastructure.",
+    "technologies": [".NET 10", "Microservices", "Transactional Outbox", "Bicep"],
+    "tags": ["dedicated-sample", "data-ownership", "outbox", "idempotency"],
+    "runCommand": "dotnet run --project src/MicroservicesOrderFlow",
+    "testCommand": "dotnet test MicroservicesOrderFlow.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/microservices-order-flow",
+    "localPath": "samples/microservices-order-flow/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "aspire-service-map",
+    "topicSlug": "dotnet-aspire",
+    "name": "Aspire Service Map",
+    "description": "A real Aspire 13.4 AppHost coordinating two .NET 10 API resources with typed references, health-aware startup, dashboard observability, topology tests, and Container Apps infrastructure.",
+    "technologies": ["Aspire 13.4", ".NET 10", "AppHost", "Bicep"],
+    "tags": ["dedicated-sample", "service-discovery", "resource-graph", "observability"],
+    "runCommand": "aspire run --project src/AspireServiceMap.AppHost",
+    "testCommand": "dotnet test AspireServiceMap.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/aspire-service-map",
+    "localPath": "samples/aspire-service-map/README.md",
+    "liveDemoUrl": null
+  },
+  {
+    "id": "orleans-shopping-cart",
+    "topicSlug": "orleans",
+    "name": "Orleans Shopping Cart",
+    "description": "A .NET 10 and Orleans 10.2 API demonstrating stable grain identity, turn-based cart ownership, localhost clustering, bounded commands, health, focused tests, and production persistence infrastructure.",
+    "technologies": ["Orleans 10.2", ".NET 10", "Virtual Actors", "Bicep"],
+    "tags": ["dedicated-sample", "grains", "turn-based-execution", "clustering"],
+    "runCommand": "dotnet run --project src/OrleansShoppingCart",
+    "testCommand": "dotnet test OrleansShoppingCart.slnx",
+    "status": "complete",
+    "githubUrl": "https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/orleans-shopping-cart",
+    "localPath": "samples/orleans-shopping-cart/README.md",
+    "liveDemoUrl": null
   }
 ]
