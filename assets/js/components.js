@@ -189,20 +189,21 @@ export function getTechnologyNavigationOrder(technologies) {
 export function renderSidebar(base, technologies, activeSlug = '') {
   const host = document.getElementById('site-sidebar');
   const groups = groupTechnologiesByCategory(technologies);
-  host.innerHTML = [...groups].map(([category, items]) => {
+  host.innerHTML = [...groups].map(([category, items], index) => {
     const containsActiveTopic = items.some(item => item.slug === activeSlug);
+    const listId = `sidebar-group-${index}`;
     return `
     <nav class="sidebar-group" aria-label="${escapeHtml(category)}">
-      <details class="sidebar-disclosure" ${containsActiveTopic ? 'open' : ''}>
-        <summary class="sidebar-label">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="${containsActiveTopic}" aria-controls="${listId}">
           <span>${escapeHtml(category)}</span>
           <span class="sidebar-count" aria-label="${items.length} topics">${items.length}</span>
           <span class="sidebar-chevron" aria-hidden="true"></span>
-        </summary>
-        <ul class="sidebar-list">
+        </button>
+        <ul id="${listId}" class="sidebar-list"${containsActiveTopic ? '' : ' hidden'}>
           ${items.map(item => `<li><a class="sidebar-link" href="${base}technologies/${item.slug}.html" ${item.slug === activeSlug ? 'aria-current="page"' : ''}><span class="sidebar-dot" style="--topic-color:${item.color}"></span>${escapeHtml(item.name)}</a></li>`).join('')}
         </ul>
-      </details>
+      </div>
     </nav>`;
   }).join('');
   const overlay = document.createElement('div');
@@ -211,6 +212,14 @@ export function renderSidebar(base, technologies, activeSlug = '') {
   document.body.append(overlay);
   overlay.addEventListener('click', closeMobileMenu);
   host.addEventListener('click', event => {
+    const button = event.target.closest('.sidebar-label');
+    if (button) {
+      const list = document.getElementById(button.getAttribute('aria-controls'));
+      const expanded = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(expanded));
+      list.hidden = !expanded;
+      return;
+    }
     if (event.target.closest('a')) closeMobileMenu();
   });
 }
