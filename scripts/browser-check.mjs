@@ -50,12 +50,12 @@ try {
   check(await page.locator('#hero-title').isVisible(), 'Hero heading is not visible');
   check(await page.locator('.hero-actions .button-primary').isVisible(), 'Primary hero action is not visible');
   check(await page.locator('.sidebar-disclosure').count() > 0, 'Sidebar category disclosures are missing');
-  check(await page.locator('.sidebar-disclosure[open]').count() === 0, 'Sidebar categories are not collapsed by default');
+  check(await page.locator('.sidebar-label[aria-expanded="true"]').count() === 0, 'Sidebar categories are not collapsed by default');
   await page.locator('.sidebar-label').first().click();
-  check(await page.locator('.sidebar-disclosure').first().getAttribute('open') !== null, 'Sidebar category did not expand');
+  check(await page.locator('.sidebar-label').first().getAttribute('aria-expanded') === 'true', 'Sidebar category did not expand');
   check(await page.locator('.sidebar-list').first().isVisible(), 'Expanded sidebar topics are not visible');
   await page.locator('.sidebar-label').first().click();
-  check(await page.locator('.sidebar-disclosure').first().getAttribute('open') === null, 'Sidebar category did not collapse');
+  check(await page.locator('.sidebar-label').first().getAttribute('aria-expanded') === 'false', 'Sidebar category did not collapse');
 
   const desktopMetrics = await page.evaluate(() => ({
     width: innerWidth,
@@ -146,9 +146,9 @@ try {
 
   await page.goto(`${baseUrl}/technologies/aspnet-core.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'ASP.NET Core', 'Direct topic link did not render ASP.NET Core');
-  check(await page.locator('.sidebar-disclosure[open]').count() === 1, 'Topic page does not expand exactly one sidebar category');
+  check(await page.locator('.sidebar-label[aria-expanded="true"]').count() === 1, 'Topic page does not expand exactly one sidebar category');
   check(
-    await page.locator('.sidebar-disclosure[open] .sidebar-link[aria-current="page"]').count() === 1,
+    await page.locator('.sidebar-label[aria-expanded="true"]').locator('..').locator('.sidebar-link[aria-current="page"]').count() === 1,
     'Expanded sidebar category does not contain the active topic'
   );
   check(await page.locator('.topic-status-complete').count() === 1, 'ASP.NET Core is not marked as a complete guide');
@@ -167,6 +167,12 @@ try {
   check((await page.locator('#github-sample .github-link').getAttribute('href')).includes('/samples/aspnet-core-api'), 'Dedicated sample links to the wrong GitHub path');
   check(await page.locator('.article-nav a').count() === 2, 'Previous/next navigation is incomplete');
   check(await page.locator('.code-block .tok-keyword').count() > 0, 'C# syntax highlighting is missing');
+  await page.evaluate(() => scrollTo(0, 900));
+  check(await page.locator('.topbar').evaluate(element => Math.abs(element.getBoundingClientRect().top) < 1), 'Top navigation did not remain sticky while scrolling');
+  await page.locator('.sidebar-label').first().click();
+  check(await page.locator('.sidebar-label[aria-expanded="true"]').count() === 2, 'Expanding one sidebar category changed another category state');
+  await page.locator('.sidebar-label').first().press('Space');
+  check(await page.locator('.sidebar-label[aria-expanded="true"]').count() === 1, 'Sidebar category did not collapse with the keyboard');
 
   await page.goto(`${baseUrl}/technologies/blazor.html`, { waitUntil: 'networkidle' });
   check((await page.locator('h1').innerText()) === 'Blazor', 'Direct topic link did not render Blazor');
@@ -757,6 +763,13 @@ try {
   check((await mobilePage.locator('h1').innerText()) === 'C#', 'Mobile C# topic page did not render');
   const csharpMobileMetrics = await mobilePage.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   check(csharpMobileMetrics.scrollWidth <= csharpMobileMetrics.width + 1, `Mobile C# horizontal overflow: ${csharpMobileMetrics.scrollWidth}px`);
+  const architectureMetrics = await mobilePage.locator('.architecture-placeholder').evaluate(element => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    overflowX: getComputedStyle(element).overflowX
+  }));
+  check(architectureMetrics.overflowX === 'auto', 'Architecture placeholder does not enable local horizontal scrolling');
+  check(architectureMetrics.scrollWidth > architectureMetrics.clientWidth, 'Architecture flow does not retain a scrollable width on mobile');
   await mobilePage.screenshot({ path: join(artifactDirectory, 'csharp-mobile-dark-top.png'), fullPage: false });
   await mobilePage.goto(`${baseUrl}/technologies/dependency-injection.html`, { waitUntil: 'networkidle' });
   check((await mobilePage.locator('h1').innerText()) === 'Dependency Injection', 'Mobile Dependency Injection topic page did not render');
