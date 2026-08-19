@@ -211,16 +211,26 @@ export function renderSidebar(base, technologies, activeSlug = '') {
   overlay.id = 'sidebar-overlay';
   document.body.append(overlay);
   overlay.addEventListener('click', closeMobileMenu);
+  const toggleSidebarGroup = button => {
+    const list = document.getElementById(button.getAttribute('aria-controls'));
+    const expanded = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(expanded));
+    list.hidden = !expanded;
+  };
   host.addEventListener('click', event => {
     const button = event.target.closest('.sidebar-label');
     if (button) {
-      const list = document.getElementById(button.getAttribute('aria-controls'));
-      const expanded = button.getAttribute('aria-expanded') !== 'true';
-      button.setAttribute('aria-expanded', String(expanded));
-      list.hidden = !expanded;
+      toggleSidebarGroup(button);
       return;
     }
     if (event.target.closest('a')) closeMobileMenu();
+  });
+  host.addEventListener('keydown', event => {
+    const button = event.target.closest('.sidebar-label');
+    if (button && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      toggleSidebarGroup(button);
+    }
   });
 }
 
