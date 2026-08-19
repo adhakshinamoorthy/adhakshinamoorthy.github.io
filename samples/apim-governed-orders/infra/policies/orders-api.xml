@@ -1,0 +1,24 @@
+<policies>
+  <inbound>
+    <base />
+    <set-header name="x-correlation-id" exists-action="skip">
+      <value>@(context.RequestId.ToString())</value>
+    </set-header>
+    <validate-jwt header-name="Authorization" failed-validation-httpcode="401" require-expiration-time="true">
+      <openid-config url="{{entra-openid-config}}" />
+      <audiences><audience>{{orders-api-audience}}</audience></audiences>
+      <required-claims><claim name="scp" match="any"><value>orders.read</value></claim></required-claims>
+    </validate-jwt>
+    <rate-limit-by-key calls="120" renewal-period="60" counter-key="@(context.Principal?.Identity?.Name ?? context.Request.IpAddress)" />
+    <set-backend-service backend-id="orders-backend" />
+  </inbound>
+  <backend><forward-request timeout="20" /></backend>
+  <outbound><base /><set-header name="Server" exists-action="delete" /></outbound>
+  <on-error>
+    <set-header name="x-correlation-id" exists-action="override"><value>@(context.RequestId.ToString())</value></set-header>
+    <return-response>
+      <set-status code="502" reason="Gateway dependency failure" />
+      <set-body>@("{\"type\":\"https://httpstatuses.com/502\",\"title\":\"Gateway dependency failure\",\"correlationId\":\"" + context.RequestId + "\"}")</set-body>
+    </return-response>
+  </on-error>
+</policies>

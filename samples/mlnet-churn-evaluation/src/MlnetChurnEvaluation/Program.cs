@@ -1,0 +1,13 @@
+var rows = new[] { new Customer(3, 1, true), new(18, 8, false), new(5, 3, true), new(30, 12, false) };
+var threshold = 0.55;
+var predictions = rows.Select(x => new { x.Churned, Score = Sigmoid(1.8 - .09 * x.MonthsActive + .35 * x.SupportTickets) }).ToArray();
+var tp = predictions.Count(x => x.Churned && x.Score >= threshold);
+var fp = predictions.Count(x => !x.Churned && x.Score >= threshold);
+var fn = predictions.Count(x => x.Churned && x.Score < threshold);
+var precision = tp / (double)Math.Max(1, tp + fp);
+var recall = tp / (double)Math.Max(1, tp + fn);
+Console.WriteLine($"threshold={threshold:F2} precision={precision:F2} recall={recall:F2}");
+if (args.Contains("--self-test") && (precision < .5 || recall < .5)) return 1;
+return 0;
+static double Sigmoid(double value) => 1 / (1 + Math.Exp(-value));
+sealed record Customer(int MonthsActive, int SupportTickets, bool Churned);

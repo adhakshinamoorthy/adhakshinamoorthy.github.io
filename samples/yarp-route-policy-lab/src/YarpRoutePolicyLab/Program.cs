@@ -1,0 +1,12 @@
+var routes = new[] { new Route("orders", "/api/orders", new[] { "GET", "POST" }, "orders"), new("catalog", "/api/catalog", new[] { "GET" }, "catalog") };
+var destinations = new[] { new Destination("orders-a", "orders", true, 2), new("orders-b", "orders", false, 0), new("catalog-a", "catalog", true, 1) };
+var request = new Request("POST", "/api/orders/42", new Dictionary<string, string> { ["X-Forwarded-User"] = "spoofed" });
+request.Headers.Remove("X-Forwarded-User");
+var route = routes.First(x => request.Path.StartsWith(x.Prefix) && x.Methods.Contains(request.Method));
+var target = destinations.Where(x => x.Cluster == route.Cluster && x.Healthy).OrderBy(x => x.InFlight).First();
+Console.WriteLine($"route={route.Name} target={target.Name} headers={request.Headers.Count}");
+if (args.Contains("--self-test") && (target.Name != "orders-a" || request.Headers.Count != 0)) return 1;
+return 0;
+sealed record Route(string Name, string Prefix, string[] Methods, string Cluster);
+sealed record Destination(string Name, string Cluster, bool Healthy, int InFlight);
+sealed record Request(string Method, string Path, Dictionary<string, string> Headers);

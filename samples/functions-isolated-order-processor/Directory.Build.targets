@@ -1,0 +1,17 @@
+<Project>
+  <Target Name="RemoveMissingFunctionsExtensionAssets"
+          BeforeTargets="_FunctionsPostBuildCopyFiles"
+          Condition="'$(AssemblyName)' == 'Microsoft.Azure.Functions.Worker.Extensions'">
+    <ItemGroup>
+      <FunctionsBuildAssemblies Remove="@(FunctionsBuildAssemblies)"
+                                Condition="!Exists('%(FunctionsBuildAssemblies.FullPath)')" />
+    </ItemGroup>
+  </Target>
+  <Target Name="RemoveMissingFunctionsAppCopyItems"
+          BeforeTargets="_CopyOutOfDateSourceItemsToOutputDirectory">
+    <ItemGroup>
+      <_SourceItemsToCopyToOutputDirectory Remove="@(_SourceItemsToCopyToOutputDirectory)"
+                                            Condition="!Exists('%(_SourceItemsToCopyToOutputDirectory.FullPath)')" />
+    </ItemGroup>
+  </Target>
+</Project>
