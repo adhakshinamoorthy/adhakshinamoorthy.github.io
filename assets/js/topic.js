@@ -12,7 +12,7 @@ import {
   renderFooter,
   renderNavbar,
   renderSidebar
-} from './components.js';
+} from './components.js?v=20260819';
 
 const base = '../';
 const slug = document.body.dataset.topic;
