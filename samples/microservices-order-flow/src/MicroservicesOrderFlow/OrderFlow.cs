@@ -28,12 +28,14 @@ public sealed class OrderService
 
     public OrderView? Find(Guid id)
     {
-        lock (gate) return orders.GetValueOrDefault(id);
+        lock (gate)
+            return orders.GetValueOrDefault(id);
     }
 
     public OrderPlaced? DequeueOutbox()
     {
-        lock (gate) return outbox.TryDequeue(out var message) ? message : null;
+        lock (gate)
+            return outbox.TryDequeue(out var message) ? message : null;
     }
 }
 
@@ -47,7 +49,8 @@ public sealed class InventoryConsumer
     {
         lock (gate)
         {
-            if (!processedMessages.Add(message.MessageId)) return false;
+            if (!processedMessages.Add(message.MessageId))
+                return false;
             foreach (var line in message.Lines)
                 reservations[line.Sku] = reservations.GetValueOrDefault(line.Sku) + line.Quantity;
             return true;
@@ -56,6 +59,7 @@ public sealed class InventoryConsumer
 
     public int Reserved(string sku)
     {
-        lock (gate) return reservations.GetValueOrDefault(sku);
+        lock (gate)
+            return reservations.GetValueOrDefault(sku);
     }
 }

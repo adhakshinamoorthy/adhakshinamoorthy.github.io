@@ -5,6 +5,7 @@ using System.Text;
 namespace EventHubsCheckpointProcessor;
 
 public sealed record TelemetryInput(string EventId, string DeviceId, double Value);
+
 public sealed record StreamEvent(string EventId, string DeviceId, double Value, string PartitionId, long SequenceNumber, DateTimeOffset EnqueuedAt);
 
 public sealed class LocalEventHub(int partitionCount = 4)
@@ -36,7 +37,8 @@ public sealed class LocalEventHub(int partitionCount = 4)
     public static int SelectPartition(string key, int partitionCount)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
-        if (partitionCount <= 0) throw new ArgumentOutOfRangeException(nameof(partitionCount));
+        if (partitionCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(partitionCount));
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(key));
         return (int)(BitConverter.ToUInt32(hash, 0) % (uint)partitionCount);
     }
@@ -45,15 +47,20 @@ public sealed class LocalEventHub(int partitionCount = 4)
 public sealed class CheckpointStore
 {
     private readonly ConcurrentDictionary<string, long> _checkpoints = new();
+
     public long Get(string partitionId) => _checkpoints.GetValueOrDefault(partitionId, -1);
+
     public void Save(string partitionId, long sequenceNumber) => _checkpoints.AddOrUpdate(partitionId, sequenceNumber, (_, current) => Math.Max(current, sequenceNumber));
+
     public IReadOnlyDictionary<string, long> Snapshot() => new Dictionary<string, long>(_checkpoints);
 }
 
 public sealed class IdempotentTelemetrySink
 {
     private readonly ConcurrentDictionary<string, StreamEvent> _events = new(StringComparer.Ordinal);
+
     public bool Write(StreamEvent item) => _events.TryAdd(item.EventId, item);
+
     public int Count => _events.Count;
 }
 

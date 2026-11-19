@@ -6,9 +6,12 @@ var completed = new Dictionary<string, string>();
 string GetStatus(string orderId) => orders.TryGetValue(orderId, out var status) ? status : "Not found";
 string Cancel(string orderId, string operationId, bool approved)
 {
-    if (!approved) return "Approval required";
-    if (completed.TryGetValue(operationId, out var prior)) return prior;
-    if (!orders.ContainsKey(orderId)) return "Order not found";
+    if (!approved)
+        return "Approval required";
+    if (completed.TryGetValue(operationId, out var prior))
+        return prior;
+    if (!orders.ContainsKey(orderId))
+        return "Order not found";
     orders[orderId] = "Cancelled";
     return completed[operationId] = $"{orderId} cancelled";
 }

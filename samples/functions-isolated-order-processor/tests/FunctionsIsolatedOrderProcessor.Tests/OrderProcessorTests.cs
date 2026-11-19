@@ -16,7 +16,9 @@ public sealed class OrderProcessorTests
     }
 
     [Theory]
-    [InlineData("{}")] [InlineData("null")] [InlineData("{\"EventId\":\"e\",\"OrderId\":\"o\",\"Amount\":0}")]
+    [InlineData("{}")]
+    [InlineData("null")]
+    [InlineData("{\"EventId\":\"e\",\"OrderId\":\"o\",\"Amount\":0}")]
     public async Task Invalid_event_is_rejected(string payload)
     {
         var processor = new OrderProcessor(new InMemoryOrderReceiptStore());

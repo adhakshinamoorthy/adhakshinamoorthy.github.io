@@ -16,10 +16,12 @@ public sealed class IncrementalOrderPipeline
     public OrderChange AddSourceChange(OrderChange change)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(change.OrderId);
-        if (change.Total < 0) throw new ArgumentException("Total cannot be negative.");
+        if (change.Total < 0)
+            throw new ArgumentException("Total cannot be negative.");
         lock (_source)
         {
-            if (_source.Any(item => item.Watermark == change.Watermark)) throw new ArgumentException("Watermark must be unique.");
+            if (_source.Any(item => item.Watermark == change.Watermark))
+                throw new ArgumentException("Watermark must be unique.");
             _source.Add(change);
         }
         return change;
@@ -34,8 +36,10 @@ public sealed class IncrementalOrderPipeline
             from = _committedWatermark;
             batch = _source.Where(item => item.Watermark > from).OrderBy(item => item.Watermark).ToArray();
         }
-        if (batch.Length == 0) return new(from, from, 0, 0, true);
-        if (validator is not null && batch.Any(item => !validator(item))) return new(from, batch[^1].Watermark, batch.Length, 0, false);
+        if (batch.Length == 0)
+            return new(from, from, 0, 0, true);
+        if (validator is not null && batch.Any(item => !validator(item)))
+            return new(from, batch[^1].Watermark, batch.Length, 0, false);
 
         foreach (var item in batch)
             _sink.AddOrUpdate(item.OrderId, new CuratedOrder(item.OrderId, item.Total, item.Watermark), (_, current) =>

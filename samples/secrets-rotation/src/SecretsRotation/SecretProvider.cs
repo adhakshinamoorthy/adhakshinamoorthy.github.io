@@ -42,7 +42,8 @@ public sealed class CachedSecretProvider(ISecretVault vault, TimeProvider timePr
     public async ValueTask<SecretValue> GetAsync(string name, CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();
-        if (_cache.TryGetValue(name, out var cached) && cached.ExpiresAtUtc > now) return cached.Secret;
+        if (_cache.TryGetValue(name, out var cached) && cached.ExpiresAtUtc > now)
+            return cached.Secret;
         var fresh = await vault.GetCurrentAsync(name, cancellationToken);
         _cache[name] = new CacheEntry(fresh, now.Add(cacheDuration));
         return fresh;

@@ -11,10 +11,12 @@ internal sealed class HeaderAuthenticationHandler(IOptionsMonitor<Authentication
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var id = Request.Headers["X-User-Id"].ToString();
-        if (string.IsNullOrWhiteSpace(id)) return Task.FromResult(AuthenticateResult.NoResult());
+        if (string.IsNullOrWhiteSpace(id))
+            return Task.FromResult(AuthenticateResult.NoResult());
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, id) };
         var permission = Request.Headers["X-Permission"].ToString();
-        if (!string.IsNullOrWhiteSpace(permission)) claims.Add(new Claim("permission", permission));
+        if (!string.IsNullOrWhiteSpace(permission))
+            claims.Add(new Claim("permission", permission));
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name));
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name)));
     }

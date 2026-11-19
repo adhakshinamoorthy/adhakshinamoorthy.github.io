@@ -120,6 +120,24 @@ To publish under a different URL, set `BASE_URL` first (PowerShell: `$env:BASE_U
 
 Do not edit files in `technologies/` by hand; the next build overwrites them.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`:
+
+- **Site:** `npm ci` then `npm run check`. Fails if topic pages or preview images are out of date, or if `verify.mjs` finds a broken reference.
+- **Samples:** checks C# formatting, then builds and tests every solution in `samples/`. One run lists every failing sample in the job summary.
+
+Run the same checks locally:
+
+```bash
+npm run check
+dotnet format whitespace --folder samples --verify-no-changes
+./scripts/test-samples.sh                        # all samples
+./scripts/test-samples.sh kafka-partition-lab    # one sample
+```
+
+To fix formatting, run `dotnet format whitespace --folder samples`. Code style is set in `.editorconfig`.
+
 ## Keyboard and accessibility
 
 - Press `/` outside a form field to focus global search.

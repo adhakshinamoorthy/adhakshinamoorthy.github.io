@@ -23,7 +23,8 @@ public sealed class ProductStore
         lock (_gate)
         {
             var index = _products.FindIndex(item => item.Id == id);
-            if (index < 0 || _products[index].Available + delta < 0) return null;
+            if (index < 0 || _products[index].Available + delta < 0)
+                return null;
             return _products[index] = _products[index] with { Available = _products[index].Available + delta, Version = _products[index].Version + 1 };
         }
     }
@@ -41,7 +42,8 @@ public sealed class Mutation
     [Authorize(Policy = "inventory.write")]
     public AdjustStockPayload AdjustStock(Guid id, int delta, ProductStore store)
     {
-        if (delta is < -100 or > 100) return new(null, new("DELTA_OUT_OF_RANGE", "Delta must be between -100 and 100."));
+        if (delta is < -100 or > 100)
+            return new(null, new("DELTA_OUT_OF_RANGE", "Delta must be between -100 and 100."));
         var product = store.Adjust(id, delta);
         return product is null
             ? new(null, new("ADJUSTMENT_REJECTED", "Product was not found or stock would become negative."))

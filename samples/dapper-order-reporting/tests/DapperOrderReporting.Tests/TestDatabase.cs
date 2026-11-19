@@ -20,7 +20,8 @@ internal sealed class TestDatabase : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+        if (Directory.Exists(_directory))
+            Directory.Delete(_directory, recursive: true);
         return ValueTask.CompletedTask;
     }
 }

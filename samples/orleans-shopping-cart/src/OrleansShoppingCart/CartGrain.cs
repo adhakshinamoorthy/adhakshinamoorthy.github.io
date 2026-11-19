@@ -17,7 +17,8 @@ public static class CartRules
 {
     public static int Merge(int current, int added)
     {
-        if (added is < 1 or > 25) throw new ArgumentOutOfRangeException(nameof(added), "Quantity must be from 1 through 25.");
+        if (added is < 1 or > 25)
+            throw new ArgumentOutOfRangeException(nameof(added), "Quantity must be from 1 through 25.");
         return checked(current + added);
     }
 }

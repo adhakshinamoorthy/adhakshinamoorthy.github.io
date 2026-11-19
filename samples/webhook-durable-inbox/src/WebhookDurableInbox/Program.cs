@@ -52,10 +52,12 @@ app.MapPost("/webhooks/orders", async (
     using var buffer = new MemoryStream();
     await request.Body.CopyToAsync(buffer, cancellationToken);
     var rawBody = buffer.ToArray();
-    if (!verifier.IsValid(rawBody, signature)) return Results.Unauthorized();
+    if (!verifier.IsValid(rawBody, signature))
+        return Results.Unauthorized();
 
     var accepted = await inbox.AcceptAsync(deliveryId, eventType, rawBody, cancellationToken);
-    if (accepted) await queue.EnqueueAsync(deliveryId, cancellationToken);
+    if (accepted)
+        await queue.EnqueueAsync(deliveryId, cancellationToken);
 
     return accepted
         ? Results.Accepted($"/webhooks/deliveries/{Uri.EscapeDataString(deliveryId)}")

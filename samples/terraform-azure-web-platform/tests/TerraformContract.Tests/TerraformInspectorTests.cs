@@ -31,7 +31,8 @@ public sealed class TerraformInspectorTests
         while (current is not null)
         {
             var candidate = Path.Combine(current.FullName, name);
-            if (Directory.Exists(candidate)) return candidate;
+            if (Directory.Exists(candidate))
+                return candidate;
             current = current.Parent;
         }
         throw new DirectoryNotFoundException(name);

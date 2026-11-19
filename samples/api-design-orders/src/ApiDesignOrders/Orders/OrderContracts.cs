@@ -25,8 +25,10 @@ internal static class OrderValidation
     private static Dictionary<string, string[]> Validate(string customerId, IReadOnlyList<OrderLineRequest>? lines)
     {
         var errors = new Dictionary<string, string[]>();
-        if (string.IsNullOrWhiteSpace(customerId)) errors["customerId"] = ["customerId is required."];
-        if (lines is null || lines.Count is < 1 or > 25) errors["lines"] = ["Provide between 1 and 25 lines."];
+        if (string.IsNullOrWhiteSpace(customerId))
+            errors["customerId"] = ["customerId is required."];
+        if (lines is null || lines.Count is < 1 or > 25)
+            errors["lines"] = ["Provide between 1 and 25 lines."];
         else if (lines.Any(line => string.IsNullOrWhiteSpace(line.Sku) || line.Quantity is < 1 or > 100))
             errors["lines"] = ["Every line needs a SKU and quantity from 1 to 100."];
         return errors;

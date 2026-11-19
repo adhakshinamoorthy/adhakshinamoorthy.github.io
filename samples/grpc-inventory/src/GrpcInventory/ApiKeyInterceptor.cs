@@ -5,8 +5,7 @@ namespace GrpcInventory;
 
 internal sealed class ApiKeyInterceptor(IConfiguration configuration) : Interceptor
 {
-    private readonly string _expected = configuration["GrpcApiKey"]
-        ?? throw new InvalidOperationException("GrpcApiKey is required.");
+    private readonly string _expected = configuration["GrpcApiKey"] ?? throw new InvalidOperationException("GrpcApiKey is required.");
 
     public override Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
     {

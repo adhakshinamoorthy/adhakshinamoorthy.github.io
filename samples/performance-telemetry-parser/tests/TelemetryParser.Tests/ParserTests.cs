@@ -26,8 +26,16 @@ public sealed class ParserTests
     public void Parsing_is_culture_independent()
     {
         var original = CultureInfo.CurrentCulture;
-        try { CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR"); Assert.True(TelemetryLineParser.TryParseSpan(Valid, out var result)); Assert.Equal(73.25, result.Value); }
-        finally { CultureInfo.CurrentCulture = original; }
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            Assert.True(TelemetryLineParser.TryParseSpan(Valid, out var result));
+            Assert.Equal(73.25, result.Value);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = original;
+        }
     }
 
     [Fact]
@@ -36,10 +44,12 @@ public sealed class ParserTests
         TelemetryLineParser.TryParseBaseline(Valid, out _);
         TelemetryLineParser.TryParseSpan(Valid, out _);
         var beforeBaseline = GC.GetAllocatedBytesForCurrentThread();
-        for (var index = 0; index < 100; index++) TelemetryLineParser.TryParseBaseline(Valid, out _);
+        for (var index = 0; index < 100; index++)
+            TelemetryLineParser.TryParseBaseline(Valid, out _);
         var baselineBytes = GC.GetAllocatedBytesForCurrentThread() - beforeBaseline;
         var beforeSpan = GC.GetAllocatedBytesForCurrentThread();
-        for (var index = 0; index < 100; index++) TelemetryLineParser.TryParseSpan(Valid, out _);
+        for (var index = 0; index < 100; index++)
+            TelemetryLineParser.TryParseSpan(Valid, out _);
         var spanBytes = GC.GetAllocatedBytesForCurrentThread() - beforeSpan;
         Assert.True(spanBytes < baselineBytes, $"Expected span allocation {spanBytes} to be lower than baseline {baselineBytes}.");
     }

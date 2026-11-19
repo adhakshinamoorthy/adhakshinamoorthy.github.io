@@ -45,7 +45,8 @@ internal sealed class OrderStore
 
     public Order? Find(Guid id)
     {
-        lock (_gate) return _orders.FirstOrDefault(order => order.Id == id);
+        lock (_gate)
+            return _orders.FirstOrDefault(order => order.Id == id);
     }
 
     public CreateOrderResult Create(string key, CreateOrderRequest request)
@@ -72,7 +73,8 @@ internal sealed class OrderStore
         lock (_gate)
         {
             var index = _orders.FindIndex(order => order.Id == id);
-            if (index < 0) return new(ReplaceOrderStatus.NotFound, null);
+            if (index < 0)
+                return new(ReplaceOrderStatus.NotFound, null);
             var current = _orders[index];
             if (!string.Equals(current.ETag, ifMatch, StringComparison.Ordinal))
                 return new(ReplaceOrderStatus.PreconditionFailed, null);
@@ -93,7 +95,8 @@ internal static class OrderCursor
     public static bool TryParse(string? value, out int offset)
     {
         offset = 0;
-        if (string.IsNullOrWhiteSpace(value)) return true;
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
         try
         {
             var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(value));

@@ -14,7 +14,8 @@ public sealed class CatalogModule : ICatalogQueries, IInventoryCommands
     public ProductSnapshot? Find(string sku) => products.GetValueOrDefault(sku);
     public bool TryReserve(string sku, int quantity)
     {
-        if (quantity <= 0 || !products.TryGetValue(sku, out var product) || product.Available < quantity) return false;
+        if (quantity <= 0 || !products.TryGetValue(sku, out var product) || product.Available < quantity)
+            return false;
         products[sku] = product with { Available = product.Available - quantity };
         return true;
     }
@@ -24,9 +25,11 @@ public sealed class OrdersModule(ICatalogQueries catalog, IInventoryCommands inv
 {
     public OrderAccepted Place(string sku, int quantity)
     {
-        if (quantity is < 1 or > 20) throw new ArgumentOutOfRangeException(nameof(quantity));
+        if (quantity is < 1 or > 20)
+            throw new ArgumentOutOfRangeException(nameof(quantity));
         var product = catalog.Find(sku) ?? throw new KeyNotFoundException("Product was not found.");
-        if (!inventory.TryReserve(product.Sku, quantity)) throw new InvalidOperationException("Insufficient inventory.");
+        if (!inventory.TryReserve(product.Sku, quantity))
+            throw new InvalidOperationException("Insufficient inventory.");
         var accepted = new OrderAccepted(Guid.NewGuid(), product.Sku, quantity, product.Price * quantity);
         events.Publish(accepted);
         return accepted;

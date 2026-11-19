@@ -92,7 +92,8 @@ public sealed class OrderQueries(SqliteConnectionFactory connections)
                     lookup.Add(order.Id, current);
                 }
 
-                if (line is not null) current.Lines.Add(line);
+                if (line is not null)
+                    current.Lines.Add(line);
                 return current;
             },
             new { OrderId = orderId },

@@ -11,9 +11,11 @@ public sealed class StableRolloutEvaluator(CheckoutFlag flag)
     public FlagDecision Evaluate(string userId, IEnumerable<string> groups)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-        if (!flag.Enabled) return new(flag.Name, false, "globally-disabled", Bucket(flag.Name, userId), flag.Owner, flag.ReviewBy);
+        if (!flag.Enabled)
+            return new(flag.Name, false, "globally-disabled", Bucket(flag.Name, userId), flag.Owner, flag.ReviewBy);
         var groupSet = groups.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (flag.IncludedGroups.Any(groupSet.Contains)) return new(flag.Name, true, "targeted-group", Bucket(flag.Name, userId), flag.Owner, flag.ReviewBy);
+        if (flag.IncludedGroups.Any(groupSet.Contains))
+            return new(flag.Name, true, "targeted-group", Bucket(flag.Name, userId), flag.Owner, flag.ReviewBy);
         var bucket = Bucket(flag.Name, userId);
         return new(flag.Name, bucket < Math.Clamp(flag.Percentage, 0, 100), "percentage", bucket, flag.Owner, flag.ReviewBy);
     }

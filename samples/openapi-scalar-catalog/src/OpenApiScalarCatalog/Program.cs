@@ -39,7 +39,8 @@ products.MapPost("/", Results<CreatedAtRoute<ProductResponse>, ValidationProblem
     ProductCatalog catalog) =>
 {
     var errors = ProductValidation.Validate(request);
-    if (errors.Count > 0) return TypedResults.ValidationProblem(errors);
+    if (errors.Count > 0)
+        return TypedResults.ValidationProblem(errors);
     var product = catalog.Add(request);
     return TypedResults.CreatedAtRoute(product, "GetProduct", new { id = product.Id });
 })

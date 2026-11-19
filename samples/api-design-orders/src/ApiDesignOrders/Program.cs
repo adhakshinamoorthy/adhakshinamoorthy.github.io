@@ -35,7 +35,8 @@ orders.MapGet("/", (int? limit, string? cursor, OrderStore store) =>
 orders.MapGet("/{id:guid}", (Guid id, OrderStore store, HttpResponse response) =>
 {
     var order = store.Find(id);
-    if (order is null) return Results.NotFound();
+    if (order is null)
+        return Results.NotFound();
     response.Headers.ETag = order.ETag;
     return Results.Ok(OrderResponse.From(order));
 }).WithName("GetOrder");
@@ -54,7 +55,8 @@ orders.MapPost("/", (
     }
 
     var validation = OrderValidation.Validate(request);
-    if (validation.Count > 0) return Results.ValidationProblem(validation);
+    if (validation.Count > 0)
+        return Results.ValidationProblem(validation);
 
     var result = store.Create(idempotencyKey, request);
     if (result.Status == CreateOrderStatus.Conflict)
@@ -85,10 +87,12 @@ orders.MapPut("/{id:guid}", (
     }
 
     var validation = OrderValidation.Validate(request);
-    if (validation.Count > 0) return Results.ValidationProblem(validation);
+    if (validation.Count > 0)
+        return Results.ValidationProblem(validation);
 
     var result = store.Replace(id, ifMatch, request);
-    if (result.Status == ReplaceOrderStatus.NotFound) return Results.NotFound();
+    if (result.Status == ReplaceOrderStatus.NotFound)
+        return Results.NotFound();
     if (result.Status == ReplaceOrderStatus.PreconditionFailed)
     {
         return Results.Problem(

@@ -8,6 +8,7 @@ namespace GraphQlInventoryCatalog.Tests;
 public sealed class GraphQlHttpTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
+
     public GraphQlHttpTests(WebApplicationFactory<Program> factory) => _client = factory.CreateClient();
 
     [Fact]
@@ -51,7 +52,12 @@ public sealed class GraphQlHttpTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     private async Task<JsonElement> Execute(string query) => await Read(await _client.SendAsync(Request(query)));
-    private static HttpRequestMessage Request(string query) => new(HttpMethod.Post, "/graphql") { Content = JsonContent.Create(new { query }) };
+
+    private static HttpRequestMessage Request(string query) => new(HttpMethod.Post, "/graphql")
+    {
+        Content = JsonContent.Create(new { query })
+    };
+
     private static async Task<JsonElement> Read(HttpResponseMessage response)
     {
         response.EnsureSuccessStatusCode();

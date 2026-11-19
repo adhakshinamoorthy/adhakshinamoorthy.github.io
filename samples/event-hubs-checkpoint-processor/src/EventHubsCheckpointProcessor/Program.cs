@@ -21,7 +21,8 @@ app.MapPost("/events", (TelemetryInput input, LocalEventHub hub) =>
 });
 app.MapPost("/partitions/{partitionId}/process", async (string partitionId, int? maximum, TelemetryProcessor processor, CancellationToken ct) =>
 {
-    if (!int.TryParse(partitionId, out var partition) || partition is < 0 or > 3) return Results.NotFound();
+    if (!int.TryParse(partitionId, out var partition) || partition is < 0 or > 3)
+        return Results.NotFound();
     var processed = await processor.ProcessAsync(partitionId, Math.Clamp(maximum ?? 100, 1, 500), ct);
     return Results.Ok(new { partitionId, processed });
 });

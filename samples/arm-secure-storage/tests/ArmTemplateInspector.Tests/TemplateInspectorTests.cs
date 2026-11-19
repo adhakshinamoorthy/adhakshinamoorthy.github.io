@@ -26,7 +26,8 @@ public sealed class TemplateInspectorTests
         while (current is not null)
         {
             var candidate = Path.Combine([current.FullName, .. segments]);
-            if (File.Exists(candidate)) return candidate;
+            if (File.Exists(candidate))
+                return candidate;
             current = current.Parent;
         }
         throw new FileNotFoundException(string.Join('/', segments));

@@ -12,7 +12,8 @@ public sealed class ApprovalRegistry
     public (ApprovalResult Result, bool Created) Record(ApprovalCallback callback, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(callback.WorkflowRunId);
-        if (callback.OrderId == Guid.Empty) throw new ArgumentException("OrderId is required.", nameof(callback));
+        if (callback.OrderId == Guid.Empty)
+            throw new ArgumentException("OrderId is required.", nameof(callback));
         if (callback.Decision is not ("approved" or "rejected"))
             throw new ArgumentException("Decision must be approved or rejected.", nameof(callback));
 

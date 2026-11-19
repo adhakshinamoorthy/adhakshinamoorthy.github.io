@@ -46,7 +46,8 @@ public sealed class InventoryGrpcTests : IClassFixture<WebApplicationFactory<Pro
         request.Skus.AddRange(["SKU-RED", "SKU-BLUE", "UNKNOWN"]);
         using var call = _client.WatchStock(request, Credentials);
         var replies = new List<StockReply>();
-        await foreach (var reply in call.ResponseStream.ReadAllAsync()) replies.Add(reply);
+        await foreach (var reply in call.ResponseStream.ReadAllAsync())
+            replies.Add(reply);
         Assert.Equal(["SKU-RED", "SKU-BLUE"], replies.Select(item => item.Sku));
     }
 

@@ -34,9 +34,12 @@ public sealed class WebhookTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         _client.Dispose();
-        if (_factory is not null) await _factory.DisposeAsync();
-        if (File.Exists(_inboxPath)) File.Delete(_inboxPath);
-        if (File.Exists(_inboxPath + ".tmp")) File.Delete(_inboxPath + ".tmp");
+        if (_factory is not null)
+            await _factory.DisposeAsync();
+        if (File.Exists(_inboxPath))
+            File.Delete(_inboxPath);
+        if (File.Exists(_inboxPath + ".tmp"))
+            File.Delete(_inboxPath + ".tmp");
     }
 
     [Fact]
@@ -95,7 +98,8 @@ public sealed class WebhookTests : IAsyncLifetime
         for (var attempt = 0; attempt < 40; attempt++)
         {
             var status = await ReadStatus(id);
-            if (string.Equals(status.GetProperty("status").GetString(), expected, StringComparison.OrdinalIgnoreCase)) return status;
+            if (string.Equals(status.GetProperty("status").GetString(), expected, StringComparison.OrdinalIgnoreCase))
+                return status;
             await Task.Delay(50);
         }
         throw new TimeoutException($"Delivery {id} did not reach {expected}.");
