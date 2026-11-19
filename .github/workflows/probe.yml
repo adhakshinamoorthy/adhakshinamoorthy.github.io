@@ -18,11 +18,12 @@ jobs:
             10.0.1xx
             10.0.3xx
       - run: |
+          set +e
           for d in aspire-service-map ef-core-order-management signalr-operations-room; do
             echo "===== $d"; cd samples/$d; s=$(ls *.slnx)
             dotnet restore "$s" -p:TreatWarningsAsErrors=false -p:NuGetAudit=false >/dev/null
-            echo "--- vulnerable"; dotnet list "$s" package --vulnerable --include-transitive
-            echo "--- outdated (top-level)"; dotnet list "$s" package --outdated
+            echo "--- vulnerable"; dotnet list "$s" package --vulnerable --include-transitive --no-restore
+            echo "--- outdated (top-level)"; dotnet list "$s" package --outdated --no-restore
             cd ../..
           done
           echo "===== versions"
