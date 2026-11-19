@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="--topic-color:#ff6600">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,15 +8,17 @@
   <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="RabbitMQ &mdash; .NET Atlas">
+  <meta property="og:title" content="RabbitMQ — .NET Atlas">
   <meta property="og:description" content="Route messages reliably between .NET services using RabbitMQ exchanges, queues, bindings, dead-letter handling, and MassTransit for a clean consumer abstraction.">
   <meta property="og:image" content="https://adhakshinamoorthy.github.io/assets/images/og-card.svg">
   <meta property="og:url" content="https://adhakshinamoorthy.github.io/technologies/rabbitmq.html">
+  <meta property="article:modified_time" content="2026-08-07">
   <meta name="twitter:card" content="summary_large_image">
-  <title>RabbitMQ &mdash; .NET Atlas</title>
+  <title>RabbitMQ — .NET Atlas</title>
   <link rel="canonical" href="https://adhakshinamoorthy.github.io/technologies/rabbitmq.html">
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=20260819">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=20261119">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"RabbitMQ","description":"Route messages reliably between .NET services using RabbitMQ exchanges, queues, bindings, dead-letter handling, and MassTransit for a clean consumer abstraction.","url":"https://adhakshinamoorthy.github.io/technologies/rabbitmq.html","dateModified":"2026-08-07","proficiencyLevel":"Intermediate","timeRequired":"PT37M","keywords":"RabbitMQ, AMQP, exchanges, queues, bindings, routing key, dead-letter exchange, publisher confirms, MassTransit, fanout, topic exchange","author":{"@type":"Person","name":"Dhakshinamoorthy A","url":"https://www.linkedin.com/in/adhakshinamoorthy"},"isPartOf":{"@type":"WebSite","name":".NET Atlas","url":"https://adhakshinamoorthy.github.io/"}}</script>
   <script>
     (() => {
       const saved = localStorage.getItem('dotnet-atlas-theme');
@@ -24,23 +26,220 @@
       document.documentElement.dataset.theme = theme;
     })();
   </script>
+  <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
 </head>
 <body data-page="topic" data-topic="rabbitmq" data-base="../">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div id="site-navbar"></div>
   <div class="site-shell">
-    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation"></aside>
+    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation" data-prerendered>
+    <nav class="sidebar-group" aria-label="Core Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-0">
+          <span>Core Platform</span>
+          <span class="sidebar-count" aria-label="4 topics">4</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-0" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet.html" ><span class="sidebar-dot" style="--topic-color:#6e5bd7"></span>.NET</a></li><li><a class="sidebar-link" href="../technologies/csharp.html" ><span class="sidebar-dot" style="--topic-color:#7f4fc7"></span>C#</a></li><li><a class="sidebar-link" href="../technologies/dependency-injection.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Dependency Injection</a></li><li><a class="sidebar-link" href="../technologies/source-generators.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Source Generators</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Web &amp; Data">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-1">
+          <span>Web &amp; Data</span>
+          <span class="sidebar-count" aria-label="13 topics">13</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-1" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/aspnet-core.html" ><span class="sidebar-dot" style="--topic-color:#2878c8"></span>ASP.NET Core</a></li><li><a class="sidebar-link" href="../technologies/entity-framework-core.html" ><span class="sidebar-dot" style="--topic-color:#4767c8"></span>Entity Framework Core</a></li><li><a class="sidebar-link" href="../technologies/blazor.html" ><span class="sidebar-dot" style="--topic-color:#7851b8"></span>Blazor</a></li><li><a class="sidebar-link" href="../technologies/minimal-apis.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>Minimal APIs</a></li><li><a class="sidebar-link" href="../technologies/authentication-authorization.html" ><span class="sidebar-dot" style="--topic-color:#c14f72"></span>Authentication &amp; Authorization</a></li><li><a class="sidebar-link" href="../technologies/grpc.html" ><span class="sidebar-dot" style="--topic-color:#1a9e9e"></span>gRPC</a></li><li><a class="sidebar-link" href="../technologies/signalr.html" ><span class="sidebar-dot" style="--topic-color:#9450c9"></span>SignalR</a></li><li><a class="sidebar-link" href="../technologies/resilience-rate-limiting.html" ><span class="sidebar-dot" style="--topic-color:#d9534f"></span>Resilience &amp; Rate Limiting</a></li><li><a class="sidebar-link" href="../technologies/openapi-scalar.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>OpenAPI &amp; Scalar</a></li><li><a class="sidebar-link" href="../technologies/api-security-owasp.html" ><span class="sidebar-dot" style="--topic-color:#c5485c"></span>API Security &amp; OWASP</a></li><li><a class="sidebar-link" href="../technologies/dapper.html" ><span class="sidebar-dot" style="--topic-color:#d26a2e"></span>Dapper</a></li><li><a class="sidebar-link" href="../technologies/graphql.html" ><span class="sidebar-dot" style="--topic-color:#e535ab"></span>GraphQL in .NET</a></li><li><a class="sidebar-link" href="../technologies/webhook-patterns.html" ><span class="sidebar-dot" style="--topic-color:#2e7d9e"></span>Webhook Patterns</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud &amp; Architecture">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="true" aria-controls="sidebar-group-2">
+          <span>Cloud &amp; Architecture</span>
+          <span class="sidebar-count" aria-label="21 topics">21</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-2" class="sidebar-list">
+          <li><a class="sidebar-link" href="../technologies/azure-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#0878c9"></span>Azure for .NET</a></li><li><a class="sidebar-link" href="../technologies/microservices.html" ><span class="sidebar-dot" style="--topic-color:#e07036"></span>Microservices</a></li><li><a class="sidebar-link" href="../technologies/clean-architecture.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Clean Architecture</a></li><li><a class="sidebar-link" href="../technologies/design-patterns.html" ><span class="sidebar-dot" style="--topic-color:#b45e98"></span>Design Patterns</a></li><li><a class="sidebar-link" href="../technologies/dotnet-aspire.html" ><span class="sidebar-dot" style="--topic-color:#8a4fd6"></span>.NET Aspire</a></li><li><a class="sidebar-link" href="../technologies/cqrs-mediatr.html" ><span class="sidebar-dot" style="--topic-color:#cf7a4a"></span>CQRS &amp; MediatR</a></li><li><a class="sidebar-link" href="../technologies/event-driven-messaging.html" ><span class="sidebar-dot" style="--topic-color:#3fa88a"></span>Event-Driven Messaging</a></li><li><a class="sidebar-link" href="../technologies/apache-kafka.html" ><span class="sidebar-dot" style="--topic-color:#2d4a6b"></span>Apache Kafka</a></li><li><a class="sidebar-link" href="../technologies/rabbitmq.html" aria-current="page"><span class="sidebar-dot" style="--topic-color:#ff6600"></span>RabbitMQ</a></li><li><a class="sidebar-link" href="../technologies/semantic-kernel.html" ><span class="sidebar-dot" style="--topic-color:#7b3fe4"></span>Semantic Kernel</a></li><li><a class="sidebar-link" href="../technologies/domain-driven-design.html" ><span class="sidebar-dot" style="--topic-color:#2a7a5e"></span>Domain-Driven Design</a></li><li><a class="sidebar-link" href="../technologies/vertical-slice-architecture.html" ><span class="sidebar-dot" style="--topic-color:#c0454a"></span>Vertical Slice Architecture</a></li><li><a class="sidebar-link" href="../technologies/microsoft-extensions-ai.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Microsoft.Extensions.AI</a></li><li><a class="sidebar-link" href="../technologies/modular-monolith.html" ><span class="sidebar-dot" style="--topic-color:#2f7d71"></span>Modular Monolith</a></li><li><a class="sidebar-link" href="../technologies/mlnet.html" ><span class="sidebar-dot" style="--topic-color:#5c61d6"></span>ML.NET</a></li><li><a class="sidebar-link" href="../technologies/model-context-protocol.html" ><span class="sidebar-dot" style="--topic-color:#6f56d9"></span>Model Context Protocol</a></li><li><a class="sidebar-link" href="../technologies/azure-key-vault.html" ><span class="sidebar-dot" style="--topic-color:#1876c9"></span>Azure Key Vault &amp; Secrets</a></li><li><a class="sidebar-link" href="../technologies/orleans.html" ><span class="sidebar-dot" style="--topic-color:#4a5fc1"></span>Orleans</a></li><li><a class="sidebar-link" href="../technologies/event-sourcing.html" ><span class="sidebar-dot" style="--topic-color:#2e6da8"></span>Event Sourcing</a></li><li><a class="sidebar-link" href="../technologies/redis-distributed-caching.html" ><span class="sidebar-dot" style="--topic-color:#c0392b"></span>Redis &amp; Distributed Caching</a></li><li><a class="sidebar-link" href="../technologies/yarp-reverse-proxy.html" ><span class="sidebar-dot" style="--topic-color:#7b4f9e"></span>YARP — Reverse Proxy</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Delivery &amp; Operations">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-3">
+          <span>Delivery &amp; Operations</span>
+          <span class="sidebar-count" aria-label="11 topics">11</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-3" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/docker.html" ><span class="sidebar-dot" style="--topic-color:#1686d9"></span>Docker</a></li><li><a class="sidebar-link" href="../technologies/kubernetes.html" ><span class="sidebar-dot" style="--topic-color:#3970cf"></span>Kubernetes</a></li><li><a class="sidebar-link" href="../technologies/background-services.html" ><span class="sidebar-dot" style="--topic-color:#c98a1f"></span>Background &amp; Hosted Services</a></li><li><a class="sidebar-link" href="../technologies/observability.html" ><span class="sidebar-dot" style="--topic-color:#2f8fae"></span>Observability &amp; OpenTelemetry</a></li><li><a class="sidebar-link" href="../technologies/cicd-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#4c9a4c"></span>CI/CD for .NET</a></li><li><a class="sidebar-link" href="../technologies/feature-flags.html" ><span class="sidebar-dot" style="--topic-color:#d18415"></span>Feature Flags</a></li><li><a class="sidebar-link" href="../technologies/internal-developer-platforms.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Internal Developer Platforms</a></li><li><a class="sidebar-link" href="../technologies/terraform.html" ><span class="sidebar-dot" style="--topic-color:#7c4dff"></span>Terraform</a></li><li><a class="sidebar-link" href="../technologies/secrets-management.html" ><span class="sidebar-dot" style="--topic-color:#a1662f"></span>Secrets Management</a></li><li><a class="sidebar-link" href="../technologies/infrastructure-as-code-bicep.html" ><span class="sidebar-dot" style="--topic-color:#5a3f9e"></span>Infrastructure as Code (Bicep)</a></li><li><a class="sidebar-link" href="../technologies/health-checks.html" ><span class="sidebar-dot" style="--topic-color:#1a7a4a"></span>Health Checks</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Quality &amp; Growth">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-4">
+          <span>Quality &amp; Growth</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-4" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/testing.html" ><span class="sidebar-dot" style="--topic-color:#168f72"></span>Testing</a></li><li><a class="sidebar-link" href="../technologies/performance.html" ><span class="sidebar-dot" style="--topic-color:#d17a2d"></span>Performance</a></li><li><a class="sidebar-link" href="../technologies/interview-questions.html" ><span class="sidebar-dot" style="--topic-color:#5f6f86"></span>Interview Questions</a></li><li><a class="sidebar-link" href="../technologies/structured-logging.html" ><span class="sidebar-dot" style="--topic-color:#4a6fa5"></span>Structured Logging</a></li><li><a class="sidebar-link" href="../technologies/architecture-testing.html" ><span class="sidebar-dot" style="--topic-color:#6b3fa0"></span>Architecture Testing</a></li><li><a class="sidebar-link" href="../technologies/testcontainers.html" ><span class="sidebar-dot" style="--topic-color:#1d6fa5"></span>Testcontainers for .NET</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cross-Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-5">
+          <span>Cross-Platform</span>
+          <span class="sidebar-count" aria-label="1 topics">1</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-5" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet-maui.html" ><span class="sidebar-dot" style="--topic-color:#7b4fe0"></span>.NET MAUI</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Architecture Practice">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-6">
+          <span>Architecture Practice</span>
+          <span class="sidebar-count" aria-label="7 topics">7</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-6" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/solution-architecture-fundamentals.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Solution Architecture Fundamentals</a></li><li><a class="sidebar-link" href="../technologies/architecture-decision-records.html" ><span class="sidebar-dot" style="--topic-color:#6b69d6"></span>Architecture Decision Records</a></li><li><a class="sidebar-link" href="../technologies/api-design-best-practices.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>API Design Best Practices</a></li><li><a class="sidebar-link" href="../technologies/multi-tenancy-patterns.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>Multi-Tenancy Patterns</a></li><li><a class="sidebar-link" href="../technologies/saga-pattern.html" ><span class="sidebar-dot" style="--topic-color:#c239b3"></span>Saga Pattern</a></li><li><a class="sidebar-link" href="../technologies/legacy-modernization.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>Legacy Modernization</a></li><li><a class="sidebar-link" href="../technologies/backend-for-frontend.html" ><span class="sidebar-dot" style="--topic-color:#4c6ef5"></span>Backend for Frontend</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud Platforms">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-7">
+          <span>Cloud Platforms</span>
+          <span class="sidebar-count" aria-label="9 topics">9</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-7" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-resource-manager.html" ><span class="sidebar-dot" style="--topic-color:#0072c6"></span>Azure Resource Manager</a></li><li><a class="sidebar-link" href="../technologies/azure-api-management.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure API Management</a></li><li><a class="sidebar-link" href="../technologies/azure-functions-serverless.html" ><span class="sidebar-dot" style="--topic-color:#0063b1"></span>Azure Functions &amp; Serverless</a></li><li><a class="sidebar-link" href="../technologies/azure-logic-apps.html" ><span class="sidebar-dot" style="--topic-color:#5c2d91"></span>Azure Logic Apps</a></li><li><a class="sidebar-link" href="../technologies/azure-event-hubs.html" ><span class="sidebar-dot" style="--topic-color:#00a4ef"></span>Azure Event Hubs</a></li><li><a class="sidebar-link" href="../technologies/azure-data-factory-etl.html" ><span class="sidebar-dot" style="--topic-color:#2d7d9a"></span>Azure Data Factory &amp; ETL</a></li><li><a class="sidebar-link" href="../technologies/cloud-adoption-framework.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>Cloud Adoption Framework</a></li><li><a class="sidebar-link" href="../technologies/aws-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#e87918"></span>AWS for .NET</a></li><li><a class="sidebar-link" href="../technologies/azure-container-apps.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Container Apps</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Azure Well-Architected">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-8">
+          <span>Azure Well-Architected</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-8" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-well-architected.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Well-Architected Framework</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-reliability.html" ><span class="sidebar-dot" style="--topic-color:#2b88d8"></span>WAF: Reliability</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-security.html" ><span class="sidebar-dot" style="--topic-color:#c43e4d"></span>WAF: Security</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-cost-optimization.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>WAF: Cost Optimization</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-operational-excellence.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>WAF: Operational Excellence</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-performance-efficiency.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>WAF: Performance Efficiency</a></li>
+        </ul>
+      </div>
+    </nav></aside>
     <main id="main-content" class="main-content" tabindex="-1">
       <div class="article-main">
         <article id="topic-article" class="article">
-          <noscript><div class="error-panel"><h1>JavaScript is required</h1><p>This static portal uses JavaScript to assemble reusable article components from local JSON data.</p></div></noscript>
-        </article>
-        <aside id="article-toc" class="toc" aria-label="Table of contents"></aside>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-separator" aria-hidden="true">/</span><span>Technologies</span><span class="breadcrumb-separator" aria-hidden="true">/</span><span aria-current="page">RabbitMQ</span></nav>
+    <header class="article-header">
+      <div class="topic-labels"><span class="topic-badge">Cloud &amp; Architecture</span><span class="topic-status topic-status-complete">Complete guide</span></div>
+      <h1>RabbitMQ</h1>
+      <p class="article-lede">RabbitMQ is a mature, widely deployed open-source message broker that routes messages through exchanges to queues using flexible binding patterns — making it a reliable backbone for microservices communication.</p>
+      <div class="article-meta"><span>⏱ 37 min read</span><span>Updated <time datetime="2026-08-07">Aug 7, 2026</time></span><span>Level: Intermediate</span></div>
+    </header>
+    <section id="overview" class="article-section"><h2>Overview</h2><p>RabbitMQ implements AMQP 0-9-1 and uses a producer-exchange-queue-consumer model. Producers publish to named exchanges rather than directly to queues; exchanges apply routing rules to deliver messages to the correct queues based on binding keys and exchange type — direct, fanout, topic, or headers. Consumer acknowledgements ensure messages are not lost if a consumer crashes before processing. Dead-letter exchanges capture failed or expired messages for inspection. In .NET, MassTransit abstracts RabbitMQ&#039;s exchange and queue topology, exposing familiar consumer and saga interfaces so the broker can be swapped with minimal code change.</p><div class="official-resources"><strong>Official resources</strong><div class="official-resource-links"><a class="button button-secondary button-small" href="https://www.rabbitmq.com/docs" target="_blank" rel="noopener noreferrer" aria-label="RabbitMQ documentation (opens in a new tab)">RabbitMQ documentation</a><a class="button button-secondary button-small" href="https://www.rabbitmq.com/docs/confirms" target="_blank" rel="noopener noreferrer" aria-label="RabbitMQ acknowledgements and publisher confirms (opens in a new tab)">RabbitMQ acknowledgements and publisher confirms</a><a class="button button-secondary button-small" href="https://masstransit.io/documentation/configuration/transports/rabbitmq" target="_blank" rel="noopener noreferrer" aria-label="MassTransit RabbitMQ transport (opens in a new tab)">MassTransit RabbitMQ transport</a></div></div></section>
+    <section id="learning-objectives" class="article-section"><h2>What you will learn</h2><ul class="practice-list learning-objectives"><li>Explain exchanges, queues, bindings, keys, acknowledgements, confirms, and dead letters.</li><li>Choose exchange and queue types from routing and availability needs.</li><li>Build safe publishers and idempotent consumers.</li><li>Tune prefetch, concurrency, retries, and backpressure.</li><li>Secure virtual hosts, topology, credentials, and management access.</li><li>Operate depth, age, unacked work, nodes, disks, and recovery.</li></ul><h3>Prerequisites</h3><ul class="plain-list prerequisites"><li>Messaging, async workers, retries, serialization, and eventual consistency.</li><li>Networking, TLS, credentials, storage, and clustering basics.</li><li>A real RabbitMQ cluster for production validation.</li></ul></section>
+    <section id="decision-guide" class="article-section"><h2>When to use RabbitMQ</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul><li>Flexible exchange routing and work queues fit the workload.</li><li>Per-message acknowledgement and dead-letter topology are useful.</li><li>Portable self-managed or hosted AMQP infrastructure is desired.</li></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul><li>Long retained replayable streams are the main requirement.</li><li>A fully managed cloud broker is operationally preferable.</li><li>The team cannot operate broker storage and clustering.</li></ul></article></div></section>
+    <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"><article class="concept-card"><strong>Exchanges</strong><p>Direct, fanout, topic, and headers exchanges route publishes to matching bindings.</p></article><article class="concept-card"><strong>Queues and bindings</strong><p>Queues buffer deliveries while bindings declare routing from exchanges.</p></article><article class="concept-card"><strong>Acknowledgements</strong><p>Ack removes a delivery; nack can requeue or reject after processing failure.</p></article><article class="concept-card"><strong>Publisher confirms</strong><p>Confirms tell publishers whether the broker accepted a publish under the configured durability semantics.</p></article><article class="concept-card"><strong>Durability and quorum queues</strong><p>Durable topology, persistent messages, quorum replication, and policies shape survival and availability.</p></article><article class="concept-card"><strong>Prefetch and concurrency</strong><p>Prefetch bounds unacknowledged work and must match consumer and dependency capacity.</p></article><article class="concept-card"><strong>Dead lettering</strong><p>Rejected, expired, or overflowed messages can route to controlled error or retry topology.</p></article><article class="concept-card"><strong>Connection recovery</strong><p>Long-lived connections, channels, heartbeat, topology recovery, and idempotent consumers handle disruption.</p></article></div></section>
+    <section id="architecture" class="article-section"><h2>Architecture</h2><p>A producer publishes to a named exchange with a routing key; the exchange delivers matching copies to bound queues; consumers acknowledge messages after processing; dead-lettered messages are routed to an error exchange for inspection.</p><div class="architecture-placeholder"><div class="diagram-flow"><div class="diagram-node" style="--node-color:#6e5bd7">Producer (.NET service)</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#ff6600">Exchange + bindings</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#2678c8">Consumer queues</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#c0392b">Dead-letter exchange</div></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
+    <section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>The routing lab deterministically proves topic wildcard matching, fan-out, delivery, ack, and nack/requeue semantics while clearly remaining a simulator.</p><ol class="step-list"><li><span>01</span><div><strong>Design topology</strong><p>Name exchanges, queues, bindings, ownership, durability, and routing keys.</p></div></li><li><span>02</span><div><strong>Configure publishers</strong><p>Reuse connections, bound messages, declare returns, and await confirms.</p></div></li><li><span>03</span><div><strong>Configure consumers</strong><p>Set prefetch and concurrency and acknowledge after idempotent effects.</p></div></li><li><span>04</span><div><strong>Handle failure</strong><p>Separate immediate retry, delayed redelivery, dead lettering, and repair.</p></div></li><li><span>05</span><div><strong>Secure access</strong><p>Use TLS, least-privilege users, virtual hosts, and protected management.</p></div></li><li><span>06</span><div><strong>Test disruption</strong><p>Exercise duplicates, consumer crash, node loss, disk alarm, and recovery.</p></div></li><li><span>07</span><div><strong>Operate capacity</strong><p>Monitor depth, age, unacked deliveries, rates, memory, disk, and nodes.</p></div></li></ol></section>
+    <section id="code-example" class="article-section"><h2>Code example</h2><p>MassTransit configures the RabbitMQ topology — exchange, queue, and dead-letter binding — from the consumer type automatically. The consumer itself only handles business logic.</p><div class="code-host"><div class="code-block"><div class="code-toolbar"><span class="code-language">OrderConsumer.cs</span><button class="copy-button" type="button"><span aria-hidden="true">▣</span> Copy</button></div><pre><code class="language-csharp"><span class="tok-keyword">using</span> <span class="tok-type">MassTransit</span>;
+
+<span class="tok-comment">// Registration</span>
+builder.<span class="tok-type">Services</span>.<span class="tok-type">AddMassTransit</span>(x =&gt;
+{
+    x.<span class="tok-type">AddConsumer</span>&lt;<span class="tok-type">OrderPlacedConsumer</span>&gt;(cfg =&gt;
+    {
+        cfg.<span class="tok-type">UseMessageRetry</span>(r =&gt; r.<span class="tok-type">Exponential</span>(
+            retryLimit: <span class="tok-number">5</span>,
+            minInterval: <span class="tok-type">TimeSpan</span>.<span class="tok-type">FromSeconds</span>(<span class="tok-number">1</span>),
+            maxInterval: <span class="tok-type">TimeSpan</span>.<span class="tok-type">FromSeconds</span>(<span class="tok-number">30</span>),
+            intervalDelta: <span class="tok-type">TimeSpan</span>.<span class="tok-type">FromSeconds</span>(<span class="tok-number">5</span>)));
+    });
+
+    x.<span class="tok-type">UsingRabbitMq</span>((ctx, cfg) =&gt;
+    {
+        cfg.<span class="tok-type">Host</span>(<span class="tok-string">&quot;rabbitmq&quot;</span>, <span class="tok-string">&quot;/&quot;</span>, h =&gt;
+        {
+            h.<span class="tok-type">Username</span>(config[<span class="tok-string">&quot;RabbitMQ:User&quot;</span>]);
+            h.<span class="tok-type">Password</span>(config[<span class="tok-string">&quot;RabbitMQ:Password&quot;</span>]);
+        });
+
+        cfg.<span class="tok-type">ConfigureEndpoints</span>(ctx);
+    });
+});
+
+<span class="tok-comment">// Consumer</span>
+<span class="tok-keyword">public</span> <span class="tok-keyword">sealed</span> <span class="tok-keyword">class</span> <span class="tok-type">OrderPlacedConsumer</span>(
+    <span class="tok-type">IInventoryService</span> inventory,
+    <span class="tok-type">ILogger</span>&lt;<span class="tok-type">OrderPlacedConsumer</span>&gt; logger)
+    : <span class="tok-type">IConsumer</span>&lt;<span class="tok-type">OrderPlaced</span>&gt;
+{
+    <span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span> <span class="tok-type">Consume</span>(<span class="tok-type">ConsumeContext</span>&lt;<span class="tok-type">OrderPlaced</span>&gt; context)
+    {
+        logger.<span class="tok-type">LogInformation</span>(
+            <span class="tok-string">&quot;Reserving stock for order {OrderId}&quot;</span>,
+            context.<span class="tok-type">Message</span>.<span class="tok-type">OrderId</span>);
+
+        <span class="tok-keyword">await</span> inventory.<span class="tok-type">ReserveAsync</span>(
+            context.<span class="tok-type">Message</span>.<span class="tok-type">OrderId</span>,
+            context.<span class="tok-type">Message</span>.<span class="tok-type">Lines</span>,
+            context.<span class="tok-type">CancellationToken</span>);
+    }
+}
+
+<span class="tok-comment">// Publishing</span>
+<span class="tok-keyword">public</span> <span class="tok-keyword">sealed</span> <span class="tok-keyword">class</span> <span class="tok-type">OrderService</span>(<span class="tok-type">IPublishEndpoint</span> publisher)
+{
+    <span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span> <span class="tok-type">PlaceOrderAsync</span>(<span class="tok-type">PlaceOrderCommand</span> cmd, <span class="tok-type">CancellationToken</span> ct)
+    {
+        <span class="tok-comment">// ... business logic ...</span>
+        <span class="tok-keyword">await</span> publisher.<span class="tok-type">Publish</span>(
+            <span class="tok-keyword">new</span> <span class="tok-type">OrderPlaced</span>(cmd.<span class="tok-type">OrderId</span>, cmd.<span class="tok-type">CustomerId</span>, cmd.<span class="tok-type">Lines</span>),
+            ct);
+    }
+}</code></pre></div></div><aside class="callout callout-note"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">note</strong><p>RabbitMQ&#039;s flexibility comes from its exchange-binding model, which can represent almost any routing topology — but that flexibility requires deliberate design of the topology before writing producer and consumer code.</p></div></aside></section>
+    <section id="testing" class="article-section"><h2>Testing strategy</h2><p>Simulator tests teach routing; production proof requires a real clustered broker.</p><ul class="practice-list guidance-list"><li>Test direct, fanout, topic, and unroutable publishes.</li><li>Crash consumers before and after acknowledgement.</li><li>Verify publisher confirm and mandatory-return behavior.</li><li>Test retry exhaustion and dead-letter repair.</li><li>Load-test prefetch, concurrency, queue age, and dependency limits.</li><li>Fail a node and verify quorum availability and recovery.</li></ul></section>
+    <section id="security" class="article-section"><h2>Security considerations</h2><p>RabbitMQ is shared durable infrastructure and its management plane is sensitive.</p><ul class="practice-list guidance-list"><li>Use TLS and private networking.</li><li>Use per-workload identities and least-privilege permissions.</li><li>Separate environments and tenants with virtual hosts where appropriate.</li><li>Validate message type and size before deserialization.</li><li>Protect management UI, definitions, logs, and dead letters.</li></ul></section>
+    <section id="performance" class="article-section"><h2>Performance and scalability</h2><p>Queue type, confirms, persistence, batching, prefetch, and consumer work determine throughput.</p><ul class="practice-list guidance-list"><li>Reuse long-lived connections and channels safely.</li><li>Batch confirms where latency permits.</li><li>Tune prefetch against processing duration and memory.</li><li>Keep payloads bounded.</li><li>Measure oldest-message age and unacked work, not depth alone.</li></ul></section>
+    <section id="deployment" class="article-section"><h2>Deployment and operations</h2><p>Topology and client behavior must remain compatible during rolling releases.</p><ul class="practice-list guidance-list"><li>Manage definitions and policies as code.</li><li>Use additive contracts and tolerant consumers.</li><li>Drain consumers before shutdown.</li><li>Avoid destructive queue redeclaration changes.</li><li>Rehearse node, disk, network, and restore failure.</li></ul></section>
+    <section id="troubleshooting" class="article-section"><h2>Common problems and fixes</h2><div class="troubleshooting-list"><article class="troubleshooting-card"><h3>Messages vanish after publish.</h3><p><strong>Likely cause:</strong> The route is missing or confirms are ignored.</p><p><strong>Fix:</strong> Use mandatory returns, confirms, and topology checks.</p></article><article class="troubleshooting-card"><h3>Messages repeat.</h3><p><strong>Likely cause:</strong> Consumer failed before ack.</p><p><strong>Fix:</strong> Make effects idempotent and ack after success.</p></article><article class="troubleshooting-card"><h3>Unacked count grows.</h3><p><strong>Likely cause:</strong> Prefetch or dependency work exceeds capacity.</p><p><strong>Fix:</strong> Reduce concurrency or fix the bottleneck.</p></article><article class="troubleshooting-card"><h3>Poison messages loop.</h3><p><strong>Likely cause:</strong> Nack requeues indefinitely.</p><p><strong>Fix:</strong> Bound retries and dead-letter.</p></article><article class="troubleshooting-card"><h3>Broker blocks publishers.</h3><p><strong>Likely cause:</strong> Memory or disk alarms fired.</p><p><strong>Fix:</strong> Restore headroom and drain backlog safely.</p></article><article class="troubleshooting-card"><h3>A node loss loses availability.</h3><p><strong>Likely cause:</strong> Queue type or replica placement is inadequate.</p><p><strong>Fix:</strong> Use tested quorum topology and placement.</p></article></div></section>
+    <section id="best-practices" class="article-section"><h2>Best practices</h2><ul class="practice-list"><li>Acknowledge only after idempotent processing.</li><li>Use confirms and mandatory returns for critical publishing.</li><li>Declare dead-letter behavior from the start.</li><li>Tune prefetch with production-like load.</li><li>Reuse connections and channels correctly.</li><li>Prefer quorum queues for replicated critical workloads.</li><li>Manage topology and policies as code.</li><li>Monitor age, unacked work, memory, disk, and node health.</li></ul><aside class="callout callout-tip"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">tip</strong><p>Use the RabbitMQ Management UI at /api/queues to monitor queue depth, unacknowledged message counts, and dead-letter queue growth during development and load testing — catching queue depth growth early prevents memory exhaustion on the broker.</p></div></aside><aside class="callout callout-warning"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">warning</strong><p>Prefetch controls how many unacknowledged deliveries can be in flight. There is no universal ideal value: too high can increase memory pressure and uneven distribution, while too low limits throughput. Start conservatively and tune with production-like load tests.</p></div></aside></section>
+    <section id="production-checklist" class="article-section"><h2>Production checklist</h2><ul class="checklist"><li>Exchange, queue, binding, ownership, durability, and keys are documented.</li><li>Publisher confirms and unroutable returns are handled.</li><li>Consumers are idempotent and ack after effects.</li><li>Retries and dead letters are bounded.</li><li>Prefetch and concurrency are load-tested.</li><li>TLS, identity, vhosts, and management access are hardened.</li><li>Depth, age, unacked work, rates, disk, memory, and nodes alert.</li><li>Node loss, disk alarm, backlog recovery, and restore are rehearsed.</li></ul></section>
+    <section id="interview-questions" class="article-section"><h2>Common interview questions</h2><div class="faq-list"><details class="faq-item"><summary><span class="faq-question">Topic versus fanout exchange?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Topic matches routing patterns; fanout broadcasts to all bound queues.</p></div></details><details class="faq-item"><summary><span class="faq-question">Ack versus publisher confirm?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Ack covers consumer completion; confirm covers broker acceptance of a publish.</p></div></details><details class="faq-item"><summary><span class="faq-question">Why are messages duplicated?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>The consumer side effect succeeded but acknowledgement did not reach the broker.</p></div></details><details class="faq-item"><summary><span class="faq-question">What does prefetch control?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>The maximum unacknowledged deliveries in flight for a consumer scope.</p></div></details><details class="faq-item"><summary><span class="faq-question">What is dead lettering?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Routing rejected, expired, or overflowed messages to another exchange.</p></div></details><details class="faq-item"><summary><span class="faq-question">Why quorum queues?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>They replicate a durable queue with consensus for stronger availability semantics.</p></div></details><details class="faq-item"><summary><span class="faq-question">RabbitMQ or Kafka?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>RabbitMQ excels at flexible routing and work queues; Kafka at retained partitioned streams and replay.</p></div></details></div></section>
+    <section id="github-sample" class="article-section article-sample"><h2>Dedicated GitHub sample</h2><p>Clone, run, test, and modify the focused implementation created for this guide.</p><div class="sample-host"><article class="github-card card reveal"><div class="github-card-head"><span class="repo-icon" aria-hidden="true"></span><span class="repo-visibility">Verified sample</span></div><h3>RabbitMQ Routing Lab</h3><p class="repo-description">A deterministic .NET 10 simulator of topic-exchange wildcard routing, queue fan-out, delivery, acknowledgement, and negative acknowledgement with requeue.</p><div class="tech-pills" aria-label="Technologies"><span>.NET 10</span><span>RabbitMQ Semantics</span><span>Topic Exchanges</span><span>xUnit</span></div><div class="tag-list" aria-label="Tags"><span>dedicated-sample</span><span>routing-key</span><span>acknowledgement</span><span>requeue</span></div><dl class="sample-commands"><div><dt>Run</dt><dd><code>dotnet run --project src/RabbitMqRoutingLab</code></dd></div><div><dt>Test</dt><dd><code>dotnet test RabbitMqRoutingLab.slnx</code></dd></div></dl><div class="repo-actions"><a class="button button-small button-primary github-link" target="_blank" rel="noreferrer" href="https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/rabbitmq-routing-lab">GitHub <span aria-hidden="true">↗</span></a></div></article></div></section>
+    <nav class="article-nav" aria-label="Previous and next topics"><a href="apache-kafka.html"><small>← Previous</small><strong>Apache Kafka</strong></a><a href="semantic-kernel.html"><small>Next →</small><strong>Semantic Kernel</strong></a></nav></article>
+        <aside id="article-toc" class="toc" aria-label="Table of contents"><p class="toc-title">On this page</p><ul class="toc-list"><li><a class="toc-link" href="#overview">Overview</a></li><li><a class="toc-link" href="#learning-objectives">What you will learn</a></li><li><a class="toc-link" href="#decision-guide">When to use RabbitMQ</a></li><li><a class="toc-link" href="#key-concepts">Key concepts</a></li><li><a class="toc-link" href="#architecture">Architecture</a></li><li><a class="toc-link" href="#implementation">Implementation walkthrough</a></li><li><a class="toc-link" href="#code-example">Code example</a></li><li><a class="toc-link" href="#testing">Testing strategy</a></li><li><a class="toc-link" href="#security">Security considerations</a></li><li><a class="toc-link" href="#performance">Performance and scalability</a></li><li><a class="toc-link" href="#deployment">Deployment and operations</a></li><li><a class="toc-link" href="#troubleshooting">Common problems and fixes</a></li><li><a class="toc-link" href="#best-practices">Best practices</a></li><li><a class="toc-link" href="#production-checklist">Production checklist</a></li><li><a class="toc-link" href="#interview-questions">Common interview questions</a></li><li><a class="toc-link" href="#github-sample">Dedicated GitHub sample</a></li></ul></aside>
       </div>
     </main>
   </div>
-  <div id="site-footer"></div>
+  <div id="site-footer">
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a class="brand" href="../index.html"><span class="brand-mark">.N</span><span>.NET <em>Atlas</em></span></a>
+          <p>A practical map of the modern .NET ecosystem, built for curious developers and architecture-minded teams.</p>
+        </div>
+        <div><strong class="footer-heading">Explore</strong><div class="footer-links"><a href="../technologies/dotnet.html">Start with .NET</a><a href="../index.html#roadmap">Learning roadmap</a><a href="../sitemap.xml">Sitemap</a></div></div>
+        <div><strong class="footer-heading">Connect</strong><div class="footer-links"><a href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">GitHub profile ↗</a><a href="https://www.linkedin.com/in/adhakshinamoorthy" target="_blank" rel="noreferrer">LinkedIn ↗</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>© 2026 Dhakshinamoorthy A. Built for learning.</p><p>HTML · CSS · JavaScript · GitHub Pages</p></div>
+    </footer></div>
   <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">&uarr;</button>
-  <script type="module" src="../assets/js/topic.js?v=20260819"></script>
+  <script type="module" src="../assets/js/topic.js?v=20261119"></script>
 </body>
 </html>

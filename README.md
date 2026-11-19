@@ -81,19 +81,31 @@ The contract is enforced by `scripts/verify.mjs`; completeness is not based on p
 
 1. Add a complete entry to [`data/technologies.json`](data/technologies.json).
 2. Use a unique URL-safe `slug`, a category, color, searchable keywords, and the article content fields shown by existing entries.
-3. Regenerate the SEO-addressable page shells and sitemap:
+3. Rebuild the generated files (needs Node 20+, no packages):
 
 ```powershell
-./scripts/generate-topic-pages.ps1
+node scripts/build-pages.mjs
 ```
 
-To publish under a different URL:
+This writes every `technologies/*.html` page **with its full article already in the HTML**, plus `data/technologies-index.json` (the small file the browser loads for navigation and search), `sitemap.xml` with `lastmod` dates, and the guide and sample counts in `index.html`. Commit the generated files.
+
+To check that generated files are up to date (for CI), run:
 
 ```powershell
-./scripts/generate-topic-pages.ps1 -BaseUrl "https://owner.github.io"
+node scripts/build-pages.mjs --check
 ```
 
-The shared renderers live in [`assets/js/components.js`](assets/js/components.js), the landing page behavior in [`assets/js/home.js`](assets/js/home.js), and article composition in [`assets/js/topic.js`](assets/js/topic.js). Reusable HTML templates are in [`components/templates.html`](components/templates.html).
+To publish under a different URL, set `BASE_URL` first (PowerShell: `$env:BASE_URL = "https://owner.github.io"`).
+
+### How rendering works
+
+- `data/technologies.json` is the source of truth. It is read only at build time and never downloaded by visitors.
+- [`scripts/lib/article-markup.mjs`](scripts/lib/article-markup.mjs) turns one topic into article HTML. Each page also gets `TechArticle` JSON-LD and a pre-rendered sidebar and table of contents.
+- [`assets/js/markup.js`](assets/js/markup.js) holds pure helpers (escaping, C# highlighting, sidebar and footer markup) shared by the build and the browser.
+- [`assets/js/topic.js`](assets/js/topic.js) does not build content. It adds the navbar and search, copy buttons, sidebar toggles, and the active table-of-contents link.
+- [`assets/js/home.js`](assets/js/home.js) and [`assets/js/components.js`](assets/js/components.js) render the landing page from the light index. Card templates are in [`components/templates.html`](components/templates.html).
+
+Do not edit files in `technologies/` by hand; the next build overwrites them.
 
 ## Keyboard and accessibility
 
@@ -109,7 +121,7 @@ The shared renderers live in [`assets/js/components.js`](assets/js/components.js
 ```text
 /
 ├── index.html
-├── technologies/          # Generated SEO-addressable article shells
+├── technologies/          # Generated, fully pre-rendered topic pages
 ├── assets/
 │   ├── css/styles.css
 │   ├── js/
@@ -118,9 +130,14 @@ The shared renderers live in [`assets/js/components.js`](assets/js/components.js
 │   └── icons/
 ├── components/templates.html
 ├── data/
-│   ├── technologies.json
+│   ├── technologies.json        # Source content (build time only)
+│   ├── technologies-index.json  # Generated light index for the browser
 │   └── github-samples.json
-├── scripts/generate-topic-pages.ps1
+├── scripts/
+│   ├── build-pages.mjs          # Generates pages, index, sitemap
+│   ├── lib/article-markup.mjs
+│   ├── verify.mjs
+│   └── browser-check.mjs
 ├── sitemap.xml
 ├── robots.txt
 └── README.md

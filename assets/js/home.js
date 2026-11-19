@@ -10,7 +10,7 @@ import {
   searchable,
   searchResultMarkup,
   technologyCard
-} from './components.js?v=20260819';
+} from './components.js?v=20261119';
 
 const base = '';
 

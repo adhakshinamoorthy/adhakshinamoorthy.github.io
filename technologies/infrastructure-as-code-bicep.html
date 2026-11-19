@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="--topic-color:#5a3f9e">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,15 +8,17 @@
   <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Infrastructure as Code (Bicep) &mdash; .NET Atlas">
+  <meta property="og:title" content="Infrastructure as Code (Bicep) — .NET Atlas">
   <meta property="og:description" content="Define, version, and deploy Azure infrastructure declaratively using Bicep modules, parameter files, deployment stacks, and CI/CD pipelines.">
   <meta property="og:image" content="https://adhakshinamoorthy.github.io/assets/images/og-card.svg">
   <meta property="og:url" content="https://adhakshinamoorthy.github.io/technologies/infrastructure-as-code-bicep.html">
+  <meta property="article:modified_time" content="2026-08-14">
   <meta name="twitter:card" content="summary_large_image">
-  <title>Infrastructure as Code (Bicep) &mdash; .NET Atlas</title>
+  <title>Infrastructure as Code (Bicep) — .NET Atlas</title>
   <link rel="canonical" href="https://adhakshinamoorthy.github.io/technologies/infrastructure-as-code-bicep.html">
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=20260819">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=20261119">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Infrastructure as Code (Bicep)","description":"Define, version, and deploy Azure infrastructure declaratively using Bicep modules, parameter files, deployment stacks, and CI/CD pipelines.","url":"https://adhakshinamoorthy.github.io/technologies/infrastructure-as-code-bicep.html","dateModified":"2026-08-14","proficiencyLevel":"Foundation to production","timeRequired":"PT38M","keywords":"Bicep, infrastructure as code, IaC, ARM templates, modules, parameter files, deployment stacks, Azure Developer CLI, azd, CI/CD","author":{"@type":"Person","name":"Dhakshinamoorthy A","url":"https://www.linkedin.com/in/adhakshinamoorthy"},"isPartOf":{"@type":"WebSite","name":".NET Atlas","url":"https://adhakshinamoorthy.github.io/"}}</script>
   <script>
     (() => {
       const saved = localStorage.getItem('dotnet-atlas-theme');
@@ -24,23 +26,226 @@
       document.documentElement.dataset.theme = theme;
     })();
   </script>
+  <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
 </head>
 <body data-page="topic" data-topic="infrastructure-as-code-bicep" data-base="../">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div id="site-navbar"></div>
   <div class="site-shell">
-    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation"></aside>
+    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation" data-prerendered>
+    <nav class="sidebar-group" aria-label="Core Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-0">
+          <span>Core Platform</span>
+          <span class="sidebar-count" aria-label="4 topics">4</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-0" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet.html" ><span class="sidebar-dot" style="--topic-color:#6e5bd7"></span>.NET</a></li><li><a class="sidebar-link" href="../technologies/csharp.html" ><span class="sidebar-dot" style="--topic-color:#7f4fc7"></span>C#</a></li><li><a class="sidebar-link" href="../technologies/dependency-injection.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Dependency Injection</a></li><li><a class="sidebar-link" href="../technologies/source-generators.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Source Generators</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Web &amp; Data">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-1">
+          <span>Web &amp; Data</span>
+          <span class="sidebar-count" aria-label="13 topics">13</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-1" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/aspnet-core.html" ><span class="sidebar-dot" style="--topic-color:#2878c8"></span>ASP.NET Core</a></li><li><a class="sidebar-link" href="../technologies/entity-framework-core.html" ><span class="sidebar-dot" style="--topic-color:#4767c8"></span>Entity Framework Core</a></li><li><a class="sidebar-link" href="../technologies/blazor.html" ><span class="sidebar-dot" style="--topic-color:#7851b8"></span>Blazor</a></li><li><a class="sidebar-link" href="../technologies/minimal-apis.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>Minimal APIs</a></li><li><a class="sidebar-link" href="../technologies/authentication-authorization.html" ><span class="sidebar-dot" style="--topic-color:#c14f72"></span>Authentication &amp; Authorization</a></li><li><a class="sidebar-link" href="../technologies/grpc.html" ><span class="sidebar-dot" style="--topic-color:#1a9e9e"></span>gRPC</a></li><li><a class="sidebar-link" href="../technologies/signalr.html" ><span class="sidebar-dot" style="--topic-color:#9450c9"></span>SignalR</a></li><li><a class="sidebar-link" href="../technologies/resilience-rate-limiting.html" ><span class="sidebar-dot" style="--topic-color:#d9534f"></span>Resilience &amp; Rate Limiting</a></li><li><a class="sidebar-link" href="../technologies/openapi-scalar.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>OpenAPI &amp; Scalar</a></li><li><a class="sidebar-link" href="../technologies/api-security-owasp.html" ><span class="sidebar-dot" style="--topic-color:#c5485c"></span>API Security &amp; OWASP</a></li><li><a class="sidebar-link" href="../technologies/dapper.html" ><span class="sidebar-dot" style="--topic-color:#d26a2e"></span>Dapper</a></li><li><a class="sidebar-link" href="../technologies/graphql.html" ><span class="sidebar-dot" style="--topic-color:#e535ab"></span>GraphQL in .NET</a></li><li><a class="sidebar-link" href="../technologies/webhook-patterns.html" ><span class="sidebar-dot" style="--topic-color:#2e7d9e"></span>Webhook Patterns</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud &amp; Architecture">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-2">
+          <span>Cloud &amp; Architecture</span>
+          <span class="sidebar-count" aria-label="21 topics">21</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-2" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#0878c9"></span>Azure for .NET</a></li><li><a class="sidebar-link" href="../technologies/microservices.html" ><span class="sidebar-dot" style="--topic-color:#e07036"></span>Microservices</a></li><li><a class="sidebar-link" href="../technologies/clean-architecture.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Clean Architecture</a></li><li><a class="sidebar-link" href="../technologies/design-patterns.html" ><span class="sidebar-dot" style="--topic-color:#b45e98"></span>Design Patterns</a></li><li><a class="sidebar-link" href="../technologies/dotnet-aspire.html" ><span class="sidebar-dot" style="--topic-color:#8a4fd6"></span>.NET Aspire</a></li><li><a class="sidebar-link" href="../technologies/cqrs-mediatr.html" ><span class="sidebar-dot" style="--topic-color:#cf7a4a"></span>CQRS &amp; MediatR</a></li><li><a class="sidebar-link" href="../technologies/event-driven-messaging.html" ><span class="sidebar-dot" style="--topic-color:#3fa88a"></span>Event-Driven Messaging</a></li><li><a class="sidebar-link" href="../technologies/apache-kafka.html" ><span class="sidebar-dot" style="--topic-color:#2d4a6b"></span>Apache Kafka</a></li><li><a class="sidebar-link" href="../technologies/rabbitmq.html" ><span class="sidebar-dot" style="--topic-color:#ff6600"></span>RabbitMQ</a></li><li><a class="sidebar-link" href="../technologies/semantic-kernel.html" ><span class="sidebar-dot" style="--topic-color:#7b3fe4"></span>Semantic Kernel</a></li><li><a class="sidebar-link" href="../technologies/domain-driven-design.html" ><span class="sidebar-dot" style="--topic-color:#2a7a5e"></span>Domain-Driven Design</a></li><li><a class="sidebar-link" href="../technologies/vertical-slice-architecture.html" ><span class="sidebar-dot" style="--topic-color:#c0454a"></span>Vertical Slice Architecture</a></li><li><a class="sidebar-link" href="../technologies/microsoft-extensions-ai.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Microsoft.Extensions.AI</a></li><li><a class="sidebar-link" href="../technologies/modular-monolith.html" ><span class="sidebar-dot" style="--topic-color:#2f7d71"></span>Modular Monolith</a></li><li><a class="sidebar-link" href="../technologies/mlnet.html" ><span class="sidebar-dot" style="--topic-color:#5c61d6"></span>ML.NET</a></li><li><a class="sidebar-link" href="../technologies/model-context-protocol.html" ><span class="sidebar-dot" style="--topic-color:#6f56d9"></span>Model Context Protocol</a></li><li><a class="sidebar-link" href="../technologies/azure-key-vault.html" ><span class="sidebar-dot" style="--topic-color:#1876c9"></span>Azure Key Vault &amp; Secrets</a></li><li><a class="sidebar-link" href="../technologies/orleans.html" ><span class="sidebar-dot" style="--topic-color:#4a5fc1"></span>Orleans</a></li><li><a class="sidebar-link" href="../technologies/event-sourcing.html" ><span class="sidebar-dot" style="--topic-color:#2e6da8"></span>Event Sourcing</a></li><li><a class="sidebar-link" href="../technologies/redis-distributed-caching.html" ><span class="sidebar-dot" style="--topic-color:#c0392b"></span>Redis &amp; Distributed Caching</a></li><li><a class="sidebar-link" href="../technologies/yarp-reverse-proxy.html" ><span class="sidebar-dot" style="--topic-color:#7b4f9e"></span>YARP — Reverse Proxy</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Delivery &amp; Operations">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="true" aria-controls="sidebar-group-3">
+          <span>Delivery &amp; Operations</span>
+          <span class="sidebar-count" aria-label="11 topics">11</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-3" class="sidebar-list">
+          <li><a class="sidebar-link" href="../technologies/docker.html" ><span class="sidebar-dot" style="--topic-color:#1686d9"></span>Docker</a></li><li><a class="sidebar-link" href="../technologies/kubernetes.html" ><span class="sidebar-dot" style="--topic-color:#3970cf"></span>Kubernetes</a></li><li><a class="sidebar-link" href="../technologies/background-services.html" ><span class="sidebar-dot" style="--topic-color:#c98a1f"></span>Background &amp; Hosted Services</a></li><li><a class="sidebar-link" href="../technologies/observability.html" ><span class="sidebar-dot" style="--topic-color:#2f8fae"></span>Observability &amp; OpenTelemetry</a></li><li><a class="sidebar-link" href="../technologies/cicd-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#4c9a4c"></span>CI/CD for .NET</a></li><li><a class="sidebar-link" href="../technologies/feature-flags.html" ><span class="sidebar-dot" style="--topic-color:#d18415"></span>Feature Flags</a></li><li><a class="sidebar-link" href="../technologies/internal-developer-platforms.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Internal Developer Platforms</a></li><li><a class="sidebar-link" href="../technologies/terraform.html" ><span class="sidebar-dot" style="--topic-color:#7c4dff"></span>Terraform</a></li><li><a class="sidebar-link" href="../technologies/secrets-management.html" ><span class="sidebar-dot" style="--topic-color:#a1662f"></span>Secrets Management</a></li><li><a class="sidebar-link" href="../technologies/infrastructure-as-code-bicep.html" aria-current="page"><span class="sidebar-dot" style="--topic-color:#5a3f9e"></span>Infrastructure as Code (Bicep)</a></li><li><a class="sidebar-link" href="../technologies/health-checks.html" ><span class="sidebar-dot" style="--topic-color:#1a7a4a"></span>Health Checks</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Quality &amp; Growth">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-4">
+          <span>Quality &amp; Growth</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-4" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/testing.html" ><span class="sidebar-dot" style="--topic-color:#168f72"></span>Testing</a></li><li><a class="sidebar-link" href="../technologies/performance.html" ><span class="sidebar-dot" style="--topic-color:#d17a2d"></span>Performance</a></li><li><a class="sidebar-link" href="../technologies/interview-questions.html" ><span class="sidebar-dot" style="--topic-color:#5f6f86"></span>Interview Questions</a></li><li><a class="sidebar-link" href="../technologies/structured-logging.html" ><span class="sidebar-dot" style="--topic-color:#4a6fa5"></span>Structured Logging</a></li><li><a class="sidebar-link" href="../technologies/architecture-testing.html" ><span class="sidebar-dot" style="--topic-color:#6b3fa0"></span>Architecture Testing</a></li><li><a class="sidebar-link" href="../technologies/testcontainers.html" ><span class="sidebar-dot" style="--topic-color:#1d6fa5"></span>Testcontainers for .NET</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cross-Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-5">
+          <span>Cross-Platform</span>
+          <span class="sidebar-count" aria-label="1 topics">1</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-5" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet-maui.html" ><span class="sidebar-dot" style="--topic-color:#7b4fe0"></span>.NET MAUI</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Architecture Practice">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-6">
+          <span>Architecture Practice</span>
+          <span class="sidebar-count" aria-label="7 topics">7</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-6" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/solution-architecture-fundamentals.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Solution Architecture Fundamentals</a></li><li><a class="sidebar-link" href="../technologies/architecture-decision-records.html" ><span class="sidebar-dot" style="--topic-color:#6b69d6"></span>Architecture Decision Records</a></li><li><a class="sidebar-link" href="../technologies/api-design-best-practices.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>API Design Best Practices</a></li><li><a class="sidebar-link" href="../technologies/multi-tenancy-patterns.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>Multi-Tenancy Patterns</a></li><li><a class="sidebar-link" href="../technologies/saga-pattern.html" ><span class="sidebar-dot" style="--topic-color:#c239b3"></span>Saga Pattern</a></li><li><a class="sidebar-link" href="../technologies/legacy-modernization.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>Legacy Modernization</a></li><li><a class="sidebar-link" href="../technologies/backend-for-frontend.html" ><span class="sidebar-dot" style="--topic-color:#4c6ef5"></span>Backend for Frontend</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud Platforms">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-7">
+          <span>Cloud Platforms</span>
+          <span class="sidebar-count" aria-label="9 topics">9</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-7" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-resource-manager.html" ><span class="sidebar-dot" style="--topic-color:#0072c6"></span>Azure Resource Manager</a></li><li><a class="sidebar-link" href="../technologies/azure-api-management.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure API Management</a></li><li><a class="sidebar-link" href="../technologies/azure-functions-serverless.html" ><span class="sidebar-dot" style="--topic-color:#0063b1"></span>Azure Functions &amp; Serverless</a></li><li><a class="sidebar-link" href="../technologies/azure-logic-apps.html" ><span class="sidebar-dot" style="--topic-color:#5c2d91"></span>Azure Logic Apps</a></li><li><a class="sidebar-link" href="../technologies/azure-event-hubs.html" ><span class="sidebar-dot" style="--topic-color:#00a4ef"></span>Azure Event Hubs</a></li><li><a class="sidebar-link" href="../technologies/azure-data-factory-etl.html" ><span class="sidebar-dot" style="--topic-color:#2d7d9a"></span>Azure Data Factory &amp; ETL</a></li><li><a class="sidebar-link" href="../technologies/cloud-adoption-framework.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>Cloud Adoption Framework</a></li><li><a class="sidebar-link" href="../technologies/aws-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#e87918"></span>AWS for .NET</a></li><li><a class="sidebar-link" href="../technologies/azure-container-apps.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Container Apps</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Azure Well-Architected">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-8">
+          <span>Azure Well-Architected</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-8" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-well-architected.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Well-Architected Framework</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-reliability.html" ><span class="sidebar-dot" style="--topic-color:#2b88d8"></span>WAF: Reliability</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-security.html" ><span class="sidebar-dot" style="--topic-color:#c43e4d"></span>WAF: Security</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-cost-optimization.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>WAF: Cost Optimization</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-operational-excellence.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>WAF: Operational Excellence</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-performance-efficiency.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>WAF: Performance Efficiency</a></li>
+        </ul>
+      </div>
+    </nav></aside>
     <main id="main-content" class="main-content" tabindex="-1">
       <div class="article-main">
         <article id="topic-article" class="article">
-          <noscript><div class="error-panel"><h1>JavaScript is required</h1><p>This static portal uses JavaScript to assemble reusable article components from local JSON data.</p></div></noscript>
-        </article>
-        <aside id="article-toc" class="toc" aria-label="Table of contents"></aside>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-separator" aria-hidden="true">/</span><span>Technologies</span><span class="breadcrumb-separator" aria-hidden="true">/</span><span aria-current="page">Infrastructure as Code (Bicep)</span></nav>
+    <header class="article-header">
+      <div class="topic-labels"><span class="topic-badge">Delivery &amp; Operations</span><span class="topic-status topic-status-complete">Complete guide</span></div>
+      <h1>Infrastructure as Code (Bicep)</h1>
+      <p class="article-lede">Bicep is Microsoft&#039;s domain-specific language for declaring Azure infrastructure as code — compiled to ARM templates, reviewed like application code, and deployed repeatably across environments.</p>
+      <div class="article-meta"><span>⏱ 38 min read</span><span>Updated <time datetime="2026-08-14">Aug 14, 2026</time></span><span>Level: Foundation to production</span></div>
+    </header>
+    <section id="overview" class="article-section"><h2>Overview</h2><p>Bicep replaces raw ARM JSON with a clean declarative syntax, strong typing, native module support, and first-class IDE tooling. Infrastructure defined in Bicep is committed to source control, reviewed in pull requests, promoted through environments with parameter files, and deployed by CI/CD pipelines using the Azure CLI or Azure Developer CLI. Deployment stacks extend this model by tracking which resources a deployment owns and cleaning up orphaned resources when the stack is updated or deleted. For .NET teams, Bicep pairs naturally with the azd CLI that Aspire uses for cloud deployments.</p><div class="official-resources"><strong>Official resources</strong><div class="official-resource-links"><a class="button button-secondary button-small" href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/" target="_blank" rel="noopener noreferrer" aria-label="Bicep documentation (opens in a new tab)">Bicep documentation</a><a class="button button-secondary button-small" href="https://learn.microsoft.com/azure/azure-resource-manager/bicep/modules" target="_blank" rel="noopener noreferrer" aria-label="Bicep modules (opens in a new tab)">Bicep modules</a><a class="button button-secondary button-small" href="https://learn.microsoft.com/azure/azure-resource-manager/templates/deploy-what-if" target="_blank" rel="noopener noreferrer" aria-label="ARM what-if (opens in a new tab)">ARM what-if</a></div></div></section>
+    <section id="learning-objectives" class="article-section"><h2>What you will learn</h2><ul class="practice-list learning-objectives"><li>Explain how Bicep compiles to ARM deployments and resource-provider APIs.</li><li>Use scopes, symbolic references, existing resources, modules, parameters, and outputs.</li><li>Create reusable typed modules and distribute them with version discipline.</li><li>Protect identities, secrets, network boundaries, and deployment permissions.</li><li>Preview, validate, deploy, observe, and troubleshoot Azure changes.</li><li>Choose deployment stacks and ownership behavior deliberately.</li></ul><h3>Prerequisites</h3><ul class="plain-list prerequisites"><li>Azure resource groups, identities, RBAC, networking, and resource-provider fundamentals.</li><li>Basic declarative IaC and Git review experience.</li><li>Azure CLI with Bicep support for optional compile and what-if exercises.</li></ul></section>
+    <section id="decision-guide" class="article-section"><h2>When to use Infrastructure as Code (Bicep)</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul><li>Azure is the target platform and first-party type coverage is valuable.</li><li>Teams need concise modules that compile directly to ARM templates.</li><li>Deployment stacks, what-if, template specs, or Bicep registries fit the operating model.</li></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul><li>The same module must manage substantial non-Azure infrastructure.</li><li>A higher-level platform already owns infrastructure and direct resource control would duplicate responsibility.</li><li>The organization cannot operate Azure scope, policy, identity, and deployment ownership safely.</li></ul></article></div></section>
+    <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"><article class="concept-card"><strong>Declarative resource definitions</strong><p>A Bicep file describes the desired state of Azure resources — their type, SKU, location, properties, and dependencies. The platform reconciles current state to match the declaration on each deployment.</p></article><article class="concept-card"><strong>Modules</strong><p>A module is a reusable Bicep file that accepts parameters and encapsulates one cohesive set of resources — a module for a Container App, a module for a Key Vault, a module for a SQL server — composable into larger deployments.</p></article><article class="concept-card"><strong>Parameter files and environments</strong><p>Bicepparam files supply environment-specific values — SKUs, capacities, feature flags, connection strings — keeping the template logic environment-neutral and the differences version-controlled and reviewable.</p></article><article class="concept-card"><strong>Deployment stacks</strong><p>A deployment stack tracks all resources deployed as a unit and applies a deny-assignment to prevent out-of-band changes. Updating or deleting the stack reconciles or removes managed resources automatically.</p></article><article class="concept-card"><strong>Scopes and symbolic dependencies</strong><p>Target scope, existing resources, symbolic names, and module outputs express ownership and ordering without manually writing dependsOn arrays.</p></article><article class="concept-card"><strong>Type system and diagnostics</strong><p>Resource schemas, decorators, compile-time validation, lint rules, and editor completion catch many deployment mistakes before Azure is contacted.</p></article><article class="concept-card"><strong>Registries and versioning</strong><p>Private module registries and template specs distribute approved modules with immutable versions across teams and subscriptions.</p></article><article class="concept-card"><strong>What-if and deployment history</strong><p>What-if previews control-plane changes while ARM deployment records provide operation status, correlation, and audit evidence.</p></article></div></section>
+    <section id="architecture" class="article-section"><h2>Architecture</h2><p>Bicep source is compiled and deployed through a CI/CD pipeline, promoting one validated template with environment-specific parameters from dev through staging to production.</p><div class="architecture-placeholder"><div class="diagram-flow"><div class="diagram-node" style="--node-color:#5a3f9e">Bicep source + modules</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#2678c8">CI/CD pipeline</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#e07036">Parameter files per env</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#168c78">Azure resource groups</div></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
+    <section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>The Bicep Container App Platform composes observability, environment, and workload modules with typed parameters, secure runtime input, managed identity, encrypted ingress, probes, scaling, tags, and local contract tests.</p><ol class="step-list"><li><span>01</span><div><strong>Choose scope and ownership</strong><p>Select tenant, management group, subscription, resource group, or extension scope and decide whether a stack owns deletion.</p></div></li><li><span>02</span><div><strong>Define typed parameters</strong><p>Use descriptions, decorators, allowed values, secure inputs, and environment-neutral defaults.</p></div></li><li><span>03</span><div><strong>Model symbolic resources</strong><p>Use explicit API versions and symbolic references so dependencies and type checking emerge from real data flow.</p></div></li><li><span>04</span><div><strong>Extract cohesive modules</strong><p>Give modules narrow responsibilities, stable inputs, useful non-secret outputs, and versioned publication.</p></div></li><li><span>05</span><div><strong>Inject identity and secrets</strong><p>Use workload identity for deployment and managed identity plus Key Vault references for runtime access.</p></div></li><li><span>06</span><div><strong>Compile and lint</strong><p>Build Bicep to ARM JSON, treat diagnostics as errors, and run organization policy and security checks.</p></div></li><li><span>07</span><div><strong>Preview and deploy</strong><p>Review what-if, apply through protected environments, retain deployment operations, and run workload smoke checks.</p></div></li><li><span>08</span><div><strong>Operate modules and stacks</strong><p>Track API and module upgrades, drift, policy changes, resource ownership, removal behavior, and recovery.</p></div></li></ol></section>
+    <section id="code-example" class="article-section"><h2>Code example</h2><p>A focused Bicep module deploys a Container App with managed identity, Key Vault secret reference, and environment-linked configuration — accepting only the values that change per environment.</p><div class="code-host"><div class="code-block"><div class="code-toolbar"><span class="code-language">container-app.bicep</span><button class="copy-button" type="button"><span aria-hidden="true">▣</span> Copy</button></div><pre><code class="language-bicep">// modules/container-app.bicep
+
+@description(&#039;Name of the Container App&#039;)
+param appName string
+
+@description(&#039;Container Apps Environment resource ID&#039;)
+param environmentId string
+
+@description(&#039;Container image including tag&#039;)
+param image string
+
+@description(&#039;Key Vault URI for secret references&#039;)
+param keyVaultUri string
+
+@allowed([&#039;dev&#039;, &#039;test&#039;, &#039;prod&#039;])
+param environment string
+
+resource identity &#039;Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31&#039; = {
+  name: &#039;${appName}-identity&#039;
+  location: resourceGroup().location
+}
+
+resource app &#039;Microsoft.App/containerApps@2024-03-01&#039; = {
+  name: appName
+  location: resourceGroup().location
+  identity: {
+    type: &#039;UserAssigned&#039;
+    userAssignedIdentities: { &#039;${identity.id}&#039;: {} }
+  }
+  properties: {
+    environmentId: environmentId
+    configuration: {
+      ingress: { external: true, targetPort: 8080 }
+      secrets: [
+        {
+          name: &#039;db-connection&#039;
+          keyVaultUrl: &#039;${keyVaultUri}secrets/db-connection&#039;
+          identity: identity.id
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          name: appName
+          image: image
+          env: [
+            { name: &#039;ASPNETCORE_ENVIRONMENT&#039;, value: environment }
+            { name: &#039;ConnectionStrings__Database&#039;, secretRef: &#039;db-connection&#039; }
+          ]
+          resources: { cpu: json(&#039;0.5&#039;), memory: &#039;1Gi&#039; }
+        }
+      ]
+      scale: {
+        minReplicas: environment == &#039;prod&#039; ? 1 : 0
+        maxReplicas: 10
+      }
+    }
+  }
+}
+
+output appUrl string = &#039;https://${app.properties.configuration.ingress.fqdn}&#039;</code></pre></div></div><aside class="callout callout-note"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">note</strong><p>Bicep defines desired infrastructure state — it does not replace application configuration, secrets management, identity assignment, or monitoring setup, all of which need their own deliberate design.</p></div></aside></section>
+    <section id="testing" class="article-section"><h2>Testing strategy</h2><p>Validate authoring semantics, compiled contracts, Azure control-plane effects, and workload outcomes.</p><ul class="practice-list guidance-list"><li>Compile every entry point and fail on diagnostics.</li><li>Lint for secrets, hardcoded locations, unsafe defaults, and stale API versions.</li><li>Test module parameter and output contracts.</li><li>Review what-if at the intended target scope.</li><li>Deploy representative configurations to an isolated subscription.</li><li>Verify policy, identity, network, observability, removal, and rollback behavior.</li></ul></section>
+    <section id="security" class="article-section"><h2>Security considerations</h2><p>Bicep improves authoring but ARM scope, identity, policy, and secret behavior still define risk.</p><ul class="practice-list guidance-list"><li>Use OIDC workload identity with the narrowest deployment role and scope.</li><li>Mark secret parameters secure but prefer Key Vault references over raw values.</li><li>Keep secrets out of outputs, deployment names, tags, and logs.</li><li>Use managed identity and data-plane roles for applications.</li><li>Enforce policy, private networking, diagnostic settings, and approved module sources.</li><li>Review role assignments and deny-assignment implications separately from resources.</li></ul></section>
+    <section id="performance" class="article-section"><h2>Performance and scalability</h2><p>Deployment speed and reliability improve when modules and dependency graphs remain deliberate.</p><ul class="practice-list guidance-list"><li>Use symbolic references to enable safe parallel deployment.</li><li>Avoid one enormous template whose unrelated resources share a failure boundary.</li><li>Keep module nesting and outputs focused.</li><li>Use stable deployment names when history semantics require them.</li><li>Measure slow resource providers and long-running operations.</li><li>Avoid unnecessary list functions and cross-scope queries.</li></ul></section>
+    <section id="deployment" class="article-section"><h2>Deployment and operations</h2><p>Promote the same reviewed Bicep and module versions while parameters vary by environment.</p><ul class="practice-list guidance-list"><li>Compile and validate before cloud authentication is granted.</li><li>Run what-if with the protected deployment identity.</li><li>Require approval for deletes, replacements, role changes, public access, and SKU changes.</li><li>Use deployment stacks when declarative removal ownership is required.</li><li>Retain deployment operations and correlation IDs.</li><li>Run post-deployment identity, health, policy, and connectivity tests.</li></ul></section>
+    <section id="troubleshooting" class="article-section"><h2>Common problems and fixes</h2><div class="troubleshooting-list"><article class="troubleshooting-card"><h3>Compilation reports a property is invalid.</h3><p><strong>Likely cause:</strong> The chosen resource API version has a different schema.</p><p><strong>Fix:</strong> Inspect the resource reference, select a supported API version, and update properties deliberately.</p></article><article class="troubleshooting-card"><h3>A module deploys before its dependency.</h3><p><strong>Likely cause:</strong> No symbolic data reference expresses the real relationship.</p><p><strong>Fix:</strong> Pass the dependency resource ID or output, or add dependsOn only when no data dependency exists.</p></article><article class="troubleshooting-card"><h3>What-if shows noisy changes every run.</h3><p><strong>Likely cause:</strong> The provider normalizes defaults or returns runtime-only values.</p><p><strong>Fix:</strong> Inspect the actual API behavior, specify stable values, and document justified noise rather than ignoring all changes.</p></article><article class="troubleshooting-card"><h3>Deployment fails with authorization despite Contributor.</h3><p><strong>Likely cause:</strong> Role assignments, policy, data actions, or cross-scope operations need different permissions.</p><p><strong>Fix:</strong> Identify the exact denied action and scope, then grant the narrowest required role to the workload identity.</p></article><article class="troubleshooting-card"><h3>A secure parameter appears in deployment history.</h3><p><strong>Likely cause:</strong> It was copied into a non-secure output, tag, property, or log.</p><p><strong>Fix:</strong> Rotate it, remove the exposure path, and use Key Vault or managed identity references.</p></article><article class="troubleshooting-card"><h3>Removing a resource from Bicep does not delete it.</h3><p><strong>Likely cause:</strong> Incremental deployment does not imply ownership-based deletion.</p><p><strong>Fix:</strong> Use a deployment stack with explicit action-on-unmanage behavior or perform a separately reviewed retirement.</p></article></div></section>
+    <section id="best-practices" class="article-section"><h2>Best practices</h2><ul class="practice-list"><li>Treat Bicep files as production code — review them in pull requests, lint with the Bicep linter, and enforce no-hardcoded-secrets and explicit API versions as CI checks.</li><li>Use modules to encapsulate cohesive resource groups — a Container App module, a networking module — and compose them in a main.bicep rather than putting everything in one large file.</li><li>Separate environment-specific values into Bicepparam files and keep template logic environment-neutral so the same compiled template is promoted from dev to prod without modification.</li><li>Run what-if deployments in CI before applying to staging or production so reviewers can see exactly which resource properties will change before approving the pipeline run.</li><li>Pin module versions and API versions, and update them through reviewed compatibility tests.</li><li>Use workload identity with least-privilege deployment roles and keep secrets out of source, outputs, and logs.</li></ul><aside class="callout callout-tip"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">tip</strong><p>Start with the Azure Developer CLI and let azd init scaffold the initial Bicep structure for your project — it produces working modules for common patterns like Container Apps with managed identity and Key Vault that you can extend rather than writing from scratch.</p></div></aside><aside class="callout callout-warning"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">warning</strong><p>A what-if result showing no changes does not guarantee the deployment will succeed — resource provider API changes, quota limits, policy denials, and dependency ordering can still cause failures at apply time.</p></div></aside></section>
+    <section id="production-checklist" class="article-section"><h2>Production checklist</h2><ul class="checklist"><li>Scope, ownership, and removal behavior are explicit.</li><li>Parameters are typed, documented, validated, and secret-safe.</li><li>Modules are cohesive, versioned, tested, and from approved registries.</li><li>API versions and compile diagnostics are controlled.</li><li>Deployment and runtime identities are least privilege.</li><li>What-if, policy, security, and cost evidence gate deployment.</li><li>Operations, correlation IDs, and post-deployment checks are retained.</li><li>Stack deletion, module upgrade, and recovery paths are rehearsed.</li></ul></section>
+    <section id="interview-questions" class="article-section"><h2>Common interview questions</h2><div class="faq-list"><details class="faq-item"><summary><span class="faq-question">What is the difference between an ARM template and a Bicep file?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>A Bicep file is a higher-level declarative language that compiles to an ARM JSON template. Bicep provides cleaner syntax, type safety, native modules, string interpolation, conditional expressions, and IDE tooling, while ARM JSON is verbose and error-prone to write by hand. The compiled output is identical — Bicep is a transparent abstraction over ARM.</p></div></details><details class="faq-item"><summary><span class="faq-question">What is a Bicep deployment stack and when would you use it?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>A deployment stack tracks all resources deployed as a unit and can apply deny-assignments to prevent out-of-band changes to managed resources. When the stack is updated, resources removed from the template can be detached, deleted, or left in place according to the configured cleanup policy. It is useful when you want the infrastructure definition to be the authoritative source and prevent drift from manual portal changes.</p></div></details><details class="faq-item"><summary><span class="faq-question">How do you pass secrets into a Bicep deployment without hardcoding them?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Reference secrets from Azure Key Vault using a Bicepparam file with a getSecret() call — this injects the secret value at deployment time from Key Vault without it appearing in source control, pipeline logs, or the compiled template. The deployment identity needs Key Vault Secrets User access on the vault.</p></div></details><details class="faq-item"><summary><span class="faq-question">How does Bicep determine deployment order?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Symbolic resource references and module outputs create implicit dependencies; use explicit dependsOn only when no data reference expresses the real ordering.</p></div></details><details class="faq-item"><summary><span class="faq-question">What is an existing resource in Bicep?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>The existing keyword references a resource managed elsewhere without redeploying it, allowing modules to read identifiers and properties at the correct scope.</p></div></details><details class="faq-item"><summary><span class="faq-question">How should reusable Bicep modules be distributed?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Publish versioned modules to a private Bicep registry or template specs, document contracts, test compiled output, and upgrade consumers deliberately.</p></div></details><details class="faq-item"><summary><span class="faq-question">What can make what-if incomplete?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Runtime values, provider behavior, policy, permissions, quota, extension resources, and unsupported change analysis can produce noise or unknown results, so what-if is evidence rather than a guarantee.</p></div></details></div></section>
+    <section id="github-sample" class="article-section article-sample"><h2>Dedicated GitHub sample</h2><p>Clone, run, test, and modify the focused implementation created for this guide.</p><div class="sample-host"><article class="github-card card reveal"><div class="github-card-head"><span class="repo-icon" aria-hidden="true"></span><span class="repo-visibility">Verified sample</span></div><h3>Bicep Container App Platform</h3><p class="repo-description">A modular Azure Container Apps deployment demonstrating typed parameters, secure inputs, observability, managed identity, ingress, probes, scaling, tags, and local Bicep contract tests.</p><div class="tech-pills" aria-label="Technologies"><span>Bicep</span><span>Azure Container Apps</span><span>ARM</span><span>.NET 10</span></div><div class="tag-list" aria-label="Tags"><span>dedicated-sample</span><span>modules</span><span>what-if</span><span>managed-identity</span></div><dl class="sample-commands"><div><dt>Run</dt><dd><code>dotnet run --project tools/BicepContract -- infra</code></dd></div><div><dt>Test</dt><dd><code>dotnet test BicepContainerAppPlatform.slnx</code></dd></div></dl><div class="repo-actions"><a class="button button-small button-primary github-link" target="_blank" rel="noreferrer" href="https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/bicep-container-app-platform">GitHub <span aria-hidden="true">↗</span></a></div></article></div></section>
+    <nav class="article-nav" aria-label="Previous and next topics"><a href="secrets-management.html"><small>← Previous</small><strong>Secrets Management</strong></a><a href="health-checks.html"><small>Next →</small><strong>Health Checks</strong></a></nav></article>
+        <aside id="article-toc" class="toc" aria-label="Table of contents"><p class="toc-title">On this page</p><ul class="toc-list"><li><a class="toc-link" href="#overview">Overview</a></li><li><a class="toc-link" href="#learning-objectives">What you will learn</a></li><li><a class="toc-link" href="#decision-guide">When to use Infrastructure as Code (Bicep)</a></li><li><a class="toc-link" href="#key-concepts">Key concepts</a></li><li><a class="toc-link" href="#architecture">Architecture</a></li><li><a class="toc-link" href="#implementation">Implementation walkthrough</a></li><li><a class="toc-link" href="#code-example">Code example</a></li><li><a class="toc-link" href="#testing">Testing strategy</a></li><li><a class="toc-link" href="#security">Security considerations</a></li><li><a class="toc-link" href="#performance">Performance and scalability</a></li><li><a class="toc-link" href="#deployment">Deployment and operations</a></li><li><a class="toc-link" href="#troubleshooting">Common problems and fixes</a></li><li><a class="toc-link" href="#best-practices">Best practices</a></li><li><a class="toc-link" href="#production-checklist">Production checklist</a></li><li><a class="toc-link" href="#interview-questions">Common interview questions</a></li><li><a class="toc-link" href="#github-sample">Dedicated GitHub sample</a></li></ul></aside>
       </div>
     </main>
   </div>
-  <div id="site-footer"></div>
+  <div id="site-footer">
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a class="brand" href="../index.html"><span class="brand-mark">.N</span><span>.NET <em>Atlas</em></span></a>
+          <p>A practical map of the modern .NET ecosystem, built for curious developers and architecture-minded teams.</p>
+        </div>
+        <div><strong class="footer-heading">Explore</strong><div class="footer-links"><a href="../technologies/dotnet.html">Start with .NET</a><a href="../index.html#roadmap">Learning roadmap</a><a href="../sitemap.xml">Sitemap</a></div></div>
+        <div><strong class="footer-heading">Connect</strong><div class="footer-links"><a href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">GitHub profile ↗</a><a href="https://www.linkedin.com/in/adhakshinamoorthy" target="_blank" rel="noreferrer">LinkedIn ↗</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>© 2026 Dhakshinamoorthy A. Built for learning.</p><p>HTML · CSS · JavaScript · GitHub Pages</p></div>
+    </footer></div>
   <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">&uarr;</button>
-  <script type="module" src="../assets/js/topic.js?v=20260819"></script>
+  <script type="module" src="../assets/js/topic.js?v=20261119"></script>
 </body>
 </html>

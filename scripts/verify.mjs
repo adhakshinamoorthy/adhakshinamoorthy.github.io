@@ -70,12 +70,17 @@ for (const topic of technologies) {
 const expectedFiles = [
   'index.html', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
   'assets/css/styles.css', 'assets/js/components.js', 'assets/js/home.js',
-  'assets/js/topic.js', 'assets/icons/favicon.svg', 'assets/images/og-card.svg',
+  'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg',
   'components/templates.html', 'data/technologies.json', 'data/github-samples.json'
 ];
 for (const relativePath of expectedFiles) {
   try { await access(join(projectRoot, relativePath)); }
   catch { errors.push(`Missing required file: ${relativePath}`); }
+}
+
+for (const topic of technologies) {
+  const page = await readFile(join(projectRoot, 'technologies', `${topic.slug}.html`), 'utf8').catch(() => '');
+  if (!page.includes(`<h1>`) || !page.includes('id="interview-questions"')) errors.push(`${topic.slug} page is not pre-rendered. Run: node scripts/build-pages.mjs`);
 }
 
 const generated = (await readdir(join(projectRoot, 'technologies'))).filter(file => file.endsWith('.html'));
