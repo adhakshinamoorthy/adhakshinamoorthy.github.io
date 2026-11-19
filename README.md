@@ -89,6 +89,19 @@ node scripts/build-pages.mjs
 
 This writes every `technologies/*.html` page **with its full article already in the HTML**, plus `data/technologies-index.json` (the small file the browser loads for navigation and search), `sitemap.xml` with `lastmod` dates, and the guide and sample counts in `index.html`. Commit the generated files.
 
+### Link preview images
+
+LinkedIn, X, Slack, Teams and WhatsApp do not show SVG preview images, so each page has a 1200×630 PNG card in `assets/og/` (topic name, category, description, level, reading time, and author). Rebuild them after changing a topic's name, category, description, level, or reading time:
+
+```powershell
+npm install        # once
+node scripts/build-og-images.mjs
+```
+
+The Inter font files in `scripts/fonts/` (SIL Open Font License) make the output the same on every machine. Only changed images are rewritten. To test how a link will look on LinkedIn after deploying, paste the URL into the [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
+
+`npm run build` runs both build scripts. `npm run check` runs every check below.
+
 To check that generated files are up to date (for CI), run:
 
 ```powershell

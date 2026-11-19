@@ -68,9 +68,9 @@ for (const topic of technologies) {
 }
 
 const expectedFiles = [
-  'index.html', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
+  'index.html', 'about.html', 'assets/js/about.js', 'assets/images/profile-480.jpg', 'assets/og/about.png', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
   'assets/css/styles.css', 'assets/js/components.js', 'assets/js/home.js',
-  'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg',
+  'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg', 'assets/og/home.png',
   'components/templates.html', 'data/technologies.json', 'data/github-samples.json'
 ];
 for (const relativePath of expectedFiles) {
@@ -80,6 +80,7 @@ for (const relativePath of expectedFiles) {
 
 for (const topic of technologies) {
   const page = await readFile(join(projectRoot, 'technologies', `${topic.slug}.html`), 'utf8').catch(() => '');
+  try { await access(join(projectRoot, 'assets', 'og', `${topic.slug}.png`)); } catch { errors.push(`${topic.slug} has no preview image. Run: node scripts/build-og-images.mjs`); }
   if (!page.includes(`<h1>`) || !page.includes('id="interview-questions"')) errors.push(`${topic.slug} page is not pre-rendered. Run: node scripts/build-pages.mjs`);
 }
 
@@ -91,7 +92,7 @@ for (const topic of technologies) {
   if (!sitemap.includes(`/technologies/${topic.slug}.html`)) errors.push(`Sitemap is missing ${topic.slug}`);
 }
 
-const htmlFiles = [join(projectRoot, 'index.html'), ...generated.map(file => join(projectRoot, 'technologies', file))];
+const htmlFiles = [join(projectRoot, 'index.html'), join(projectRoot, 'about.html'), ...generated.map(file => join(projectRoot, 'technologies', file))];
 for (const htmlFile of htmlFiles) {
   const html = await readFile(htmlFile, 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {

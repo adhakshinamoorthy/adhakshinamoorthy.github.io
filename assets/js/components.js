@@ -93,6 +93,7 @@ export function renderNavbar(base, technologies, activeSlug = '') {
           <a class="top-link" href="${base}index.html#featured-title">Explore</a>
           <a class="top-link" href="${base}index.html#roadmap">Roadmap</a>
           <a class="top-link" href="${base}index.html#samples-title">Samples</a>
+          <a class="top-link" href="${base}about.html">About</a>
         </nav>
         <span class="nav-spacer"></span>
         <div class="nav-search">
