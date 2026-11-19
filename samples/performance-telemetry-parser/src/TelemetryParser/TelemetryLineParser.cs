@@ -29,8 +29,10 @@ public static class TelemetryLineParser
         var start = 0;
         for (var index = 0; index <= line.Length; index++)
         {
-            if (index != line.Length && line[index] != '|') continue;
-            if (fieldCount == fields.Length) { reading = default; return false; }
+            if (index != line.Length && line[index] != '|')
+                continue;
+            if (fieldCount == fields.Length)
+            { reading = default; return false; }
             fields[fieldCount++] = start..index;
             start = index + 1;
         }

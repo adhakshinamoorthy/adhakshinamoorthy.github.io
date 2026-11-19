@@ -1,0 +1,34 @@
+# Shared code style for the C# samples. Applied by `dotnet format`.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,csx}]
+indent_style = space
+indent_size = 4
+
+# One statement per line and braces on their own lines.
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Prefer modern C# idioms.
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_sort_system_directives_first = true
+
+[*.{csproj,props,targets,slnx,xml}]
+indent_style = space
+indent_size = 2
+
+[*.{json,yml,yaml,md,js,mjs,css,html}]
+indent_style = space
+indent_size = 2

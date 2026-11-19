@@ -13,7 +13,8 @@ import { renderArticle, renderToc } from './lib/article-markup.mjs';
 
 const BASE_URL = (process.env.BASE_URL || 'https://adhakshinamoorthy.github.io').replace(/\/$/, '');
 const ASSET_VERSION = '20261119';
-const AUTHOR = { name: 'Dhakshinamoorthy A', url: 'https://www.linkedin.com/in/adhakshinamoorthy' };
+const AUTHOR = { name: 'Dhakshinamoorthy A', url: `${BASE_URL}/about.html` };
+const AUTHOR_SAME_AS = ['https://www.linkedin.com/in/adhakshinamoorthy', 'https://github.com/adhakshinamoorthy'];
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const checkOnly = process.argv.includes('--check');
@@ -30,6 +31,9 @@ for (const topic of technologies) {
 const index = technologies.map(topic => Object.fromEntries(indexFields.filter(f => f in topic).map(f => [f, topic[f]])));
 outputs.set(join('data', 'technologies-index.json'), JSON.stringify(index) + '\n');
 outputs.set('sitemap.xml', sitemap());
+
+const about = await readFile(join(root, 'about.html'), 'utf8');
+outputs.set('about.html', about.replace(/\?v=\d+/g, `?v=${ASSET_VERSION}`));
 
 const home = await readFile(join(root, 'index.html'), 'utf8');
 outputs.set('index.html', home
@@ -72,7 +76,7 @@ function topicPage(topic) {
     proficiencyLevel: topic.level,
     timeRequired: `PT${topic.readingMinutes}M`,
     keywords: (topic.keywords || []).join(', '),
-    author: { '@type': 'Person', ...AUTHOR },
+    author: { '@type': 'Person', '@id': `${AUTHOR.url}#person`, ...AUTHOR, sameAs: AUTHOR_SAME_AS },
     isPartOf: { '@type': 'WebSite', name: '.NET Atlas', url: `${BASE_URL}/` }
   };
   // `<` is escaped so content can never close the script tag early.
@@ -90,10 +94,18 @@ function topicPage(topic) {
   <meta property="og:type" content="article">
   <meta property="og:title" content="${e(title)}">
   <meta property="og:description" content="${e(topic.shortDescription)}">
-  <meta property="og:image" content="${BASE_URL}/assets/images/og-card.svg">
+  <meta property="og:image" content="${BASE_URL}/assets/og/${topic.slug}.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${e(`${topic.name}: ${topic.category} guide on .NET Atlas`)}">
+  <meta property="og:site_name" content=".NET Atlas">
   <meta property="og:url" content="${url}">
   <meta property="article:modified_time" content="${e(topic.updated)}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${e(title)}">
+  <meta name="twitter:description" content="${e(topic.shortDescription)}">
+  <meta name="twitter:image" content="${BASE_URL}/assets/og/${topic.slug}.png">
   <title>${e(title)}</title>
   <link rel="canonical" href="${url}">
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
@@ -132,6 +144,7 @@ function sitemap() {
   const latest = technologies.map(t => t.updated).sort().at(-1);
   const entries = [
     `  <url><loc>${BASE_URL}/</loc><lastmod>${latest}</lastmod></url>`,
+    `  <url><loc>${BASE_URL}/about.html</loc><lastmod>${latest}</lastmod></url>`,
     ...technologies.map(t => `  <url><loc>${BASE_URL}/technologies/${t.slug}.html</loc><lastmod>${t.updated}</lastmod></url>`)
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>

@@ -110,8 +110,10 @@ public sealed class OrderItem
 
     private OrderItem(Guid id, Guid orderId, string productCode, string description, decimal unitPrice, int quantity)
     {
-        if (unitPrice <= 0) throw new ArgumentOutOfRangeException(nameof(unitPrice));
-        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
+        if (unitPrice <= 0)
+            throw new ArgumentOutOfRangeException(nameof(unitPrice));
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity));
 
         Id = id;
         OrderId = orderId;

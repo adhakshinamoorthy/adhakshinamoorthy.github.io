@@ -1,1 +1,13 @@
-using HostedWorkQueue;var queue=new WorkQueue(4);var processed=new List<string>();var worker=new QueueWorker(queue,(item,_)=>{processed.Add(item.Payload);return ValueTask.CompletedTask;});await queue.EnqueueAsync(new(Guid.NewGuid(),"report-42"));queue.Complete();await worker.RunAsync(default);Console.WriteLine($"Processed: {string.Join(',',processed)}; failures={worker.Failures}");
+using HostedWorkQueue;
+
+var queue = new WorkQueue(4);
+var processed = new List<string>();
+var worker = new QueueWorker(queue, (item, _) =>
+{
+    processed.Add(item.Payload);
+    return ValueTask.CompletedTask;
+});
+await queue.EnqueueAsync(new(Guid.NewGuid(), "report-42"));
+queue.Complete();
+await worker.RunAsync(default);
+Console.WriteLine($"Processed: {string.Join(',', processed)}; failures={worker.Failures}");

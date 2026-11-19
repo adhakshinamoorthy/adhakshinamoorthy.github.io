@@ -49,10 +49,12 @@ public sealed class OperationsHubTests : IClassFixture<WebApplicationFactory<Pro
             options.WebSocketFactory = async (context, cancellationToken) =>
             {
                 var webSocketClient = _factory.Server.CreateWebSocketClient();
-                if (userId is not null) webSocketClient.ConfigureRequest = request => request.Headers["X-User-Id"] = userId;
+                if (userId is not null)
+                    webSocketClient.ConfigureRequest = request => request.Headers["X-User-Id"] = userId;
                 return await webSocketClient.ConnectAsync(context.Uri, cancellationToken);
             };
-            if (userId is not null) options.Headers.Add("X-User-Id", userId);
+            if (userId is not null)
+                options.Headers.Add("X-User-Id", userId);
         })
         .WithAutomaticReconnect([TimeSpan.Zero, TimeSpan.FromMilliseconds(100)])
         .Build();

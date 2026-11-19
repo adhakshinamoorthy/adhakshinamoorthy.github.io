@@ -33,7 +33,8 @@ internal sealed class SqliteDatabase : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        if (Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+        if (Directory.Exists(_directory))
+            Directory.Delete(_directory, recursive: true);
         return ValueTask.CompletedTask;
     }
 }

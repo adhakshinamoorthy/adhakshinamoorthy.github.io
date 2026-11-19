@@ -28,7 +28,8 @@ public sealed class OrderingDbContextTests
     {
         await using var database = new SqliteDatabase();
         await database.MigrateAsync();
-        await using (var seed = database.CreateContext()) await DatabaseSeeder.SeedAsync(seed);
+        await using (var seed = database.CreateContext())
+            await DatabaseSeeder.SeedAsync(seed);
         await using var db = database.CreateContext();
 
         var summaries = await new OrderQueries(db).GetOpenOrdersAsync(page: 0, pageSize: 10);
@@ -56,7 +57,8 @@ public sealed class OrderingDbContextTests
     {
         await using var database = new SqliteDatabase();
         await database.MigrateAsync();
-        await using (var seed = database.CreateContext()) await DatabaseSeeder.SeedAsync(seed);
+        await using (var seed = database.CreateContext())
+            await DatabaseSeeder.SeedAsync(seed);
         await using var first = database.CreateContext();
         await using var second = database.CreateContext();
 

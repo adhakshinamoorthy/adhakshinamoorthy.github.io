@@ -26,7 +26,8 @@ public sealed class OperationsHub(OperationsRoomStore store) : Hub<IOperationsCl
     {
         room = OperationsRoomStore.ValidateRoom(room);
         text = text.Trim();
-        if (text.Length is < 1 or > 500) throw new HubException("Message length must be between 1 and 500 characters.");
+        if (text.Length is < 1 or > 500)
+            throw new HubException("Message length must be between 1 and 500 characters.");
         var sender = Context.UserIdentifier ?? throw new HubException("The connection has no user identifier.");
         var message = store.Add(room, sender, text);
         await Clients.Group(room).MessageReceived(message);
@@ -42,17 +43,20 @@ public sealed class OperationsRoomStore
     {
         lock (_gate)
         {
-            if (!_messages.TryGetValue(room, out var list)) _messages[room] = list = [];
+            if (!_messages.TryGetValue(room, out var list))
+                _messages[room] = list = [];
             var message = new OperationMessage(room, sender, text, DateTimeOffset.UtcNow);
             list.Add(message);
-            if (list.Count > 50) list.RemoveAt(0);
+            if (list.Count > 50)
+                list.RemoveAt(0);
             return message;
         }
     }
 
     public IReadOnlyList<OperationMessage> Read(string room)
     {
-        lock (_gate) return _messages.TryGetValue(room, out var list) ? list.ToArray() : [];
+        lock (_gate)
+            return _messages.TryGetValue(room, out var list) ? list.ToArray() : [];
     }
 
     public static string ValidateRoom(string room)

@@ -18,7 +18,8 @@ sealed class CacheClient(IChatClient inner) : IChatClient
     public static int Hits { get; private set; }
     public async Task<string> CompleteAsync(string prompt)
     {
-        if (cache.TryGetValue(prompt, out var value)) { Hits++; return $"cache:{value}"; }
+        if (cache.TryGetValue(prompt, out var value))
+        { Hits++; return $"cache:{value}"; }
         return cache[prompt] = await inner.CompleteAsync(prompt);
     }
 }

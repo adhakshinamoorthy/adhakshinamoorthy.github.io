@@ -10,9 +10,11 @@ internal sealed class WebhookSignatureVerifier(string secret)
     public bool IsValid(ReadOnlySpan<byte> payload, string signature)
     {
         const string prefix = "sha256=";
-        if (!signature.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
+        if (!signature.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return false;
         var suppliedHex = signature[prefix.Length..];
-        if (suppliedHex.Length != 64) return false;
+        if (suppliedHex.Length != 64)
+            return false;
 
         byte[] supplied;
         try

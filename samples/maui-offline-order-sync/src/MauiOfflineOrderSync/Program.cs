@@ -18,9 +18,14 @@ sealed class OfflineStore
     public void Queue(string orderId, string action, string operationId) => outbox[operationId] = (orderId, action);
     public string Sync(string operationId, int remoteVersion)
     {
-        if (completed.Contains(operationId)) return "Already synced";
-        if (!outbox.TryGetValue(operationId, out var item)) return "Missing operation";
-        if (orders[item.OrderId].Version != remoteVersion) return "Conflict";
-        completed.Add(operationId); outbox.Remove(operationId); return "Synced";
+        if (completed.Contains(operationId))
+            return "Already synced";
+        if (!outbox.TryGetValue(operationId, out var item))
+            return "Missing operation";
+        if (orders[item.OrderId].Version != remoteVersion)
+            return "Conflict";
+        completed.Add(operationId);
+        outbox.Remove(operationId);
+        return "Synced";
     }
 }

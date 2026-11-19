@@ -22,7 +22,8 @@ internal sealed class InventoryService(InventoryStore store) : Inventory.Invento
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             var sku = Normalize(rawSku);
-            if (store.TryGet(sku, out var stock)) await responseStream.WriteAsync(ToReply(sku, stock), context.CancellationToken);
+            if (store.TryGet(sku, out var stock))
+                await responseStream.WriteAsync(ToReply(sku, stock), context.CancellationToken);
         }
     }
 

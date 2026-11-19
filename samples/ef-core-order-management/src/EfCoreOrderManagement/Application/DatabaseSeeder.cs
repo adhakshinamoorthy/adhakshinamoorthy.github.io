@@ -8,7 +8,8 @@ public static class DatabaseSeeder
 {
     public static async Task SeedAsync(OrderingDbContext db, CancellationToken cancellationToken = default)
     {
-        if (await db.Orders.AnyAsync(cancellationToken)) return;
+        if (await db.Orders.AnyAsync(cancellationToken))
+            return;
 
         var customer = Customer.Create("reader@example.com", "Portal Reader");
         var order = Order.Place(

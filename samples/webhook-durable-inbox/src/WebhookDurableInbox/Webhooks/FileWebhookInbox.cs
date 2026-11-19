@@ -33,7 +33,8 @@ internal sealed class FileWebhookInbox
         try
         {
             var state = await LoadAsync(cancellationToken);
-            if (state.Deliveries.Any(item => item.DeliveryId == deliveryId)) return false;
+            if (state.Deliveries.Any(item => item.DeliveryId == deliveryId))
+                return false;
             state.Deliveries.Add(new WebhookDelivery(
                 deliveryId,
                 eventType,
@@ -51,7 +52,8 @@ internal sealed class FileWebhookInbox
     public async Task<WebhookDelivery?> FindAsync(string deliveryId, CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken);
-        try { return (await LoadAsync(cancellationToken)).Deliveries.FirstOrDefault(item => item.DeliveryId == deliveryId); }
+        try
+        { return (await LoadAsync(cancellationToken)).Deliveries.FirstOrDefault(item => item.DeliveryId == deliveryId); }
         finally { _gate.Release(); }
     }
 
@@ -75,7 +77,8 @@ internal sealed class FileWebhookInbox
         {
             var state = await LoadAsync(cancellationToken);
             var index = state.Deliveries.FindIndex(item => item.DeliveryId == deliveryId);
-            if (index < 0 || state.Deliveries[index].Status == DeliveryStatus.Completed) return null;
+            if (index < 0 || state.Deliveries[index].Status == DeliveryStatus.Completed)
+                return null;
             var delivery = state.Deliveries[index] with { Status = DeliveryStatus.Processing, Attempts = state.Deliveries[index].Attempts + 1 };
             state.Deliveries[index] = delivery;
             await SaveAsync(state, cancellationToken);
@@ -101,7 +104,8 @@ internal sealed class FileWebhookInbox
         {
             var state = await LoadAsync(cancellationToken);
             var index = state.Deliveries.FindIndex(item => item.DeliveryId == id);
-            if (index < 0) return;
+            if (index < 0)
+                return;
             state.Deliveries[index] = update(state.Deliveries[index]);
             await SaveAsync(state, cancellationToken);
         }
@@ -110,7 +114,8 @@ internal sealed class FileWebhookInbox
 
     private async Task<InboxState> LoadAsync(CancellationToken cancellationToken)
     {
-        if (!File.Exists(_path)) return new InboxState();
+        if (!File.Exists(_path))
+            return new InboxState();
         await using var stream = File.OpenRead(_path);
         return await JsonSerializer.DeserializeAsync<InboxState>(stream, JsonOptions, cancellationToken) ?? new InboxState();
     }

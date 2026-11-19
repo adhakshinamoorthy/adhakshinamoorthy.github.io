@@ -32,7 +32,8 @@ internal sealed class WebhookProcessor(
         await foreach (var deliveryId in queue.ReadAllAsync(stoppingToken))
         {
             var delivery = await inbox.BeginAsync(deliveryId, stoppingToken);
-            if (delivery is null) continue;
+            if (delivery is null)
+                continue;
             try
             {
                 var payload = Convert.FromBase64String(delivery.PayloadBase64);

@@ -89,6 +89,19 @@ node scripts/build-pages.mjs
 
 This writes every `technologies/*.html` page **with its full article already in the HTML**, plus `data/technologies-index.json` (the small file the browser loads for navigation and search), `sitemap.xml` with `lastmod` dates, and the guide and sample counts in `index.html`. Commit the generated files.
 
+### Link preview images
+
+LinkedIn, X, Slack, Teams and WhatsApp do not show SVG preview images, so each page has a 1200×630 PNG card in `assets/og/` (topic name, category, description, level, reading time, and author). Rebuild them after changing a topic's name, category, description, level, or reading time:
+
+```powershell
+npm install        # once
+node scripts/build-og-images.mjs
+```
+
+The Inter font files in `scripts/fonts/` (SIL Open Font License) make the output the same on every machine. Only changed images are rewritten. To test how a link will look on LinkedIn after deploying, paste the URL into the [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
+
+`npm run build` runs both build scripts. `npm run check` runs every check below.
+
 To check that generated files are up to date (for CI), run:
 
 ```powershell
@@ -106,6 +119,24 @@ To publish under a different URL, set `BASE_URL` first (PowerShell: `$env:BASE_U
 - [`assets/js/home.js`](assets/js/home.js) and [`assets/js/components.js`](assets/js/components.js) render the landing page from the light index. Card templates are in [`components/templates.html`](components/templates.html).
 
 Do not edit files in `technologies/` by hand; the next build overwrites them.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`:
+
+- **Site:** `npm ci` then `npm run check`. Fails if topic pages or preview images are out of date, or if `verify.mjs` finds a broken reference.
+- **Samples:** checks C# formatting, then builds and tests every solution in `samples/`. One run lists every failing sample in the job summary.
+
+Run the same checks locally:
+
+```bash
+npm run check
+dotnet format whitespace --folder samples --verify-no-changes
+./scripts/test-samples.sh                        # all samples
+./scripts/test-samples.sh kafka-partition-lab    # one sample
+```
+
+To fix formatting, run `dotnet format whitespace --folder samples`. Code style is set in `.editorconfig`.
 
 ## Keyboard and accessibility
 

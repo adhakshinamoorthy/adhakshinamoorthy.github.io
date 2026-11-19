@@ -1,6 +1,7 @@
 namespace TerraformContract;
 
 public sealed record ContractCheck(string Name, bool Passed);
+
 public sealed record InspectionResult(IReadOnlyList<ContractCheck> Checks)
 {
     public bool IsValid => Checks.All(check => check.Passed);
@@ -10,7 +11,8 @@ public static class TerraformInspector
 {
     public static InspectionResult Inspect(string directory)
     {
-        if (!Directory.Exists(directory)) throw new DirectoryNotFoundException(directory);
+        if (!Directory.Exists(directory))
+            throw new DirectoryNotFoundException(directory);
         var source = string.Join('\n', Directory.GetFiles(directory, "*.tf").Order().Select(File.ReadAllText));
         var checks = new[]
         {

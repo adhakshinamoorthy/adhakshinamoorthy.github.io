@@ -12,7 +12,8 @@ public sealed class OrderCatalog
     public Order Create(CreateOrder request)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.CustomerId);
-        if (request.Total <= 0) throw new ArgumentOutOfRangeException(nameof(request), "Total must be positive.");
+        if (request.Total <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request), "Total must be positive.");
 
         var order = new Order(Guid.NewGuid(), request.CustomerId.Trim(), request.Total, "accepted");
         _orders[order.Id] = order;

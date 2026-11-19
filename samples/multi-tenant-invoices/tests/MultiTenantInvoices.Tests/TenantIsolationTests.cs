@@ -9,6 +9,7 @@ namespace MultiTenantInvoices.Tests;
 public sealed class TenantIsolationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
+
     public TenantIsolationTests(WebApplicationFactory<Program> factory) => _factory = factory;
 
     [Fact]
@@ -55,5 +56,6 @@ public sealed class TenantIsolationTests : IClassFixture<WebApplicationFactory<P
         client.DefaultRequestHeaders.Add("X-Tenant-Id", tenant);
         return client;
     }
+
     private static Task<HttpResponseMessage> Create(HttpClient client, string number) => client.PostAsJsonAsync("/api/invoices", new { number, amount = 10m });
 }

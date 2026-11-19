@@ -39,7 +39,8 @@ public sealed class ManifestFactoryTests
         while (directory is not null)
         {
             var candidate = Path.Combine([directory.FullName, .. segments]);
-            if (File.Exists(candidate)) return candidate;
+            if (File.Exists(candidate))
+                return candidate;
             directory = directory.Parent;
         }
         throw new FileNotFoundException(string.Join('/', segments));

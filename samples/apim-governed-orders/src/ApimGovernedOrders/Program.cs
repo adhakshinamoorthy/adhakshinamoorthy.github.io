@@ -9,7 +9,8 @@ app.Use(async (context, next) =>
 {
     const string header = "x-correlation-id";
     var correlationId = context.Request.Headers[header].FirstOrDefault();
-    if (string.IsNullOrWhiteSpace(correlationId)) correlationId = context.TraceIdentifier;
+    if (string.IsNullOrWhiteSpace(correlationId))
+        correlationId = context.TraceIdentifier;
     context.Response.Headers[header] = correlationId;
     using (app.Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
     {

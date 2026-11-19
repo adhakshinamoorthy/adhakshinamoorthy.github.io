@@ -368,3 +368,34 @@ kbd { font: 11px var(--font-sans); color: var(--text-muted); background: var(--s
 @media print {
   :root{--canvas:#fff;--surface:#fff;--text:#000;--text-secondary:#333;--border:#bbb;color-scheme:light}.topbar,.sidebar,.toc,.site-footer,.back-to-top,.article-nav,.copy-button{display:none!important}.site-shell,.article-main{display:block;max-width:none}.article-main{padding:0}.article{max-width:none}.article-section{break-inside:avoid}.code-block{box-shadow:none;border-color:#555}.reveal{opacity:1;transform:none}a{color:#000;text-decoration:none}a[href^="http"]::after{content:" (" attr(href) ")";font-size:10px}
 }
+
+/* About page and author strip */
+.home-author { display: inline-flex; align-items: center; gap: 12px; margin-top: 28px; padding: 8px 16px 8px 8px; color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; box-shadow: var(--shadow-1); transition: border-color .2s, transform .2s var(--ease); }
+.home-author:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.home-author img { display: block; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.home-author strong { display: block; font-size: 15px; }
+.home-author small { display: block; color: var(--text-muted); font-size: 13px; }
+.home-author-arrow { color: var(--brand-strong); font-weight: 700; }
+.about-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(32px, 5vw, 64px); background: radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 30%); }
+.profile-photo img { display: block; width: clamp(160px, 20vw, 240px); height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 6px solid var(--surface); box-shadow: var(--shadow-2), 0 0 0 2px color-mix(in srgb, var(--brand) 45%, transparent); }
+.about-intro h1 { margin: 10px 0 6px; font-size: clamp(34px, 8.5vw, 64px); line-height: 1.05; letter-spacing: -.045em; }
+.about-role { margin: 0; color: var(--text-secondary); font-size: clamp(18px, 1.8vw, 22px); font-weight: 600; }
+.about-stats { margin-top: 24px; }
+.about-story { padding-top: 24px; }
+.about-prose { max-width: 760px; }
+.about-prose h2 { margin: 0 0 14px; font-size: clamp(26px, 2.6vw, 36px); letter-spacing: -.03em; }
+.about-prose h2:not(:first-child) { margin-top: 40px; }
+.about-prose p { margin: 0 0 16px; color: var(--text-secondary); font-size: 18px; line-height: 1.7; }
+.focus-card { padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.focus-card h3 { margin: 0; font-size: 19px; }
+.focus-card p { margin: 0; color: var(--text-secondary); flex: 1; }
+.contact-card { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr); gap: 40px; padding: clamp(24px, 4vw, 44px); }
+.contact-card:hover { transform: none; }
+.contact-card h2 { margin: 8px 0 12px; font-size: clamp(26px, 2.6vw, 36px); letter-spacing: -.03em; }
+.contact-card > div > p { color: var(--text-secondary); }
+.contact-actions { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.contact-note { margin: 4px 0 0; color: var(--text-muted); font-size: 14px; }
+@media (max-width: 860px) {
+  .about-hero { grid-template-columns: 1fr; justify-items: start; }
+  .contact-card { grid-template-columns: 1fr; }
+}

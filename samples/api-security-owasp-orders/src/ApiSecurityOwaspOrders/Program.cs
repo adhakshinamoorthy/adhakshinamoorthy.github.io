@@ -44,7 +44,8 @@ app.UseAuthorization();
 var orders = app.MapGroup("/api/orders").RequireAuthorization().RequireRateLimiting("api");
 orders.MapGet("/", (ClaimsPrincipal user, IOrderRepository repository, int? limit) =>
 {
-    if (limit is < 1 or > 100) return Results.BadRequest(new { error = "limit must be between 1 and 100" });
+    if (limit is < 1 or > 100)
+        return Results.BadRequest(new { error = "limit must be between 1 and 100" });
     var tenant = user.FindFirstValue("tenant")!;
     return Results.Ok(repository.List(tenant, limit ?? 20).Select(OrderResponse.From));
 });
@@ -79,7 +80,8 @@ internal sealed class LocalIdentityHandler(IOptionsMonitor<AuthenticationSchemeO
     {
         var subject = Request.Headers["X-Subject"].ToString();
         var tenant = Request.Headers["X-Tenant"].ToString();
-        if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(tenant)) return Task.FromResult(AuthenticateResult.NoResult());
+        if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(tenant))
+            return Task.FromResult(AuthenticateResult.NoResult());
         Claim[] claims = [new(ClaimTypes.NameIdentifier, subject), new("tenant", tenant)];
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, SchemeName));
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, SchemeName)));
