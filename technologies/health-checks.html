@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="--topic-color:#1a7a4a">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,15 +8,17 @@
   <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Health Checks &mdash; .NET Atlas">
+  <meta property="og:title" content="Health Checks — .NET Atlas">
   <meta property="og:description" content="Expose meaningful liveness, readiness, and startup signals from .NET applications so orchestrators, load balancers, and dashboards can act on real dependency health.">
   <meta property="og:image" content="https://adhakshinamoorthy.github.io/assets/images/og-card.svg">
   <meta property="og:url" content="https://adhakshinamoorthy.github.io/technologies/health-checks.html">
+  <meta property="article:modified_time" content="2026-08-13">
   <meta name="twitter:card" content="summary_large_image">
-  <title>Health Checks &mdash; .NET Atlas</title>
+  <title>Health Checks — .NET Atlas</title>
   <link rel="canonical" href="https://adhakshinamoorthy.github.io/technologies/health-checks.html">
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=20260819">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=20261119">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Health Checks","description":"Expose meaningful liveness, readiness, and startup signals from .NET applications so orchestrators, load balancers, and dashboards can act on real dependency health.","url":"https://adhakshinamoorthy.github.io/technologies/health-checks.html","dateModified":"2026-08-13","proficiencyLevel":"Foundation to production","timeRequired":"PT36M","keywords":"health checks, IHealthCheck, readiness, liveness, startup probe, AspNetCore.Diagnostics.HealthChecks, health check UI, Kubernetes probes, dependency health","author":{"@type":"Person","name":"Dhakshinamoorthy A","url":"https://www.linkedin.com/in/adhakshinamoorthy"},"isPartOf":{"@type":"WebSite","name":".NET Atlas","url":"https://adhakshinamoorthy.github.io/"}}</script>
   <script>
     (() => {
       const saved = localStorage.getItem('dotnet-atlas-theme');
@@ -24,23 +26,246 @@
       document.documentElement.dataset.theme = theme;
     })();
   </script>
+  <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
 </head>
 <body data-page="topic" data-topic="health-checks" data-base="../">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div id="site-navbar"></div>
   <div class="site-shell">
-    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation"></aside>
+    <aside id="site-sidebar" class="sidebar" aria-label="Technology navigation" data-prerendered>
+    <nav class="sidebar-group" aria-label="Core Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-0">
+          <span>Core Platform</span>
+          <span class="sidebar-count" aria-label="4 topics">4</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-0" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet.html" ><span class="sidebar-dot" style="--topic-color:#6e5bd7"></span>.NET</a></li><li><a class="sidebar-link" href="../technologies/csharp.html" ><span class="sidebar-dot" style="--topic-color:#7f4fc7"></span>C#</a></li><li><a class="sidebar-link" href="../technologies/dependency-injection.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Dependency Injection</a></li><li><a class="sidebar-link" href="../technologies/source-generators.html" ><span class="sidebar-dot" style="--topic-color:#9a4fa8"></span>Source Generators</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Web &amp; Data">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-1">
+          <span>Web &amp; Data</span>
+          <span class="sidebar-count" aria-label="13 topics">13</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-1" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/aspnet-core.html" ><span class="sidebar-dot" style="--topic-color:#2878c8"></span>ASP.NET Core</a></li><li><a class="sidebar-link" href="../technologies/entity-framework-core.html" ><span class="sidebar-dot" style="--topic-color:#4767c8"></span>Entity Framework Core</a></li><li><a class="sidebar-link" href="../technologies/blazor.html" ><span class="sidebar-dot" style="--topic-color:#7851b8"></span>Blazor</a></li><li><a class="sidebar-link" href="../technologies/minimal-apis.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>Minimal APIs</a></li><li><a class="sidebar-link" href="../technologies/authentication-authorization.html" ><span class="sidebar-dot" style="--topic-color:#c14f72"></span>Authentication &amp; Authorization</a></li><li><a class="sidebar-link" href="../technologies/grpc.html" ><span class="sidebar-dot" style="--topic-color:#1a9e9e"></span>gRPC</a></li><li><a class="sidebar-link" href="../technologies/signalr.html" ><span class="sidebar-dot" style="--topic-color:#9450c9"></span>SignalR</a></li><li><a class="sidebar-link" href="../technologies/resilience-rate-limiting.html" ><span class="sidebar-dot" style="--topic-color:#d9534f"></span>Resilience &amp; Rate Limiting</a></li><li><a class="sidebar-link" href="../technologies/openapi-scalar.html" ><span class="sidebar-dot" style="--topic-color:#168dcc"></span>OpenAPI &amp; Scalar</a></li><li><a class="sidebar-link" href="../technologies/api-security-owasp.html" ><span class="sidebar-dot" style="--topic-color:#c5485c"></span>API Security &amp; OWASP</a></li><li><a class="sidebar-link" href="../technologies/dapper.html" ><span class="sidebar-dot" style="--topic-color:#d26a2e"></span>Dapper</a></li><li><a class="sidebar-link" href="../technologies/graphql.html" ><span class="sidebar-dot" style="--topic-color:#e535ab"></span>GraphQL in .NET</a></li><li><a class="sidebar-link" href="../technologies/webhook-patterns.html" ><span class="sidebar-dot" style="--topic-color:#2e7d9e"></span>Webhook Patterns</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud &amp; Architecture">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-2">
+          <span>Cloud &amp; Architecture</span>
+          <span class="sidebar-count" aria-label="21 topics">21</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-2" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#0878c9"></span>Azure for .NET</a></li><li><a class="sidebar-link" href="../technologies/microservices.html" ><span class="sidebar-dot" style="--topic-color:#e07036"></span>Microservices</a></li><li><a class="sidebar-link" href="../technologies/clean-architecture.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Clean Architecture</a></li><li><a class="sidebar-link" href="../technologies/design-patterns.html" ><span class="sidebar-dot" style="--topic-color:#b45e98"></span>Design Patterns</a></li><li><a class="sidebar-link" href="../technologies/dotnet-aspire.html" ><span class="sidebar-dot" style="--topic-color:#8a4fd6"></span>.NET Aspire</a></li><li><a class="sidebar-link" href="../technologies/cqrs-mediatr.html" ><span class="sidebar-dot" style="--topic-color:#cf7a4a"></span>CQRS &amp; MediatR</a></li><li><a class="sidebar-link" href="../technologies/event-driven-messaging.html" ><span class="sidebar-dot" style="--topic-color:#3fa88a"></span>Event-Driven Messaging</a></li><li><a class="sidebar-link" href="../technologies/apache-kafka.html" ><span class="sidebar-dot" style="--topic-color:#2d4a6b"></span>Apache Kafka</a></li><li><a class="sidebar-link" href="../technologies/rabbitmq.html" ><span class="sidebar-dot" style="--topic-color:#ff6600"></span>RabbitMQ</a></li><li><a class="sidebar-link" href="../technologies/semantic-kernel.html" ><span class="sidebar-dot" style="--topic-color:#7b3fe4"></span>Semantic Kernel</a></li><li><a class="sidebar-link" href="../technologies/domain-driven-design.html" ><span class="sidebar-dot" style="--topic-color:#2a7a5e"></span>Domain-Driven Design</a></li><li><a class="sidebar-link" href="../technologies/vertical-slice-architecture.html" ><span class="sidebar-dot" style="--topic-color:#c0454a"></span>Vertical Slice Architecture</a></li><li><a class="sidebar-link" href="../technologies/microsoft-extensions-ai.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Microsoft.Extensions.AI</a></li><li><a class="sidebar-link" href="../technologies/modular-monolith.html" ><span class="sidebar-dot" style="--topic-color:#2f7d71"></span>Modular Monolith</a></li><li><a class="sidebar-link" href="../technologies/mlnet.html" ><span class="sidebar-dot" style="--topic-color:#5c61d6"></span>ML.NET</a></li><li><a class="sidebar-link" href="../technologies/model-context-protocol.html" ><span class="sidebar-dot" style="--topic-color:#6f56d9"></span>Model Context Protocol</a></li><li><a class="sidebar-link" href="../technologies/azure-key-vault.html" ><span class="sidebar-dot" style="--topic-color:#1876c9"></span>Azure Key Vault &amp; Secrets</a></li><li><a class="sidebar-link" href="../technologies/orleans.html" ><span class="sidebar-dot" style="--topic-color:#4a5fc1"></span>Orleans</a></li><li><a class="sidebar-link" href="../technologies/event-sourcing.html" ><span class="sidebar-dot" style="--topic-color:#2e6da8"></span>Event Sourcing</a></li><li><a class="sidebar-link" href="../technologies/redis-distributed-caching.html" ><span class="sidebar-dot" style="--topic-color:#c0392b"></span>Redis &amp; Distributed Caching</a></li><li><a class="sidebar-link" href="../technologies/yarp-reverse-proxy.html" ><span class="sidebar-dot" style="--topic-color:#7b4f9e"></span>YARP — Reverse Proxy</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Delivery &amp; Operations">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="true" aria-controls="sidebar-group-3">
+          <span>Delivery &amp; Operations</span>
+          <span class="sidebar-count" aria-label="11 topics">11</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-3" class="sidebar-list">
+          <li><a class="sidebar-link" href="../technologies/docker.html" ><span class="sidebar-dot" style="--topic-color:#1686d9"></span>Docker</a></li><li><a class="sidebar-link" href="../technologies/kubernetes.html" ><span class="sidebar-dot" style="--topic-color:#3970cf"></span>Kubernetes</a></li><li><a class="sidebar-link" href="../technologies/background-services.html" ><span class="sidebar-dot" style="--topic-color:#c98a1f"></span>Background &amp; Hosted Services</a></li><li><a class="sidebar-link" href="../technologies/observability.html" ><span class="sidebar-dot" style="--topic-color:#2f8fae"></span>Observability &amp; OpenTelemetry</a></li><li><a class="sidebar-link" href="../technologies/cicd-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#4c9a4c"></span>CI/CD for .NET</a></li><li><a class="sidebar-link" href="../technologies/feature-flags.html" ><span class="sidebar-dot" style="--topic-color:#d18415"></span>Feature Flags</a></li><li><a class="sidebar-link" href="../technologies/internal-developer-platforms.html" ><span class="sidebar-dot" style="--topic-color:#168c78"></span>Internal Developer Platforms</a></li><li><a class="sidebar-link" href="../technologies/terraform.html" ><span class="sidebar-dot" style="--topic-color:#7c4dff"></span>Terraform</a></li><li><a class="sidebar-link" href="../technologies/secrets-management.html" ><span class="sidebar-dot" style="--topic-color:#a1662f"></span>Secrets Management</a></li><li><a class="sidebar-link" href="../technologies/infrastructure-as-code-bicep.html" ><span class="sidebar-dot" style="--topic-color:#5a3f9e"></span>Infrastructure as Code (Bicep)</a></li><li><a class="sidebar-link" href="../technologies/health-checks.html" aria-current="page"><span class="sidebar-dot" style="--topic-color:#1a7a4a"></span>Health Checks</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Quality &amp; Growth">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-4">
+          <span>Quality &amp; Growth</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-4" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/testing.html" ><span class="sidebar-dot" style="--topic-color:#168f72"></span>Testing</a></li><li><a class="sidebar-link" href="../technologies/performance.html" ><span class="sidebar-dot" style="--topic-color:#d17a2d"></span>Performance</a></li><li><a class="sidebar-link" href="../technologies/interview-questions.html" ><span class="sidebar-dot" style="--topic-color:#5f6f86"></span>Interview Questions</a></li><li><a class="sidebar-link" href="../technologies/structured-logging.html" ><span class="sidebar-dot" style="--topic-color:#4a6fa5"></span>Structured Logging</a></li><li><a class="sidebar-link" href="../technologies/architecture-testing.html" ><span class="sidebar-dot" style="--topic-color:#6b3fa0"></span>Architecture Testing</a></li><li><a class="sidebar-link" href="../technologies/testcontainers.html" ><span class="sidebar-dot" style="--topic-color:#1d6fa5"></span>Testcontainers for .NET</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cross-Platform">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-5">
+          <span>Cross-Platform</span>
+          <span class="sidebar-count" aria-label="1 topics">1</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-5" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/dotnet-maui.html" ><span class="sidebar-dot" style="--topic-color:#7b4fe0"></span>.NET MAUI</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Architecture Practice">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-6">
+          <span>Architecture Practice</span>
+          <span class="sidebar-count" aria-label="7 topics">7</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-6" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/solution-architecture-fundamentals.html" ><span class="sidebar-dot" style="--topic-color:#5b5fc7"></span>Solution Architecture Fundamentals</a></li><li><a class="sidebar-link" href="../technologies/architecture-decision-records.html" ><span class="sidebar-dot" style="--topic-color:#6b69d6"></span>Architecture Decision Records</a></li><li><a class="sidebar-link" href="../technologies/api-design-best-practices.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>API Design Best Practices</a></li><li><a class="sidebar-link" href="../technologies/multi-tenancy-patterns.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>Multi-Tenancy Patterns</a></li><li><a class="sidebar-link" href="../technologies/saga-pattern.html" ><span class="sidebar-dot" style="--topic-color:#c239b3"></span>Saga Pattern</a></li><li><a class="sidebar-link" href="../technologies/legacy-modernization.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>Legacy Modernization</a></li><li><a class="sidebar-link" href="../technologies/backend-for-frontend.html" ><span class="sidebar-dot" style="--topic-color:#4c6ef5"></span>Backend for Frontend</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Cloud Platforms">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-7">
+          <span>Cloud Platforms</span>
+          <span class="sidebar-count" aria-label="9 topics">9</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-7" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-resource-manager.html" ><span class="sidebar-dot" style="--topic-color:#0072c6"></span>Azure Resource Manager</a></li><li><a class="sidebar-link" href="../technologies/azure-api-management.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure API Management</a></li><li><a class="sidebar-link" href="../technologies/azure-functions-serverless.html" ><span class="sidebar-dot" style="--topic-color:#0063b1"></span>Azure Functions &amp; Serverless</a></li><li><a class="sidebar-link" href="../technologies/azure-logic-apps.html" ><span class="sidebar-dot" style="--topic-color:#5c2d91"></span>Azure Logic Apps</a></li><li><a class="sidebar-link" href="../technologies/azure-event-hubs.html" ><span class="sidebar-dot" style="--topic-color:#00a4ef"></span>Azure Event Hubs</a></li><li><a class="sidebar-link" href="../technologies/azure-data-factory-etl.html" ><span class="sidebar-dot" style="--topic-color:#2d7d9a"></span>Azure Data Factory &amp; ETL</a></li><li><a class="sidebar-link" href="../technologies/cloud-adoption-framework.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>Cloud Adoption Framework</a></li><li><a class="sidebar-link" href="../technologies/aws-for-dotnet.html" ><span class="sidebar-dot" style="--topic-color:#e87918"></span>AWS for .NET</a></li><li><a class="sidebar-link" href="../technologies/azure-container-apps.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Container Apps</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="sidebar-group" aria-label="Azure Well-Architected">
+      <div class="sidebar-disclosure">
+        <button class="sidebar-label" type="button" aria-expanded="false" aria-controls="sidebar-group-8">
+          <span>Azure Well-Architected</span>
+          <span class="sidebar-count" aria-label="6 topics">6</span>
+          <span class="sidebar-chevron" aria-hidden="true"></span>
+        </button>
+        <ul id="sidebar-group-8" class="sidebar-list" hidden>
+          <li><a class="sidebar-link" href="../technologies/azure-well-architected.html" ><span class="sidebar-dot" style="--topic-color:#0078d4"></span>Azure Well-Architected Framework</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-reliability.html" ><span class="sidebar-dot" style="--topic-color:#2b88d8"></span>WAF: Reliability</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-security.html" ><span class="sidebar-dot" style="--topic-color:#c43e4d"></span>WAF: Security</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-cost-optimization.html" ><span class="sidebar-dot" style="--topic-color:#498205"></span>WAF: Cost Optimization</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-operational-excellence.html" ><span class="sidebar-dot" style="--topic-color:#8764b8"></span>WAF: Operational Excellence</a></li><li><a class="sidebar-link" href="../technologies/azure-waf-performance-efficiency.html" ><span class="sidebar-dot" style="--topic-color:#d83b01"></span>WAF: Performance Efficiency</a></li>
+        </ul>
+      </div>
+    </nav></aside>
     <main id="main-content" class="main-content" tabindex="-1">
       <div class="article-main">
         <article id="topic-article" class="article">
-          <noscript><div class="error-panel"><h1>JavaScript is required</h1><p>This static portal uses JavaScript to assemble reusable article components from local JSON data.</p></div></noscript>
-        </article>
-        <aside id="article-toc" class="toc" aria-label="Table of contents"></aside>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a><span class="breadcrumb-separator" aria-hidden="true">/</span><span>Technologies</span><span class="breadcrumb-separator" aria-hidden="true">/</span><span aria-current="page">Health Checks</span></nav>
+    <header class="article-header">
+      <div class="topic-labels"><span class="topic-badge">Delivery &amp; Operations</span><span class="topic-status topic-status-complete">Complete guide</span></div>
+      <h1>Health Checks</h1>
+      <p class="article-lede">Health checks expose signals that tell orchestrators, load balancers, and monitoring systems whether an application is alive, ready to serve traffic, and has access to its dependencies.</p>
+      <div class="article-meta"><span>⏱ 36 min read</span><span>Updated <time datetime="2026-08-13">Aug 13, 2026</time></span><span>Level: Foundation to production</span></div>
+    </header>
+    <section id="overview" class="article-section"><h2>Overview</h2><p>Health endpoints are control-plane contracts, not generic diagnostics. Liveness answers whether the process is irrecoverably stuck and should restart; it must not fail merely because a dependency is unavailable. Readiness answers whether this instance should receive new traffic and may include only dependencies required for serving that traffic. Startup protects slow initialization from premature liveness failures. ASP.NET Core registers IHealthCheck implementations and uses tags and predicates to expose separate endpoints. Checks need short cancellation-aware timeouts, bounded concurrency, stable sanitized output, and failure status chosen from operational consequences. Cache expensive results where appropriate, secure detailed dashboards, and test probe timings against deployment grace periods. A misdesigned probe can create restart loops or synchronized dependency load during the incident it was meant to diagnose.</p><div class="official-resources"><strong>Official resources</strong><div class="official-resource-links"><a class="button button-secondary button-small" href="https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks" target="_blank" rel="noopener noreferrer" aria-label="ASP.NET Core health checks (opens in a new tab)">ASP.NET Core health checks</a><a class="button button-secondary button-small" href="https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/" target="_blank" rel="noopener noreferrer" aria-label="Kubernetes probes (opens in a new tab)">Kubernetes probes</a></div></div></section>
+    <section id="learning-objectives" class="article-section"><h2>What you will learn</h2><ul class="practice-list learning-objectives"><li>Separate liveness, readiness, and startup semantics.</li><li>Implement cancellation-aware dependency probes.</li><li>Aggregate required and optional dependency status.</li><li>Configure probe budgets with deployment behavior.</li><li>Protect diagnostic output.</li><li>Test transitions and failure consequences.</li></ul><h3>Prerequisites</h3><ul class="plain-list prerequisites"><li>ASP.NET Core routing and dependency injection.</li><li>Container or load-balancer probe fundamentals.</li><li>Known required and optional dependencies.</li></ul></section>
+    <section id="decision-guide" class="article-section"><h2>When to use Health Checks</h2><div class="decision-grid"><article class="decision-panel decision-use"><h3>Good fit</h3><ul><li>An orchestrator or load balancer needs an action signal.</li><li>A dependency determines traffic readiness.</li><li>Startup initialization needs a distinct grace window.</li></ul></article><article class="decision-panel decision-avoid"><h3>Choose another approach when</h3><ul><li>Liveness performs every dependency query.</li><li>A public endpoint exposes exception details.</li><li>Checks trigger repairs or destructive side effects.</li></ul></article></div></section>
+    <section id="key-concepts" class="article-section"><h2>Key concepts</h2><div class="concept-grid"><article class="concept-card"><strong>Liveness</strong><p>A lightweight process signal whose failure asks the orchestrator to restart this instance.</p></article><article class="concept-card"><strong>Readiness</strong><p>A traffic-admission signal that reflects whether the instance can serve its required workload.</p></article><article class="concept-card"><strong>Startup</strong><p>An initialization gate that delays normal liveness and readiness evaluation for slow-starting applications.</p></article><article class="concept-card"><strong>IHealthCheck</strong><p>A cancellation-aware component reports Healthy, Degraded, or Unhealthy plus controlled diagnostic data.</p></article><article class="concept-card"><strong>Tags and predicates</strong><p>Registration tags let separate endpoints select only the checks appropriate for each consumer.</p></article><article class="concept-card"><strong>Dependency criticality</strong><p>Required and optional dependencies map to different aggregate statuses and routing consequences.</p></article><article class="concept-card"><strong>Probe budgets</strong><p>Timeout, period, and failure threshold together define how quickly infrastructure reacts.</p></article><article class="concept-card"><strong>Operational output</strong><p>Machine-readable status supports automation while detailed diagnostics remain protected and sanitized.</p></article></div></section>
+    <section id="architecture" class="article-section"><h2>Architecture</h2><p>Kubernetes probes call dedicated health endpoints filtered by tag; the readiness endpoint checks real dependencies while the liveness endpoint stays lightweight, and the UI dashboard polls all endpoints for operator visibility.</p><div class="architecture-placeholder"><div class="diagram-flow"><div class="diagram-node" style="--node-color:#2678c8">Kubernetes probes</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#1a7a4a">Liveness endpoint</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#e07036">Readiness endpoint</div><span class="diagram-arrow" aria-hidden="true">→</span><div class="diagram-node" style="--node-color:#6e5bd7">Health check UI</div></div><p class="diagram-caption">Conceptual architecture · Adapt to your system context</p></div></section>
+    <section id="implementation" class="article-section"><h2>Implementation walkthrough</h2><p>The sample models startup state, required and optional dependencies, cancellation, and deterministic aggregate results without external infrastructure.</p><ol class="step-list"><li><span>01</span><div><strong>Name consumers</strong><p>List who calls each endpoint and what action they take.</p></div></li><li><span>02</span><div><strong>Separate signals</strong><p>Keep process liveness distinct from startup and traffic readiness.</p></div></li><li><span>03</span><div><strong>Classify dependencies</strong><p>Mark dependencies required, optional, or irrelevant to a route.</p></div></li><li><span>04</span><div><strong>Implement probes</strong><p>Use short cancellation-aware checks with controlled result data.</p></div></li><li><span>05</span><div><strong>Aggregate status</strong><p>Map required failures to Unhealthy and optional failures to Degraded.</p></div></li><li><span>06</span><div><strong>Configure timing</strong><p>Align timeout, interval, threshold, startup grace, and shutdown drain.</p></div></li><li><span>07</span><div><strong>Secure and observe</strong><p>Protect details, monitor transitions, and rehearse failure and recovery.</p></div></li></ol></section>
+    <section id="code-example" class="article-section"><h2>Code example</h2><p>Checks are registered with tags, exposed on separate endpoints filtered by tag, and a custom database check demonstrates how to surface a real dependency result with diagnostic data.</p><div class="code-host"><div class="code-block"><div class="code-toolbar"><span class="code-language">Program.cs</span><button class="copy-button" type="button"><span aria-hidden="true">▣</span> Copy</button></div><pre><code class="language-csharp"><span class="tok-keyword">using</span> <span class="tok-type">Microsoft</span>.<span class="tok-type">Extensions</span>.<span class="tok-type">Diagnostics</span>.<span class="tok-type">HealthChecks</span>;
+
+<span class="tok-keyword">var</span> builder = <span class="tok-type">WebApplication</span>.<span class="tok-type">CreateBuilder</span>(args);
+
+builder.<span class="tok-type">Services</span>
+    .<span class="tok-type">AddHealthChecks</span>()
+    <span class="tok-comment">// Liveness: trivial — if this fails the process is hung</span>
+    .<span class="tok-type">AddCheck</span>(<span class="tok-string">&quot;self&quot;</span>, () =&gt; <span class="tok-type">HealthCheckResult</span>.<span class="tok-type">Healthy</span>(), tags: [<span class="tok-string">&quot;live&quot;</span>])
+    <span class="tok-comment">// Readiness: real dependencies</span>
+    .<span class="tok-type">AddNpgSql</span>(
+        builder.<span class="tok-type">Configuration</span>.<span class="tok-type">GetConnectionString</span>(<span class="tok-string">&quot;Database&quot;</span>)!,
+        name: <span class="tok-string">&quot;database&quot;</span>,
+        failureStatus: <span class="tok-type">HealthStatus</span>.<span class="tok-type">Unhealthy</span>,
+        tags: [<span class="tok-string">&quot;ready&quot;</span>])
+    .<span class="tok-type">AddRedis</span>(
+        builder.<span class="tok-type">Configuration</span>.<span class="tok-type">GetConnectionString</span>(<span class="tok-string">&quot;Redis&quot;</span>)!,
+        name: <span class="tok-string">&quot;cache&quot;</span>,
+        failureStatus: <span class="tok-type">HealthStatus</span>.<span class="tok-type">Degraded</span>,
+        tags: [<span class="tok-string">&quot;ready&quot;</span>])
+    .<span class="tok-type">AddCheck</span>&lt;<span class="tok-type">MessageBusHealthCheck</span>&gt;(<span class="tok-string">&quot;messaging&quot;</span>, tags: [<span class="tok-string">&quot;ready&quot;</span>]);
+
+<span class="tok-keyword">var</span> app = builder.<span class="tok-type">Build</span>();
+
+<span class="tok-comment">// Liveness: lightweight, no dependency checks</span>
+app.<span class="tok-type">MapHealthChecks</span>(<span class="tok-string">&quot;/health/live&quot;</span>, <span class="tok-keyword">new</span>()
+{
+    <span class="tok-type">Predicate</span> = check =&gt; check.<span class="tok-type">Tags</span>.<span class="tok-type">Contains</span>(<span class="tok-string">&quot;live&quot;</span>),
+    <span class="tok-type">ResponseWriter</span> = <span class="tok-type">WriteJsonResponse</span>
+});
+
+<span class="tok-comment">// Readiness: all dependency checks</span>
+app.<span class="tok-type">MapHealthChecks</span>(<span class="tok-string">&quot;/health/ready&quot;</span>, <span class="tok-keyword">new</span>()
+{
+    <span class="tok-type">Predicate</span> = check =&gt; check.<span class="tok-type">Tags</span>.<span class="tok-type">Contains</span>(<span class="tok-string">&quot;ready&quot;</span>),
+    <span class="tok-type">ResponseWriter</span> = <span class="tok-type">WriteJsonResponse</span>
+});
+
+app.<span class="tok-type">Run</span>();
+
+<span class="tok-comment">// Custom check: verifies a business-critical queue is reachable</span>
+<span class="tok-keyword">public</span> <span class="tok-keyword">sealed</span> <span class="tok-keyword">class</span> <span class="tok-type">MessageBusHealthCheck</span>(
+    <span class="tok-type">IServiceBusClientFactory</span> factory) : <span class="tok-type">IHealthCheck</span>
+{
+    <span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span>&lt;<span class="tok-type">HealthCheckResult</span>&gt; <span class="tok-type">CheckHealthAsync</span>(
+        <span class="tok-type">HealthCheckContext</span> context, <span class="tok-type">CancellationToken</span> ct)
+    {
+        <span class="tok-keyword">try</span>
+        {
+            <span class="tok-keyword">var</span> client = factory.<span class="tok-type">CreateAdminClient</span>();
+            <span class="tok-keyword">var</span> props = <span class="tok-keyword">await</span> client.<span class="tok-type">GetQueueRuntimePropertiesAsync</span>(
+                <span class="tok-string">&quot;order-events&quot;</span>, ct);
+
+            <span class="tok-keyword">var</span> data = <span class="tok-keyword">new</span> <span class="tok-type">Dictionary</span>&lt;<span class="tok-keyword">string</span>, <span class="tok-keyword">object</span>&gt;
+            {
+                [<span class="tok-string">&quot;activeMessages&quot;</span>] = props.<span class="tok-type">Value</span>.<span class="tok-type">ActiveMessageCount</span>,
+                [<span class="tok-string">&quot;deadLetterMessages&quot;</span>] = props.<span class="tok-type">Value</span>.<span class="tok-type">DeadLetterMessageCount</span>
+            };
+
+            <span class="tok-keyword">return</span> props.<span class="tok-type">Value</span>.<span class="tok-type">DeadLetterMessageCount</span> &gt; <span class="tok-number">1000</span>
+                ? <span class="tok-type">HealthCheckResult</span>.<span class="tok-type">Degraded</span>(<span class="tok-string">&quot;High dead-letter count&quot;</span>, data: data)
+                : <span class="tok-type">HealthCheckResult</span>.<span class="tok-type">Healthy</span>(data: data);
+        }
+        <span class="tok-keyword">catch</span> (<span class="tok-type">Exception</span> ex)
+        {
+            <span class="tok-keyword">return</span> <span class="tok-type">HealthCheckResult</span>.<span class="tok-type">Unhealthy</span>(
+                <span class="tok-string">&quot;Service Bus unreachable&quot;</span>, ex);
+        }
+    }
+}
+
+<span class="tok-keyword">static</span> <span class="tok-type">Task</span> <span class="tok-type">WriteJsonResponse</span>(<span class="tok-type">HttpContext</span> ctx, <span class="tok-type">HealthReport</span> report) =&gt;
+    ctx.<span class="tok-type">Response</span>.<span class="tok-type">WriteAsJsonAsync</span>(<span class="tok-keyword">new</span>
+    {
+        status = report.<span class="tok-type">Status</span>.<span class="tok-type">ToString</span>(),
+        checks = report.<span class="tok-type">Entries</span>.<span class="tok-type">Select</span>(e =&gt; <span class="tok-keyword">new</span>
+        {
+            name = e.<span class="tok-type">Key</span>,
+            status = e.<span class="tok-type">Value</span>.<span class="tok-type">Status</span>.<span class="tok-type">ToString</span>(),
+            description = e.<span class="tok-type">Value</span>.<span class="tok-type">Description</span>,
+            data = e.<span class="tok-type">Value</span>.<span class="tok-type">Data</span>
+        })
+    });</code></pre></div></div><aside class="callout callout-note"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">note</strong><p>A health check that always returns Healthy is worse than no health check — it builds false confidence. Check the actual dependency, return meaningful status, and include data that helps an on-call engineer act without additional investigation.</p></div></aside></section>
+    <section id="testing" class="article-section"><h2>Testing strategy</h2><p>Test the state transitions and the infrastructure action each status is meant to cause.</p><ul class="practice-list guidance-list"><li>Verify startup is unhealthy until initialization completes.</li><li>Fail a required dependency and assert readiness.</li><li>Fail an optional dependency and assert degradation.</li><li>Prove cancellation reaches slow probes.</li><li>Test endpoint tag selection.</li><li>Rehearse probe timing during deploy and drain.</li></ul></section>
+    <section id="security" class="article-section"><h2>Security considerations</h2><p>Health data can reveal architecture and credentials if responses are not deliberately constrained.</p><ul class="practice-list guidance-list"><li>Expose only status publicly.</li><li>Protect detailed dashboards.</li><li>Never return connection strings or exception stacks.</li><li>Rate limit expensive diagnostic endpoints.</li><li>Audit operator access.</li></ul></section>
+    <section id="performance" class="article-section"><h2>Performance and scalability</h2><p>Frequent probes from many replicas can become production load.</p><ul class="practice-list guidance-list"><li>Keep liveness dependency-free.</li><li>Set short timeouts.</li><li>Cache expensive readiness checks briefly.</li><li>Avoid sequential slow probes.</li><li>Measure probe latency and call volume.</li></ul></section>
+    <section id="deployment" class="article-section"><h2>Deployment and operations</h2><p>Probe timings must match startup, traffic drain, and shutdown behavior.</p><ul class="practice-list guidance-list"><li>Set startup grace from measured startup.</li><li>Remove readiness before shutdown.</li><li>Keep liveness threshold tolerant of pauses.</li><li>Version response contracts.</li><li>Test rolling deployment and dependency outage.</li></ul></section>
+    <section id="troubleshooting" class="article-section"><h2>Common problems and fixes</h2><div class="troubleshooting-list"><article class="troubleshooting-card"><h3>Pods restart during database outage.</h3><p><strong>Likely cause:</strong> Liveness checks the database.</p><p><strong>Fix:</strong> Move dependency checks to readiness.</p></article><article class="troubleshooting-card"><h3>Traffic arrives before initialization.</h3><p><strong>Likely cause:</strong> No startup or readiness gate exists.</p><p><strong>Fix:</strong> Report startup state until initialization completes.</p></article><article class="troubleshooting-card"><h3>Probe requests time out.</h3><p><strong>Likely cause:</strong> A dependency call ignores cancellation.</p><p><strong>Fix:</strong> Apply a short timeout and propagate the token.</p></article><article class="troubleshooting-card"><h3>Probe creates database load.</h3><p><strong>Likely cause:</strong> Every caller runs an expensive query.</p><p><strong>Fix:</strong> Use a cheap query and bounded caching.</p></article><article class="troubleshooting-card"><h3>Dashboard leaks internals.</h3><p><strong>Likely cause:</strong> Detailed output is public.</p><p><strong>Fix:</strong> Authenticate details and return minimal public JSON.</p></article><article class="troubleshooting-card"><h3>Pod never receives traffic.</h3><p><strong>Likely cause:</strong> Readiness failure lacks component evidence.</p><p><strong>Fix:</strong> Log sanitized per-check status and inspect thresholds.</p></article></div></section>
+    <section id="best-practices" class="article-section"><h2>Best practices</h2><ul class="practice-list"><li>Separate probe semantics.</li><li>Keep liveness local.</li><li>Tag checks by consumer.</li><li>Classify dependency criticality.</li><li>Honor cancellation.</li><li>Sanitize public output.</li><li>Bound probe cost.</li><li>Rehearse deployment transitions.</li></ul><aside class="callout callout-tip"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">tip</strong><p>Add a dead-letter message count check to your Service Bus or RabbitMQ health check — a rising dead-letter count is one of the earliest signals of a processing problem and is nearly free to surface from the broker&#039;s management API.</p></div></aside><aside class="callout callout-warning"><div class="callout-icon" aria-hidden="true"></div><div><strong class="callout-label">warning</strong><p>Health check endpoints should never require authentication from the orchestrator — Kubernetes and load balancers call them without credentials — but restrict them from the public internet using network policy or path-based ingress rules.</p></div></aside></section>
+    <section id="production-checklist" class="article-section"><h2>Production checklist</h2><ul class="checklist"><li>Consumers and actions are documented.</li><li>Liveness is lightweight.</li><li>Startup grace is measured.</li><li>Readiness includes only required dependencies.</li><li>Checks honor cancellation and timeout.</li><li>Public output is sanitized.</li><li>Probe timing matches drain behavior.</li><li>Outage and rolling-deploy drills pass.</li></ul></section>
+    <section id="interview-questions" class="article-section"><h2>Common interview questions</h2><div class="faq-list"><details class="faq-item"><summary><span class="faq-question">Liveness versus readiness?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Liveness decides restart; readiness decides whether this instance receives traffic.</p></div></details><details class="faq-item"><summary><span class="faq-question">Why not put database checks in liveness?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>A shared outage would restart every healthy process and can worsen recovery.</p></div></details><details class="faq-item"><summary><span class="faq-question">What is a startup probe for?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>It grants initialization time before normal liveness and readiness thresholds apply.</p></div></details><details class="faq-item"><summary><span class="faq-question">How do tags help?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>They let endpoints select different registered checks for different consumers.</p></div></details><details class="faq-item"><summary><span class="faq-question">When should a check return Degraded?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>When an optional capability is impaired but core traffic can still be served.</p></div></details><details class="faq-item"><summary><span class="faq-question">Why must checks honor cancellation?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>Probe infrastructure has a deadline and abandoned dependency calls consume resources.</p></div></details><details class="faq-item"><summary><span class="faq-question">Should health checks repair systems?</span><span class="faq-chevron" aria-hidden="true">+</span></summary><div class="faq-answer"><p>No; checks should observe and report, while controlled operators perform remediation.</p></div></details></div></section>
+    <section id="github-sample" class="article-section article-sample"><h2>Dedicated GitHub sample</h2><p>Clone, run, test, and modify the focused implementation created for this guide.</p><div class="sample-host"><article class="github-card card reveal"><div class="github-card-head"><span class="repo-icon" aria-hidden="true"></span><span class="repo-visibility">Verified sample</span></div><h3>Health Readiness Lab</h3><p class="repo-description">A deterministic .NET 10 sample demonstrating startup state, required and optional dependency aggregation, degraded readiness, and cancellation-aware probes.</p><div class="tech-pills" aria-label="Technologies"><span>.NET 10</span><span>Health Checks</span><span>Readiness</span><span>xUnit</span></div><div class="tag-list" aria-label="Tags"><span>dedicated-sample</span><span>startup</span><span>readiness</span><span>cancellation</span></div><dl class="sample-commands"><div><dt>Run</dt><dd><code>dotnet run --project src/HealthReadinessLab</code></dd></div><div><dt>Test</dt><dd><code>dotnet test HealthReadinessLab.slnx</code></dd></div></dl><div class="repo-actions"><a class="button button-small button-primary github-link" target="_blank" rel="noreferrer" href="https://github.com/adhakshinamoorthy/adhakshinamoorthy.github.io/tree/main/samples/health-readiness-lab">GitHub <span aria-hidden="true">↗</span></a></div></article></div></section>
+    <nav class="article-nav" aria-label="Previous and next topics"><a href="infrastructure-as-code-bicep.html"><small>← Previous</small><strong>Infrastructure as Code (Bicep)</strong></a><a href="testing.html"><small>Next →</small><strong>Testing</strong></a></nav></article>
+        <aside id="article-toc" class="toc" aria-label="Table of contents"><p class="toc-title">On this page</p><ul class="toc-list"><li><a class="toc-link" href="#overview">Overview</a></li><li><a class="toc-link" href="#learning-objectives">What you will learn</a></li><li><a class="toc-link" href="#decision-guide">When to use Health Checks</a></li><li><a class="toc-link" href="#key-concepts">Key concepts</a></li><li><a class="toc-link" href="#architecture">Architecture</a></li><li><a class="toc-link" href="#implementation">Implementation walkthrough</a></li><li><a class="toc-link" href="#code-example">Code example</a></li><li><a class="toc-link" href="#testing">Testing strategy</a></li><li><a class="toc-link" href="#security">Security considerations</a></li><li><a class="toc-link" href="#performance">Performance and scalability</a></li><li><a class="toc-link" href="#deployment">Deployment and operations</a></li><li><a class="toc-link" href="#troubleshooting">Common problems and fixes</a></li><li><a class="toc-link" href="#best-practices">Best practices</a></li><li><a class="toc-link" href="#production-checklist">Production checklist</a></li><li><a class="toc-link" href="#interview-questions">Common interview questions</a></li><li><a class="toc-link" href="#github-sample">Dedicated GitHub sample</a></li></ul></aside>
       </div>
     </main>
   </div>
-  <div id="site-footer"></div>
+  <div id="site-footer">
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a class="brand" href="../index.html"><span class="brand-mark">.N</span><span>.NET <em>Atlas</em></span></a>
+          <p>A practical map of the modern .NET ecosystem, built for curious developers and architecture-minded teams.</p>
+        </div>
+        <div><strong class="footer-heading">Explore</strong><div class="footer-links"><a href="../technologies/dotnet.html">Start with .NET</a><a href="../index.html#roadmap">Learning roadmap</a><a href="../sitemap.xml">Sitemap</a></div></div>
+        <div><strong class="footer-heading">Connect</strong><div class="footer-links"><a href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">GitHub profile ↗</a><a href="https://www.linkedin.com/in/adhakshinamoorthy" target="_blank" rel="noreferrer">LinkedIn ↗</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>© 2026 Dhakshinamoorthy A. Built for learning.</p><p>HTML · CSS · JavaScript · GitHub Pages</p></div>
+    </footer></div>
   <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">&uarr;</button>
-  <script type="module" src="../assets/js/topic.js?v=20260819"></script>
+  <script type="module" src="../assets/js/topic.js?v=20261119"></script>
 </body>
 </html>
