@@ -74,8 +74,8 @@ export function footerMarkup(base = '', year = new Date().getFullYear()) {
           <a class="brand" href="${base}index.html"><span class="brand-mark">.N</span><span>.NET <em>Atlas</em></span></a>
           <p>A practical map of the modern .NET ecosystem, built for curious developers and architecture-minded teams.</p>
         </div>
-        <div><strong class="footer-heading">Explore</strong><div class="footer-links"><a href="${base}technologies/dotnet.html">Start with .NET</a><a href="${base}index.html#roadmap">Learning roadmap</a><a href="${base}sitemap.xml">Sitemap</a></div></div>
-        <div><strong class="footer-heading">Connect</strong><div class="footer-links"><a href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">GitHub profile ↗</a><a href="https://www.linkedin.com/in/adhakshinamoorthy" target="_blank" rel="noreferrer">LinkedIn ↗</a></div></div>
+        <div><strong class="footer-heading">Explore</strong><div class="footer-links"><a href="${base}technologies/dotnet.html">Start with .NET</a><a href="${base}index.html#roadmap">Learning roadmap</a><a href="${base}about.html">About the author</a><a href="${base}sitemap.xml">Sitemap</a></div></div>
+        <div><strong class="footer-heading">Connect</strong><div class="footer-links"><a href="https://github.com/adhakshinamoorthy" target="_blank" rel="noreferrer">GitHub profile ↗</a><a href="https://www.linkedin.com/in/adhakshinamoorthy" target="_blank" rel="noreferrer">LinkedIn ↗</a><a href="${base}about.html#work-with-me">Work with me</a></div></div>
       </div>
       <div class="footer-bottom"><p>© ${year} Dhakshinamoorthy A. Built for learning.</p><p>HTML · CSS · JavaScript · GitHub Pages</p></div>
     </footer>`;

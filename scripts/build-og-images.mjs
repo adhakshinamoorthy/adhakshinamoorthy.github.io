@@ -51,6 +51,17 @@ cards.push({
   meta: 'Concepts  ·  Architecture  ·  Code'
 });
 
+const photo = await readFile(join(root, 'assets', 'images', 'profile-480.jpg'));
+cards.push({
+  file: 'about.png',
+  color: '#6e5bd7',
+  label: 'About the author',
+  title: 'Dhakshinamoorthy A',
+  description: 'Technical Architect for .NET and Azure with 18+ years in software. Azure architecture, .NET modernisation, and multitenant SaaS.',
+  meta: 'Available for consulting',
+  photo: `data:image/jpeg;base64,${photo.toString('base64')}`
+});
+
 const outDir = join(root, 'assets', 'og');
 await mkdir(outDir, { recursive: true });
 const stale = [];
@@ -97,13 +108,14 @@ function wrap(font, text, size, maxWidth, maxLines) {
   return kept;
 }
 
-// Largest title size (84 down to 52) that fits in two lines.
-function fitTitle(text) {
+// Largest title size (84 down to 52) that fits in maxLines lines.
+function fitTitle(text, maxWidth, maxLines = 2) {
   for (let size = 84; size >= 52; size -= 4) {
-    const lines = wrap(bold, text, size, TEXT_WIDTH, 2);
-    if (!lines.at(-1).endsWith('…')) return { size, lines };
+    const lines = wrap(bold, text, size, maxWidth, maxLines);
+    const fits = lines.every(line => width(bold, line, size) <= maxWidth);
+    if (fits && !lines.at(-1).endsWith('…')) return { size, lines };
   }
-  return { size: 52, lines: wrap(bold, text, 52, TEXT_WIDTH, 2) };
+  return { size: 52, lines: wrap(bold, text, 52, maxWidth, 2) };
 }
 
 function render(card) {
@@ -111,7 +123,8 @@ function render(card) {
   const label = card.label.toUpperCase();
   const labelSize = 20;
   const labelWidth = width(semibold, label, labelSize) + 2 * label.length * 1.2 + 40; // letter-spacing 1.2
-  const title = fitTitle(card.title);
+  const textWidth = card.photo ? 680 : TEXT_WIDTH;
+  const title = fitTitle(card.title, textWidth, card.photo ? 1 : 2);
   const descSize = 30;
   const descLineHeight = descSize * 1.4;
   const labelY = 160;
@@ -123,7 +136,7 @@ function render(card) {
   // Use as many description lines (max 3) as fit above the footer divider at y=530.
   let maxDescLines = 0;
   while (maxDescLines < 3 && descTop + descSize + maxDescLines * descLineHeight + 8 <= 512) maxDescLines++;
-  const desc = wrap(regular, card.description, descSize, TEXT_WIDTH - 40, Math.max(1, maxDescLines));
+  const desc = wrap(regular, card.description, descSize, textWidth - (card.photo ? 0 : 40), Math.max(1, maxDescLines));
   const descLines = desc.map((l, i) =>
     `<text x="${PAD}" y="${descTop + descSize + i * descLineHeight}" font-family="Inter" font-weight="400" font-size="${descSize}" fill="#cbd5e1">${x(l)}</text>`).join('');
 
@@ -135,6 +148,9 @@ function render(card) {
   <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg)"/>
   <circle cx="1080" cy="90" r="360" fill="url(#glow)"/>
   <rect width="14" height="${HEIGHT}" fill="${color}"/>
+  ${card.photo ? `<clipPath id="photo"><circle cx="950" cy="330" r="160"/></clipPath>
+  <circle cx="950" cy="330" r="168" fill="#a89bff" fill-opacity=".55"/>
+  <image href="${card.photo}" x="790" y="170" width="320" height="320" clip-path="url(#photo)" preserveAspectRatio="xMidYMid slice"/>` : ''}
   <rect x="${PAD}" y="64" width="60" height="60" rx="16" fill="#6e5bd7"/>
   <text x="${PAD + 30}" y="104" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#ffffff">.N</text>
   <text x="${PAD + 78}" y="105" font-family="Inter" font-weight="600" font-size="30" fill="#ffffff">.NET <tspan fill="#a89bff">Atlas</tspan></text>

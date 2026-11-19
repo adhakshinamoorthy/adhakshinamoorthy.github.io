@@ -68,7 +68,7 @@ for (const topic of technologies) {
 }
 
 const expectedFiles = [
-  'index.html', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
+  'index.html', 'about.html', 'assets/js/about.js', 'assets/images/profile-480.jpg', 'assets/og/about.png', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
   'assets/css/styles.css', 'assets/js/components.js', 'assets/js/home.js',
   'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg', 'assets/og/home.png',
   'components/templates.html', 'data/technologies.json', 'data/github-samples.json'
@@ -92,7 +92,7 @@ for (const topic of technologies) {
   if (!sitemap.includes(`/technologies/${topic.slug}.html`)) errors.push(`Sitemap is missing ${topic.slug}`);
 }
 
-const htmlFiles = [join(projectRoot, 'index.html'), ...generated.map(file => join(projectRoot, 'technologies', file))];
+const htmlFiles = [join(projectRoot, 'index.html'), join(projectRoot, 'about.html'), ...generated.map(file => join(projectRoot, 'technologies', file))];
 for (const htmlFile of htmlFiles) {
   const html = await readFile(htmlFile, 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
