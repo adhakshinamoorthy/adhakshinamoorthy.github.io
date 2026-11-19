@@ -3,3 +3,4 @@ artifacts/
 **/obj/
 **/TestResults/
 **/BenchmarkDotNet.Artifacts/
+node_modules/
