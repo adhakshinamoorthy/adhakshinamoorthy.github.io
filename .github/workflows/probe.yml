@@ -1,0 +1,29 @@
+name: probe
+on: { push: { branches: [tmp/nuget-probe] } }
+permissions: { contents: read }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - uses: actions/cache@v5
+        with: { path: ~/.nuget/packages, key: probe-${{ github.run_id }} }
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            10.0.1xx
+            10.0.3xx
+      - run: |
+          for d in aspire-service-map ef-core-order-management signalr-operations-room; do
+            echo "===== $d"; cd samples/$d; s=$(ls *.slnx)
+            dotnet restore "$s" -p:TreatWarningsAsErrors=false -p:NuGetAudit=false >/dev/null
+            echo "--- vulnerable"; dotnet list "$s" package --vulnerable --include-transitive
+            echo "--- outdated (top-level)"; dotnet list "$s" package --outdated
+            cd ../..
+          done
+          echo "===== versions"
+          for p in aspire.hosting.apphost aspire.appHost.sdk testcontainers.postgresql ssh.net microsoft.aspnetcore.signalr.client microsoft.aspnetcore.mvc.testing messagepack; do
+            echo "$p: $(curl -s https://api.nuget.org/v3-flatcontainer/${p,,}/index.json | jq -r '.versions | map(select(test("-")|not)) | .[-5:] | join(" ")')"
+          done
