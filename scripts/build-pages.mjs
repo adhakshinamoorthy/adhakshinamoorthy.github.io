@@ -90,10 +90,18 @@ function topicPage(topic) {
   <meta property="og:type" content="article">
   <meta property="og:title" content="${e(title)}">
   <meta property="og:description" content="${e(topic.shortDescription)}">
-  <meta property="og:image" content="${BASE_URL}/assets/images/og-card.svg">
+  <meta property="og:image" content="${BASE_URL}/assets/og/${topic.slug}.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${e(`${topic.name}: ${topic.category} guide on .NET Atlas`)}">
+  <meta property="og:site_name" content=".NET Atlas">
   <meta property="og:url" content="${url}">
   <meta property="article:modified_time" content="${e(topic.updated)}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${e(title)}">
+  <meta name="twitter:description" content="${e(topic.shortDescription)}">
+  <meta name="twitter:image" content="${BASE_URL}/assets/og/${topic.slug}.png">
   <title>${e(title)}</title>
   <link rel="canonical" href="${url}">
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">

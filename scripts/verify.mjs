@@ -70,7 +70,7 @@ for (const topic of technologies) {
 const expectedFiles = [
   'index.html', 'README.md', 'robots.txt', 'sitemap.xml', '.nojekyll',
   'assets/css/styles.css', 'assets/js/components.js', 'assets/js/home.js',
-  'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg',
+  'assets/js/topic.js', 'assets/js/markup.js', 'data/technologies-index.json', 'assets/icons/favicon.svg', 'assets/images/og-card.svg', 'assets/og/home.png',
   'components/templates.html', 'data/technologies.json', 'data/github-samples.json'
 ];
 for (const relativePath of expectedFiles) {
@@ -80,6 +80,7 @@ for (const relativePath of expectedFiles) {
 
 for (const topic of technologies) {
   const page = await readFile(join(projectRoot, 'technologies', `${topic.slug}.html`), 'utf8').catch(() => '');
+  try { await access(join(projectRoot, 'assets', 'og', `${topic.slug}.png`)); } catch { errors.push(`${topic.slug} has no preview image. Run: node scripts/build-og-images.mjs`); }
   if (!page.includes(`<h1>`) || !page.includes('id="interview-questions"')) errors.push(`${topic.slug} page is not pre-rendered. Run: node scripts/build-pages.mjs`);
 }
 
